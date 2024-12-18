@@ -1,0 +1,7 @@
+{
+  "name": "hifis-auth",
+  "version": "0.0.0",
+  "dependencies": {
+    "@openauthjs/openauth": "workspace:*"
+  }
+}
