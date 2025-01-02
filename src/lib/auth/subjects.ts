@@ -1,9 +1,6 @@
 import { createSubjects } from "@openauthjs/openauth";
-import { object, string } from "valibot";
+import { usersInsertSchema } from "../../routes/[organization]/users/schema";
 
 export const subjects = createSubjects({
-  user: object({
-    email: string(),
-    orgId: string()
-  })
+  user: usersInsertSchema
 })

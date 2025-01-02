@@ -27,7 +27,6 @@ export const handle: Handle = async ({ event, resolve }) => {
   if (err && !event.url.pathname.startsWith("/auth/callback")) {
     redirect(302, url)
   }
-  console.dir(event, { depth: null })
   event.locals.db = db
   return resolve(event, {
     filterSerializedResponseHeaders(name) {

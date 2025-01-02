@@ -3,14 +3,12 @@ import { config } from "dotenv"
 
 config({ path: ".env" })
 
-if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
-
 export default defineConfig({
-  schema: './src/lib/server/db/schema',
+  schema: './src/schemas/index.ts',
   out: "./migrations",
 
   dbCredentials: {
-    url: process.env.DATABASE_URL
+    url: process.env.DB_URI!
   },
 
   verbose: true,

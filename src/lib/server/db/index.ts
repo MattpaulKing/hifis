@@ -1,1 +1,1 @@
-export { db } from "./client"
+export { db, dbURI } from "./client"

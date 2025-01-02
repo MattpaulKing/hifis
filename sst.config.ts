@@ -28,13 +28,21 @@ export default $config({
       }
     });
 
+    new sst.x.DevCommand("Auth", {
+      link: [db],
+      dev: {
+        autostart: true,
+        command: "bun run --hot ./src/auth/authorizer.ts"
+      }
+    })
+
     cluster.addService("hifis-service", {
       link: [bucket, redis, db],
       loadBalancer: {
         ports: [{ listen: "80/http", forward: "3000/http" }],
       },
       dev: {
-        command: "npm run dev && bun run --hot ./src/auth/authorizer.ts",
+        command: "npm run dev"
       },
     });
   },
