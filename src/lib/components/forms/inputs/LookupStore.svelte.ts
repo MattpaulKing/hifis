@@ -1,22 +1,21 @@
 import { getContext, setContext } from "svelte";
-import type { FormFieldProxy } from "sveltekit-superforms";
 import type { Lookup } from "$lib/interfaces/Lookup";
 
 const LOOKUP_CTX = Symbol("LOOKUP_CTX")
 type Args = {
   lookups: Lookup[] | undefined,
-  value: FormFieldProxy<string | string[]>["value"]
-  inputValue: string
+  value: string | string[]
+  inputValue: string | undefined
 }
 
 class LookupStore {
-  lookups = $state<Lookup[]>([])
+  lookups = $state<(Lookup | undefined)[]>([])
   searching = $state(false)
   inputValue = $state<string>('')
 
-  constructor({ value, lookups = [], inputValue = '' }: Args) {
-    this.lookups = lookups
-    this.inputValue = inputValue
+  constructor({ value, lookups, inputValue }: Args) {
+    this.lookups = lookups ?? []
+    this.inputValue = inputValue ?? ''
   }
 }
 

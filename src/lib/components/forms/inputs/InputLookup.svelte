@@ -8,10 +8,12 @@
 		restProps?: Record<keyof HTMLInputElement, string>;
 	};
 	let { apiRoute, ...restProps }: Props = $props();
-	let { focused, disabled, errors } = getField<string>();
+	let { value, focused, disabled, errors } = getField<string | undefined>();
 	let store = getLookups();
 
 	let timeout: ReturnType<typeof setTimeout>;
+
+	$inspect(store);
 
 	function handleSearch() {
 		store.searching = true;
@@ -19,9 +21,19 @@
 		timeout = setTimeout(fetchLookups, 400);
 	}
 	async function fetchLookups() {
-		store.lookups = await fetch(`${route(apiRoute)}?search=${store.inputValue}&lookups=true`).then(
-			async (r) => (await r.json()) as Lookup[]
-		);
+		let fetchedLookups = await fetch(
+			`${route(apiRoute)}?search=${store.inputValue}&lookups=true`
+		).then(async (r) => (await r.json()) as Lookup[]);
+
+		if (Array.isArray($value) && $value.length > 0) {
+			let selectedLookups = store.lookups.filter((lookup) => $value.includes(lookup?.id));
+			fetchedLookups = fetchedLookups.filter((lookup) => !$value?.includes(lookup.id));
+			store.lookups = [...selectedLookups, ...fetchedLookups];
+		} else if (typeof $value === 'string' && $value.length > 0) {
+			fetchedLookups = fetchedLookups.filter((lookup) => lookup.id !== $value);
+			let selectedLookup = store.lookups.find((lookup) => lookup?.id === $value);
+			store.lookups = [selectedLookup, ...fetchedLookups];
+		}
 		store.searching = false;
 	}
 	function onkeydown(e: KeyboardEvent) {
@@ -32,7 +44,6 @@
 		}
 		handleSearch();
 	}
-	$inspect(store.searching);
 </script>
 
 <input

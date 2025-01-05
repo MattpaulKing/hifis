@@ -1,24 +1,58 @@
 <script lang="ts">
 	import { getField } from './context.svelte';
 	import { getLookups } from './LookupStore.svelte';
+	import type { Lookup } from '$lib/interfaces/Lookup';
 
-	let { value, path, focused, disabled, errors } = getField<string>();
+	let { value, path, focused } = getField<string | string[]>();
 	let store = getLookups();
-	$inspect(store.searching);
+
+	function handleClick({ lookup }: { lookup: Lookup }) {
+		if (Array.isArray($value)) {
+			if ($value.includes(lookup.id)) {
+				$value = $value.filter((id) => id !== lookup.id);
+				store.inputValue = '';
+			} else {
+				$value.push(lookup.id);
+				store.inputValue = '';
+			}
+		} else {
+			if ($value === lookup.id) {
+				$value = '';
+				store.inputValue = '';
+			} else {
+				$value = lookup.id;
+				store.inputValue = lookup.label;
+			}
+		}
+	}
 </script>
 
-<div class="relative">
+<div role="combobox" aria-expanded={$focused} aria-controls={path} tabindex="0" class="relative">
 	{#if $focused}
-		<div class="card absolute flex flex-col p-2">
+		<div
+			class="card absolute flex h-fit max-h-36 min-w-full flex-col space-y-1 overflow-y-auto px-2 py-4"
+		>
 			{#if store.searching}
-				<div class="placeholder h-12 w-full animate-pulse"></div>
-				<div class="placeholder h-12 w-full animate-pulse"></div>
-				<div class="placeholder h-12 w-full animate-pulse"></div>
-			{:else}
-				{#each store.lookups as lookup}
-					<div class="flex">{lookup.label}</div>
+				{@render searchPlaceholder()}
+				{@render searchPlaceholder()}
+				{@render searchPlaceholder()}
+			{:else if store.lookups.length > 0}
+				{#each store.lookups.filter((lookup) => lookup !== undefined) as lookup}
+					<button
+						onclick={() => handleClick({ lookup })}
+						type="button"
+						class="{$value === lookup.id
+							? 'variant-ghost'
+							: ''} px-2 py-1 text-left rounded-token hover:variant-ghost">{lookup.label}</button
+					>
 				{/each}
+			{:else}
+				<span>Nothing found ...</span>
 			{/if}
 		</div>
 	{/if}
 </div>
+
+{#snippet searchPlaceholder()}
+	<div class="placeholder h-8 w-full animate-pulse"></div>
+{/snippet}
