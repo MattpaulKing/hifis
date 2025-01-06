@@ -15,8 +15,8 @@ export const users = pgTable('users', {
 
 export const usersInsertSchema = v.object({
   id: v.pipe(v.string(), v.uuid()),
-  firstName: v.pipe(v.string(), v.trim()),
-  lastName: v.pipe(v.string(), v.trim()),
+  firstName: v.pipe(v.string(), v.trim(), v.minLength(1, "First Name is required")),
+  lastName: v.pipe(v.string(), v.trim(), v.minLength(1, "Last Name is required")),
   phone: v.nullable(v.pipe(v.string(), v.trim())),
   email: v.pipe(v.string(), v.email()),
   orgId: v.pipe(v.string(), v.uuid())

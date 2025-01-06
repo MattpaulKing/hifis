@@ -35,6 +35,9 @@ const SERVERS = {
 const ACTIONS = {
   "default /[organization]/[crud=crud]": (params: { organization: (string | number), crud: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
     return `/${params.organization}/${params.crud}`
+  },
+  "invite /[organization]/users/[crud=crud]": (params: { organization: (string | number), crud: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
+    return `/${params.organization}/users/${params.crud}?/invite`
   }
 }
 
@@ -144,7 +147,7 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 export type KIT_ROUTES = {
   PAGES: { '/': never, '/[organization]': 'organization', '/[organization]/[crud=crud]': 'organization' | 'crud', '/[organization]/users/[crud=crud]': 'organization' | 'crud' }
   SERVERS: { 'GET /api/v1/organizations': never, 'GET /auth/callback': never }
-  ACTIONS: { 'default /[organization]/[crud=crud]': 'organization' | 'crud' }
+  ACTIONS: { 'default /[organization]/[crud=crud]': 'organization' | 'crud', 'invite /[organization]/users/[crud=crud]': 'organization' | 'crud' }
   LINKS: Record<string, never>
   Params: { organization: never, crud: never }
 }

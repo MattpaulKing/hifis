@@ -28,7 +28,7 @@
 
 <div
 	class="relative flex h-min w-full {restProps.class ?? ''} {bordered
-		? 'card border-surface-200-700-token border p-4 shadow-lg shadow-surface-500'
+		? 'card border-surface-200-700-token border p-6 shadow-lg shadow-surface-500'
 		: ''}"
 >
 	{#if $delayed}

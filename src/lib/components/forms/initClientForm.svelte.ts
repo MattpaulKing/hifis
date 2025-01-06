@@ -1,8 +1,9 @@
 import { valibot } from "sveltekit-superforms/adapters"
 import { superForm, type FormOptions, type Infer, type SuperValidated } from "sveltekit-superforms"
+import { getFormMsgStore } from "."
 import type { ObjectEntries, ObjectSchema } from "valibot"
 
-type ISchema = ObjectSchema<ObjectEntries, string | undefined>
+export type ISchema = ObjectSchema<ObjectEntries, string | undefined>
 
 function defaultFormOptions<T extends ISchema>(validator: T) {
   return {
@@ -21,8 +22,16 @@ function defaultFormOptions<T extends ISchema>(validator: T) {
 export default function <T extends ISchema>({ form, schema, opts = {} }:
   { form: SuperValidated<Infer<T>, any, Infer<T>>, schema: T, opts?: FormOptions<Infer<T>, any, Infer<T>> }
 ) {
+  let msgStore = getFormMsgStore()
   return superForm(form, {
     ...defaultFormOptions(schema),
+    onResult({ result }) {
+      if (result.status && result?.status >= 400 && result?.status < 500) {
+        msgStore.setMsg({ msg: "Invalid fields", status: "error" })
+      } else if (result.status && result.status >= 500) {
+        msgStore.setMsg({ msg: "Error", status: "error" })
+      }
+    },
     ...opts
   })
 }
