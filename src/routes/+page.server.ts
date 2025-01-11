@@ -10,7 +10,6 @@ export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
       .from(organizations)
       .where(eq(organizations.id, subject.properties.orgId))
       .limit(1)
-
     redirect(302, `/${org.label}`)
   }
   return {

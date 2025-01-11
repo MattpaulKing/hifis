@@ -1,6 +1,6 @@
 import { createSubjects } from "@openauthjs/openauth";
-import { usersInsertSchema } from "../../routes/[organization]/users/schema";
+import { usersFormSchema } from "../../routes/[orgLabel]/users/schema";
 
 export const subjects = createSubjects({
-  user: usersInsertSchema
+  user: usersFormSchema
 })

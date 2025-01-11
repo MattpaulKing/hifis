@@ -2,6 +2,8 @@
 	import { setFormCtx } from './inputs/context.svelte';
 	import { LoadingSpinner } from '.';
 	import type { SuperForm } from 'sveltekit-superforms';
+	import type { Snippet } from 'svelte';
+	import { fade } from 'svelte/transition';
 
 	let {
 		form,
@@ -10,7 +12,10 @@
 		enctype = 'application/x-www-form-urlencoded',
 		bordered = true,
 		children,
-		...restProps
+		class: classes,
+		title,
+		btns,
+		stepper
 	}: {
 		form: SuperForm<T>;
 		action: string;
@@ -19,7 +24,9 @@
 		bordered?: boolean;
 		children: any;
 		class?: string;
-		[k: string]: unknown;
+		title?: Snippet;
+		btns?: Snippet;
+		stepper?: Snippet;
 	} = $props();
 
 	setFormCtx({ disabled });
@@ -27,20 +34,28 @@
 </script>
 
 <div
-	class="relative flex h-min w-full {restProps.class ?? ''} {bordered
-		? 'card border-surface-200-700-token border p-6 shadow-lg shadow-surface-500'
+	in:fade
+	class="relative flex h-min w-fit flex-wrap md:flex-nowrap {bordered
+		? 'card border-surface-200-700-token border shadow-lg shadow-surface-500'
 		: ''}"
 >
-	{#if $delayed}
-		<LoadingSpinner />
-	{/if}
-	<form
-		class="flex w-full flex-col lg:grid lg:grid-cols-2 lg:gap-x-4"
-		method="POST"
-		{action}
-		use:enhance
-		{enctype}
-	>
-		{@render children()}
-	</form>
+	{@render stepper?.()}
+	<div class="flex flex-col p-6 {classes ?? ''}">
+		{#if $delayed}
+			<LoadingSpinner />
+		{/if}
+		<div class="flex w-full justify-between">
+			<h3 class="h3 font-bold">{@render title?.()}</h3>
+			{@render btns?.()}
+		</div>
+		<form
+			class="flex w-full flex-col lg:grid lg:grid-cols-2 lg:gap-x-4"
+			method="POST"
+			{action}
+			use:enhance
+			{enctype}
+		>
+			{@render children()}
+		</form>
+	</div>
 </div>

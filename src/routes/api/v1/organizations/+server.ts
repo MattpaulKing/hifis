@@ -1,6 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import { json } from "@sveltejs/kit";
-import { organizations } from "../../../[organization]/schema";
+import { organizations } from "../../../[orgLabel]/schema";
 import type { RequestHandler } from "./$types";
 import type { Lookup } from "$lib/interfaces/Lookup";
 

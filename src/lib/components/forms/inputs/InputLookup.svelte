@@ -13,8 +13,6 @@
 
 	let timeout: ReturnType<typeof setTimeout>;
 
-	$inspect(store);
-
 	function handleSearch() {
 		store.searching = true;
 		if (timeout) clearTimeout(timeout);
@@ -50,7 +48,7 @@
 	type="search"
 	autocomplete="off"
 	class="input"
-	disabled={$disabled}
+	readonly={$disabled}
 	title={store.inputValue}
 	bind:value={store.inputValue}
 	aria-invalid={$errors ? 'true' : 'false'}

@@ -24,6 +24,7 @@ export default function <T extends ISchema>({ form, schema, opts = {} }:
 ) {
   let msgStore = getFormMsgStore()
   return superForm(form, {
+    //@ts-ignore
     ...defaultFormOptions(schema),
     onResult({ result }) {
       if (result.status && result?.status >= 400 && result?.status < 500) {

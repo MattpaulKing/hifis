@@ -10,14 +10,14 @@
  */
 const PAGES = {
   "/": `/`,
-  "/[organization]": (params: { organization: (string | number) }) => {
-    return `/${params.organization}`
+  "/[orgLabel]": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}`
   },
-  "/[organization]/[crud=crud]": (params: { organization: (string | number), crud: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.organization}/${params.crud}`
+  "/[orgLabel]/clients/create": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}/clients/create`
   },
-  "/[organization]/users/[crud=crud]": (params: { organization: (string | number), crud: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.organization}/users/${params.crud}`
+  "/[orgLabel]/users/create": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}/users/create`
   }
 }
 
@@ -25,6 +25,7 @@ const PAGES = {
  * SERVERS
  */
 const SERVERS = {
+  "GET /api/v1/clients": `/api/v1/clients`,
   "GET /api/v1/organizations": `/api/v1/organizations`,
   "GET /auth/callback": `/auth/callback`
 }
@@ -33,11 +34,11 @@ const SERVERS = {
  * ACTIONS
  */
 const ACTIONS = {
-  "default /[organization]/[crud=crud]": (params: { organization: (string | number), crud: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.organization}/${params.crud}`
+  "default /[orgLabel]/clients/create": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}/clients/create`
   },
-  "invite /[organization]/users/[crud=crud]": (params: { organization: (string | number), crud: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.organization}/users/${params.crud}?/invite`
+  "default /[orgLabel]/users/create": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}/users/create`
   }
 }
 
@@ -145,9 +146,9 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 * ```
 */
 export type KIT_ROUTES = {
-  PAGES: { '/': never, '/[organization]': 'organization', '/[organization]/[crud=crud]': 'organization' | 'crud', '/[organization]/users/[crud=crud]': 'organization' | 'crud' }
-  SERVERS: { 'GET /api/v1/organizations': never, 'GET /auth/callback': never }
-  ACTIONS: { 'default /[organization]/[crud=crud]': 'organization' | 'crud', 'invite /[organization]/users/[crud=crud]': 'organization' | 'crud' }
+  PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients/create': 'orgLabel', '/[orgLabel]/users/create': 'orgLabel' }
+  SERVERS: { 'GET /api/v1/clients': never, 'GET /api/v1/organizations': never, 'GET /auth/callback': never }
+  ACTIONS: { 'default /[orgLabel]/clients/create': 'orgLabel', 'default /[orgLabel]/users/create': 'orgLabel' }
   LINKS: Record<string, never>
-  Params: { organization: never, crud: never }
+  Params: { orgLabel: never }
 }

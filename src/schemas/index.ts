@@ -1,2 +1,3 @@
-export { users } from "../routes/[organization]/users/schema"
-export { organizations } from "../routes/[organization]/schema"
+export { organizations } from "../routes/[orgLabel]/schema"
+export { users } from "../routes/[orgLabel]/users/schema"
+export { clients } from "../routes/[orgLabel]/clients/schema"
