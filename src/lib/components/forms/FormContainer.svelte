@@ -1,6 +1,6 @@
 <script lang="ts" generics="T extends Record<string, unknown>">
 	import { setFormCtx } from './inputs/context.svelte';
-	import { LoadingSpinner } from '.';
+	import { getFormMsgStore, LoadingSpinner } from '.';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -31,6 +31,7 @@
 
 	setFormCtx({ disabled });
 	let { delayed, enhance } = form;
+	let msgStore = getFormMsgStore();
 </script>
 
 <div
@@ -39,6 +40,21 @@
 		? 'card border-surface-200-700-token border shadow-lg shadow-surface-500'
 		: ''}"
 >
+	<div class="absolute right-0 top-0 z-50 flex w-full flex-col items-end">
+		{#if msgStore.current?.msg}
+			<div
+				transition:fade
+				class="flex h-fit w-fit max-w-64 border p-2 rounded-token {msgStore.current.status ===
+				'error'
+					? 'variant-soft-error border-error-400-500-token'
+					: ''}"
+			>
+				<span>
+					{msgStore.current.msg}
+				</span>
+			</div>
+		{/if}
+	</div>
 	{@render stepper?.()}
 	<div class="flex flex-col p-6 {classes ?? ''}">
 		{#if $delayed}

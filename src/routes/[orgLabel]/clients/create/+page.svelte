@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { initClientForm } from '$lib/components/forms/index.js';
+	import { FormContainer, getFormMsgStore, initClientForm } from '$lib/components/forms/index.js';
 	import { Step, Stepper, StepperStore } from '$lib/components/stepper';
 	import { route } from '$lib/ROUTES';
-	import { slide } from 'svelte/transition';
 	import { ClientForm } from '../lib';
 	import { clientsFormSchema } from '../schema/index.js';
 
@@ -14,30 +13,44 @@
 			resetForm: true
 		}
 	});
-	let stepperStore = new StepperStore({ pageIdx: 0, pages: ['something', 'sth'], expanded: false });
+	let stepperStore = new StepperStore({
+		pages: [
+			{
+				label: 'contact',
+				href: route('/[orgLabel]/clients/create', { orgLabel: data.orgLabel })
+			},
+			{
+				label: 'contact2',
+				href: route('/[orgLabel]/clients/create', { orgLabel: data.orgLabel }).concat('?some=1')
+			}
+		],
+		expanded: false
+	});
+	let possibleDuplicates = $state([]);
 </script>
 
 <div class="flex h-full w-full flex-col items-center justify-center">
-	<ClientForm
+	<FormContainer
+		class="min-w-96 max-w-lg"
 		{form}
-		lookups={data.lookups}
-		action={{
-			path: 'default /[orgLabel]/clients/create',
-			params: { orgLabel: data.orgLabel }
-		}}
-		crud="create"
+		action={route('default /[orgLabel]/clients/create', { orgLabel: data.orgLabel })}
 	>
 		{#snippet stepper()}
-			<Stepper {stepperStore}>
+			<Stepper title="Steps" {stepperStore}>
 				{#each stepperStore.pages as page, idx}
-					<Step
-						{stepperStore}
-						{idx}
-						href={`${route('/[orgLabel]/clients/create', { orgLabel: data.orgLabel })}?page=1`}
-						{page}
-					></Step>
+					<Step {stepperStore} {idx} {page}>
+						{#if stepperStore.expanded}
+							{page.label}
+						{:else}
+							{idx + 1}
+						{/if}
+					</Step>
 				{/each}
 			</Stepper>
 		{/snippet}
-	</ClientForm>
+		{#snippet title()}
+			<span class="w-fit"> Add Client </span>
+		{/snippet}
+		<ClientForm {form} lookups={data.lookups} {possibleDuplicates} crud="create"></ClientForm>
+	</FormContainer>
 </div>

@@ -1,17 +1,13 @@
+import { page } from "$app/state"
 
+export type StepPage = { label: string, href: string, disabled?: boolean }
 export default class {
-  pageIdx = $state(0)
-  pages = $state<string[]>([])
+  pages = $state<StepPage[]>([])
   expanded = $state(false)
   pageIdxMax = $derived(this.pages.length)
-  constructor({ pageIdx, pages, expanded }: { pageIdx: number, pages: [], expanded: boolean }) {
-    this.pageIdx = pageIdx
+  pageIdx = $derived(this.pages.findIndex(stepPage => stepPage.href === `${page.url.pathname}${page.url.search}`))
+  constructor({ pages, expanded }: { pages: StepPage[], expanded: boolean }) {
     this.pages = pages
     this.expanded = expanded
   }
 }
-// 	pageIdx: number;
-// 	pageIdxMax: number;
-// 	pages: string[];
-// 	expanded: boolean;
-// }

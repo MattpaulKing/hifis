@@ -4,11 +4,12 @@
 	import { slide } from 'svelte/transition';
 	type EventProps = MouseEvent & { currentTarget: EventTarget & HTMLButtonElement };
 	type Props = {
+		title: string;
 		stepperStore: StepperStore;
 		onToggle?: (e: EventProps) => void;
 		children: Snippet;
 	};
-	let { stepperStore, onToggle, children }: Props = $props();
+	let { title, stepperStore, onToggle, children }: Props = $props();
 	function onclick(e: EventProps) {
 		stepperStore.expanded = !stepperStore.expanded;
 		onToggle?.(e);
@@ -23,9 +24,9 @@
 			class="card border-surface-300-600-token flex w-full flex-row place-items-baseline gap-x-2
   border-r p-2 hover:will-change-auto md:flex-col md:rounded-br-none md:rounded-tr-none md:p-4"
 		>
-			<div class="flex w-full place-items-center justify-between gap-x-2 text-lg font-bold">
+			<div class="flex w-full place-items-center justify-between gap-x-4 text-lg font-bold">
 				{#if stepperStore.expanded}
-					<span>Steps</span>
+					<span>{title}</span>
 				{/if}
 				<button
 					{onclick}
@@ -34,9 +35,9 @@
 					><img
 						src="/SignOut.png"
 						class="h-5 w-5 transition-all duration-500 dark:invert {stepperStore.expanded
-							? 'rotate-180'
-							: ''}"
-						alt="close"
+							? ''
+							: 'rotate-180'}"
+						alt="toggle"
 					/></button
 				>
 			</div>
