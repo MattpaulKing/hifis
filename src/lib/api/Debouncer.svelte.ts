@@ -1,3 +1,4 @@
+import { browser } from "$app/environment"
 
 export default class {
   #timeout = $state<ReturnType<typeof setTimeout>>()
@@ -10,8 +11,14 @@ export default class {
   }
 
   search() {
-    if (this.#timeout) clearTimeout(this.#timeout)
-    this.#timeout = setTimeout(async () => await this.callback(), this.ms)
+    this.destroy()
+    if (browser) {
+      this.#timeout = setTimeout(async () => await this.callback(), this.ms)
+    }
   }
-
+  destroy() {
+    if (this.#timeout) {
+      clearTimeout(this.#timeout)
+    }
+  }
 }
