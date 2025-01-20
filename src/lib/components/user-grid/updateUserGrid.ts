@@ -1,7 +1,7 @@
 import { route } from "$lib/ROUTES";
-import type { GridItemState } from "$lib/interfaces/Grid";
+import type { LayoutItem } from "./types";
 
-export default async function(gridItemState: GridItemState[]) {
+export default async function(gridItemState: LayoutItem[]) {
   let req = await fetch(route('POST /api/v1/grid'), {
     method: 'POST',
     headers: {

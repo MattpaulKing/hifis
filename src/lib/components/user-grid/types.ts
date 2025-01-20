@@ -3,11 +3,13 @@ export type RequireAtLeastOne<T> = {
 }[keyof T];
 export type LayoutItem = Size & Position & {
   id: string;
-  min?: Size;
+  min: Size;
   max?: Size;
   moveable: boolean;
-  resizable: boolean;
+  resizeable: boolean;
 };
+
+export type LayoutItemEntity = { id: string; label: string, active: boolean }
 /**
  * Item position in grid units
  */

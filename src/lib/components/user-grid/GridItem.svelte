@@ -1,6 +1,6 @@
 <!--@component?
-min: minimum size of item in Grid Units
-max: maximum size of item in Grid Units
+  min: minimum size of item in Grid Units
+  max: maximum size of item in Grid Units
 -->
 
 <script lang="ts">
@@ -8,66 +8,43 @@ max: maximum size of item in Grid Units
 	import { coordinate2size, calcPosition, snapOnMove, snapOnResize } from './utils/item';
 	import { hasCollisions, getCollisions, getAvailablePosition } from './utils/grid';
 	import { getGridContext } from './utils/gridContext.svelte';
-	import type { ItemSize, LayoutItem, Size } from './types';
-	let gridSettings = getGridContext();
+	import { GridItemTabs } from '.';
+	import { GridItem } from 'svelte-grid-extended';
+	import type { ItemSize, LayoutItem, LayoutItemEntity } from './types';
+
 	type Props = {
-		id: string;
-		activeClass?: string;
-		previewClass?: string;
-		x: number;
-		y: number;
-		w: number;
-		h: number;
-		min?: Size;
-		max?: Size;
-		moveable?: boolean;
-		resizable?: boolean;
+		item: LayoutItem;
+		entities: LayoutItemEntity[];
 		onChange?: (item: LayoutItem) => void;
 		onPreview?: (item: LayoutItem) => void;
-		gridItem: Snippet;
+		gridItem: Snippet<[LayoutItemEntity]>;
 		class?: string;
 	};
 	let {
-		id,
-		activeClass,
-		previewClass,
 		class: classes,
-		x = $bindable(),
-		y = $bindable(),
-		w = $bindable(),
-		h = $bindable(),
-		min = { h: 1, w: 1 },
-		max,
-		moveable = true,
-		resizable = true,
+		item = $bindable(),
+		entities = $bindable(),
 		gridItem,
-		onChange,
 		onPreview
 	}: Props = $props();
-	let active = $state(false);
-	let left: number = $state();
-	let top: number = $state();
-	let width: number = $state();
-	let height: number = $state();
 
-	let item = $derived({
-		id,
-		x,
-		y,
-		w,
-		h,
-		min,
-		max,
-		moveable,
-		resizable
-	});
+	let gridSettings = getGridContext();
+	let active = $state(false);
+	//TODO: Change left, top, width, height, etc. so that they're a derived
+	let left: number = $state(0);
+	let top: number = $state(0);
+	let width: number = $state(0);
+	let height: number = $state(0);
+	let activeEntity = $derived(entities.find((entity) => entity.active));
 
 	onMount(() => {
 		gridSettings.registerItem(item);
+
 		return () => {
 			gridSettings.unregisterItem(item);
 		};
 	});
+
 	// reposition item on grid change
 	$effect(() => {
 		if (!active && gridSettings.itemSize) {
@@ -83,12 +60,15 @@ max: maximum size of item in Grid Units
 		if (!active && item) {
 			previewItem = item;
 		}
-		if (onPreview) {
-			onPreview(previewItem);
-		}
 	});
 
-	let previewItem = item;
+	let previewItem = $state({ ...item });
+	let preview = $derived(
+		calcPosition(previewItem, {
+			itemSize: gridSettings.itemSize,
+			gap: gridSettings.gap
+		})
+	);
 
 	function applyPreview() {
 		item.x = previewItem.x;
@@ -100,26 +80,28 @@ max: maximum size of item in Grid Units
 		// TODO: scroll
 	}
 	// INTERACTION LOGIC
-	let itemRef: HTMLDivElement;
-	const initialPointerPosition = { left: 0, top: 0 };
+	let itemRef = $state<HTMLDivElement>();
+	let initialPointerPosition = $state({ left: 0, top: 0 });
 	function initInteraction(event: PointerEvent) {
 		active = true;
 		initialPointerPosition.left = event.pageX;
 		initialPointerPosition.top = event.pageY;
-		itemRef.setPointerCapture(event.pointerId);
+		initialPosition = { left, top };
+		pointerShift = { left: event.pageX - left, top: event.pageY - top };
+		itemRef?.setPointerCapture(event.pointerId);
 	}
 	function endInteraction(event: PointerEvent) {
 		applyPreview();
 		active = false;
 		initialPointerPosition.left = 0;
 		initialPointerPosition.top = 0;
-		itemRef.releasePointerCapture(event.pointerId);
+		itemRef?.releasePointerCapture(event.pointerId);
 	}
 	// MOVE ITEM LOGIC
-	let initialPosition = { left: 0, top: 0 };
-	let pointerShift = { left: 0, top: 0 };
+	let initialPosition = $state({ left: 0, top: 0 });
+	let pointerShift = $state({ left: 0, top: 0 });
+
 	function moveStart(event: PointerEvent) {
-		console.log('hit');
 		if (event.button !== 0) return;
 		initInteraction(event);
 		initialPosition = { left, top };
@@ -127,6 +109,7 @@ max: maximum size of item in Grid Units
 		window.addEventListener('pointermove', move);
 		window.addEventListener('pointerup', moveEnd);
 	}
+
 	function move(event: PointerEvent) {
 		if (!gridSettings.itemSize) {
 			throw new Error('Grid is not mounted yet');
@@ -154,14 +137,14 @@ max: maximum size of item in Grid Units
 			scroll();
 		}
 		// TODO: throttle this, hasColisions is expensive
-		{
-			const { x, y } = snapOnMove(left, top, previewItem, gridSettings);
-			if (gridSettings.collision !== 'none') {
-				movePreviewWithCollisions(x, y);
-			} else {
-				if (!hasCollisions({ ...previewItem, x, y }, Object.values(gridSettings.items))) {
-					previewItem = { ...previewItem, x, y };
-				}
+		const { x, y } = snapOnMove(left, top, previewItem, gridSettings);
+		if (gridSettings.collision !== 'none') {
+			movePreviewWithCollisions(x, y);
+		} else {
+			if (!hasCollisions({ ...previewItem, x, y }, Object.values(gridSettings.items))) {
+				previewItem = { ...previewItem, x, y };
+				previewItem.x = x;
+				previewItem.y = y;
 			}
 		}
 	}
@@ -174,12 +157,11 @@ max: maximum size of item in Grid Units
 			gridSettings.maxRows
 		);
 		if (newPosition) {
-			const { x, y } = newPosition;
-			collItem.x = x;
-			collItem.y = y;
+			collItem.x = newPosition.x;
+			collItem.y = newPosition.y;
 		}
 	}
-	function handleCollisionsForPreviewItemWithPush(newAttributes) {
+	function handleCollisionsForPreviewItemWithPush(newAttributes: { x: number; y: number }) {
 		const gridItems = Object.values(gridSettings.items);
 		const itemsExceptPreview = gridItems.filter((item) => item.id != previewItem.id);
 		const collItems = getCollisions({ ...previewItem, ...newAttributes }, itemsExceptPreview);
@@ -235,7 +217,7 @@ max: maximum size of item in Grid Units
 		const positionChanged = x != previewItem.x || newY != previewItem.y;
 		previewItem = { ...previewItem, x, y: newY };
 		if (positionChanged) {
-			compressItems();
+			// compressItems();
 			applyPreview();
 		}
 	}
@@ -248,197 +230,52 @@ max: maximum size of item in Grid Units
 	}
 	function moveEnd(event: PointerEvent) {
 		if (event.button !== 0) return;
-		endInteraction(event);
 		pointerShift = { left: 0, top: 0 };
 		window.removeEventListener('pointermove', move);
 		window.removeEventListener('pointerup', moveEnd);
-	}
-	// RESIZE ITEM LOGIC
-	let initialSize = { width: 0, height: 0 };
-	let minSize: ItemSize;
-	let maxSize: ItemSize;
-
-	$effect(() => {
-		if (gridSettings.itemSize) {
-			minSize = {
-				width: coordinate2size(min.w, gridSettings.itemSize.width, gridSettings.gap),
-				height: coordinate2size(min.h, gridSettings.itemSize.height, gridSettings.gap)
-			};
-		}
-	});
-
-	let _resizable = $derived(!gridSettings.readOnly && item.resizable);
-	function resizeStart(event: PointerEvent) {
-		if (event.button !== 0) return;
-		event.stopPropagation();
-		initInteraction(event);
-		initialSize = { width, height };
-		window.addEventListener('pointermove', resize);
-		window.addEventListener('pointerup', resizeEnd);
-	}
-	function resize(event: PointerEvent) {
-		if (!gridSettings.itemSize) {
-			throw new Error('Grid is not mounted yet');
-		}
-		width = event.pageX + initialSize.width - initialPointerPosition.left;
-		height = event.pageY + initialSize.height - initialPointerPosition.top;
-		if (gridSettings.bounds && gridSettings.boundsTo) {
-			const parentRect = gridSettings.boundsTo.getBoundingClientRect();
-			if (width + left > parentRect.width) {
-				width = parentRect.width - left;
-			}
-			if (height + top > parentRect.height) {
-				height = parentRect.height - top;
-			}
-		}
-		if (minSize) {
-			width = Math.max(width, minSize.width);
-			height = Math.max(height, minSize.height);
-		}
-		//TODO: FIX
-		// if (maxSize) {
-		if (false) {
-			width = Math.min(width, maxSize.width);
-			height = Math.min(height, maxSize.height);
-		}
-		if (gridSettings.collision === 'none') {
-			scroll;
-		}
-		// TODO: throttle this, hasColisions is expensive
-		{
-			const { w, h } = snapOnResize(width, height, previewItem, gridSettings);
-			if (gridSettings.collision !== 'none') {
-				resizePreviewWithCollisions(w, h);
-			} else {
-				if (!hasCollisions({ ...previewItem, w, h }, Object.values(gridSettings.items))) {
-					previewItem = { ...previewItem, w, h };
-				}
-			}
-		}
-	}
-	function resizePreviewWithCollisionsWithPush(w: number, h: number) {
-		handleCollisionsForPreviewItemWithPush({ w, h });
-	}
-	function resizePreviewWithCollisionsWithCompress(w: number, h: number) {
-		const sizeChanged = w != previewItem.w || h != previewItem.h;
-		if (sizeChanged) {
-			const hGap = h - previewItem.h;
-			previewItem = { ...previewItem, w, h };
-			applyPreview();
-			const collItems = getCollisions(
-				{ ...previewItem, w, h: 9999 },
-				Object.values(gridSettings.items)
-			);
-			collItems.forEach((item) => {
-				item.y += hGap;
-			});
-			compressItems();
-		}
-	}
-	function resizePreviewWithCollisions(w: number, h: number) {
-		if (gridSettings.collision === 'compress') {
-			resizePreviewWithCollisionsWithCompress(w, h);
-		} else {
-			resizePreviewWithCollisionsWithPush(w, h);
-		}
-	}
-	function resizeEnd(event: PointerEvent) {
-		if (event.button !== 0) return;
 		endInteraction(event);
-		window.removeEventListener('pointermove', resize);
-		window.removeEventListener('pointerup', resizeEnd);
-	}
-	function compressItems() {
-		const gridItems = Object.values(gridSettings.items);
-		const sortedItems = [...gridItems].sort((a, b) => a.y - b.y);
-		sortedItems.reduce(
-			(accItem, currentItem) => {
-				if (currentItem.id === previewItem.id) {
-					//if previewItem do nothing
-				} else if (previewItem.y < currentItem.y + currentItem.h) {
-					//compress items above previewItem
-					const maxY =
-						currentItem.y >= previewItem.y
-							? currentItem.y + previewItem.h + 1
-							: previewItem.y + currentItem.h + 1;
-					let newY = maxY;
-					while (newY >= 0) {
-						if (hasCollisions({ ...currentItem, y: newY }, accItem)) {
-							break;
-						}
-						newY--;
-					}
-					currentItem.y = newY + 1;
-					accItem.push(currentItem);
-				} else {
-					//compress items below previewItem
-					let newY = currentItem.y;
-					while (newY >= 0) {
-						if (hasCollisions({ ...currentItem, y: newY }, accItem)) {
-							break;
-						}
-						newY--;
-					}
-					if (newY < currentItem.y && newY > 0) {
-						currentItem.y = newY + 1;
-					}
-					accItem.push(currentItem);
-				}
-				return accItem;
-			},
-			[previewItem]
-		);
 	}
 </script>
 
+{#snippet gridItemContent()}
+	<div class="flex w-full place-items-center justify-between">
+		<GridItemTabs {entities}>
+			<div
+				bind:this={itemRef}
+				onpointerdown={moveStart}
+				class="btn btn-sm touch-none select-none px-1 hover:variant-ghost"
+			>
+				<img src="/Move.png" class="h-7 w-7 dark:invert" alt="move" />
+			</div>
+			<button class="btn btn-sm touch-none select-none px-1 hover:variant-ghost">
+				<img src="/Resize.png" class="h-7 w-7 dark:invert" alt="resize" />
+			</button>
+		</GridItemTabs>
+	</div>
+	{#if activeEntity}
+		{@render gridItem(activeEntity)}
+	{/if}
+{/snippet}
+
 <div
-	class={`${classes} ${active ? activeClass : ''}`}
-	class:item-default={!classes}
-	class:active-default={!activeClass && active}
-	class:non-active-default={!active}
-	onpointerdown={moveable ? moveStart : null}
-	style={`position: absolute; left:${left}px; top:${top}px; width: ${width}px; height: ${height}px; 
-			${moveable ? 'cursor: move;' : ''} touch-action: none; user-select: none;`}
-	bind:this={itemRef}
+	class="{classes} {active ? 'opacity-50' : ''} transition-all"
+	style={`position: absolute; left:${left}px; top:${top}px; width: ${width}px; height: ${height}px;`}
 >
-	{@render gridItem()}
+	{@render gridItemContent()}
 </div>
 
-{#if active && gridSettings.itemSize}
-	{@const preview = calcPosition(previewItem, {
-		itemSize: gridSettings.itemSize,
-		gap: gridSettings.gap
-	})}
+{#if active}
 	<div
-		class={previewClass ?? ''}
-		class:item-preview-default={!previewClass}
+		class="{classes} border opacity-90 transition-all"
 		style={`position: absolute; left:${preview.left}px; top:${preview.top}px;  
 		width: ${preview.width}px; height: ${preview.height}px; z-index: -10;`}
-	></div>
+	>
+		<!-- {@render gridItemContent()} -->
+		<div>hi</div>
+	</div>
 {/if}
 
 <style>
-	.item-default {
-		transition:
-			width 0.2s,
-			height 0.2s;
-		transition:
-			transform 0.2s,
-			opacity 0.2s;
-	}
-	.active-default {
-		opacity: 0.7;
-	}
-	.item-preview-default {
-		background-color: rgb(192, 127, 127);
-		transition: all 0.2s;
-	}
-	.non-active-default {
-		transition:
-			left 0.2s,
-			top 0.2s;
-		transition-timing-function: ease-in-out;
-	}
 	.resizer-default {
 		touch-action: none;
 		position: absolute;

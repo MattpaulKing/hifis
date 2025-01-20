@@ -1,45 +1,51 @@
 <script lang="ts">
 	import { Debouncer } from '$lib/api';
 	import { saveUserGrid, Grid, GridItem } from '$lib/components/user-grid';
-	import { Tabs } from '$lib/components/user-grid';
+	import { innerWidth } from 'svelte/reactivity/window';
 
-	let outer = $state([
-		{ id: '1', x: 0, y: 0, h: 10, w: 20, version: 1 },
-		{ id: '2', x: 20, y: 0, h: 10, w: 20, version: 1 }
+	let items = $state([
+		{
+			id: '1',
+			label: 'A',
+			x: 0,
+			y: 0,
+			h: 10,
+			w: 20,
+			min: { h: 10, w: 20 },
+			moveable: true,
+			resizeable: true
+		},
+		{
+			id: '2',
+			label: 'B',
+			x: 20,
+			y: 0,
+			h: 10,
+			w: 20,
+			min: { h: 10, w: 20 },
+			moveable: true,
+			resizeable: true
+		}
 	]);
 	let debouncer = new Debouncer({
 		callback: async () => {
-			await saveUserGrid(outer);
+			await saveUserGrid(items);
 			return;
 		}
 	});
-	let entities = [
+	let entities = $state([
 		{ id: '1', label: 'something', active: false },
 		{ id: '2', label: 'something else', active: true },
 		{ id: '3', label: 'sth else', active: false }
-	];
-	/*
-  TODO:
-  1. Make a wrapper for GridItems i.e. Tab Component
-  2. Make a moveHandle
-  3. Make a resizer
-  */
+	]);
 </script>
 
 <div class="flex h-full w-full">
-	<Grid bounds cols={120} rows={60} itemSize={{ width: 16, height: 16 }}>
-		{#each outer as item}
-			<GridItem
-				id={item.id}
-				activeClass="opacity-0"
-				class="bg-surface-200-700-token"
-				bind:x={item.x}
-				bind:y={item.y}
-				bind:w={item.w}
-				bind:h={item.h}
-			>
-				{#snippet gridItem()}
-					<Tabs {entities}></Tabs>
+	<Grid cols={120} rows={0} itemSize={{ width: 32, height: 32 }} collision="none">
+		{#each items as item, i}
+			<GridItem class="card rounded-token" bind:item={items[i]} bind:entities>
+				{#snippet gridItem(entity)}
+					<div>{entity.label}</div>
 				{/snippet}
 			</GridItem>
 		{/each}

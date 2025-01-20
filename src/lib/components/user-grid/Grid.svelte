@@ -2,8 +2,10 @@
 	import { onMount, type Snippet } from 'svelte';
 	import { assertGridOptions } from './utils/assert';
 	import { getGridDimensions } from './utils/grid';
-	import type { GridDimensions } from './types';
 	import { setGridContext } from './utils/gridContext.svelte';
+	import { findGridSize } from './utils/breakpoints';
+	import type { GridDimensions } from './types';
+	import GridItemTabs from './GridItemTabs.svelte';
 	type Props = {
 		cols: number;
 		rows: number;
@@ -46,68 +48,37 @@
 		children
 	}: Props = $props();
 
-	let shouldExpandCols = $state(false);
-	let shouldExpandRows = $state(false);
 	let calculatedGridSize: GridDimensions | undefined = $state();
-	let gridContainer: HTMLDivElement | undefined = $state();
 
-	const gridSettings = setGridContext({
-		cols: 0,
-		rows: 0,
-		items: {},
+	let gridSettings = setGridContext({
+		cols,
+		rows,
 		itemSize,
 		bounds,
 		readOnly,
-		debug
+		debug,
+		collision
 	});
 
 	let valid = $derived(assertGridOptions({ cols, rows, itemSize }));
+
 	onMount(() => {
-		if (gridSettings.itemSize && cols === 0) {
-			gridSettings.containerWidth = cols * (gridSettings.itemSize.width + gap + 1);
-		} else {
-			gridSettings.containerWidth = null;
-		}
-
-		if (gridSettings.itemSize && rows === 0) {
-			gridSettings.containerHeight = rows * (gridSettings.itemSize.height + gap + 1);
-		} else {
-			gridSettings.containerHeight = null;
-		}
-
-		if (!gridContainer) return;
-		gridSettings.boundsTo = gridContainer;
+		if (!gridSettings.boundsTo) return;
 		const sizeObserver = new ResizeObserver((entries) => {
 			if (entries.length > 1) {
 				throw new Error('that observer must have only one entry');
 			}
-			const entry = entries[0];
-			const width = entry.contentRect.width;
-			const height = entry.contentRect.height;
-			gridSettings.itemSize = {
-				width: itemSize.width ?? (width - (cols + 1) * gap) / cols,
-				height: itemSize.height ?? (height - (rows + 1) * gap) / rows
-			};
-		});
-		sizeObserver.observe(gridContainer);
-		return () => sizeObserver.disconnect();
-	});
-	$effect(() => {
-		calculatedGridSize = getGridDimensions(Object.values(gridSettings.items));
-		if (shouldExpandCols) {
+			calculatedGridSize = getGridDimensions(Object.values(gridSettings.items));
 			gridSettings.cols = calculatedGridSize.cols;
-			gridSettings.maxCols = calculatedGridSize.cols;
-		}
-		if (shouldExpandRows && gridSettings.collision === 'none') {
-			gridSettings.rows = calculatedGridSize.rows;
-			gridSettings.maxRows = calculatedGridSize.rows;
-		}
+		});
+		sizeObserver.observe(gridSettings.boundsTo);
+		return () => sizeObserver.disconnect();
 	});
 </script>
 
 <div
 	class="relative! {classes}"
-	bind:this={gridContainer}
+	bind:this={gridSettings.boundsTo}
 	style={`width: ${gridSettings.containerWidth ? `${gridSettings.containerWidth}px` : '100%'}; 
 	height: ${gridSettings.containerHeight ? `${gridSettings.containerHeight}px` : '100%'};`}
 >

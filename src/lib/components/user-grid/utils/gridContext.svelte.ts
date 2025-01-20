@@ -1,5 +1,5 @@
 import { getContext, setContext } from "svelte";
-import type { GridDimensions, GridParams, ItemSize, LayoutItem } from "../types";
+import type { Collision, GridDimensions, ItemSize, LayoutItem } from "../types";
 
 type GridSettingsParams = {
   cols: number,
@@ -12,7 +12,7 @@ type GridSettingsParams = {
   bounds?: boolean,
   readOnly?: boolean,
   debug?: boolean,
-  collision?: "none"
+  collision?: Collision
 }
 
 class GridSettings {
@@ -22,7 +22,7 @@ class GridSettings {
   maxRows = $state(Infinity)
   gap = $state(0)
   items = $state<Record<string, LayoutItem>>({})
-  itemSize = $state<ItemSize>()
+  itemSize = $state<ItemSize>({ width: 0, height: 0 })
   bounds = $state(false)
   boundsTo = $state<HTMLDivElement | undefined>()
   readOnly = $state(false)
@@ -64,9 +64,9 @@ class GridSettings {
   }
 }
 
-const GRID_CONTEXT_NAME = Symbol('svelte-grid-extended-context');
+const GRID_CTX = Symbol('GRID_CTX');
 export function getGridContext() {
-  let context = getContext<GridSettings>(GRID_CONTEXT_NAME);
+  let context = getContext<GridSettings>(GRID_CTX);
   if (context === undefined) {
     throw new Error(
       `<GridItem /> is missing a parent <Grid /> component. Make sure you are using the component inside a <Grid />.`
@@ -75,5 +75,5 @@ export function getGridContext() {
   return context;
 }
 export function setGridContext(gridSettings: GridSettingsParams) {
-  return setContext(GRID_CONTEXT_NAME, new GridSettings(gridSettings));
+  return setContext(GRID_CTX, new GridSettings(gridSettings));
 }
