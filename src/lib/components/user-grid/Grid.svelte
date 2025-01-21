@@ -61,6 +61,7 @@
 	});
 
 	let valid = $derived(assertGridOptions({ cols, rows, itemSize }));
+	$inspect(valid);
 
 	onMount(() => {
 		if (!gridSettings.boundsTo) return;

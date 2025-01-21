@@ -18,12 +18,12 @@ export function size2coordinate(size: number, cellSize: number, gap: number): nu
 }
 
 export function snapOnMove(left: number, top: number, item: LayoutItem, gridParams: SnapGridParams): Position {
-  const { itemSize, gap } = gridParams;
+  const { itemSize, gap, maxRows, maxCols } = gridParams;
   const { w, h } = item;
   let x = position2coordinate(left, itemSize.width, gap);
   let y = position2coordinate(top, itemSize.height, gap);
-  x = clamp(x, 0, gridParams.maxCols - w);
-  y = clamp(y, 0, gridParams.maxRows - h);
+  x = clamp(x, 0, maxCols - w);
+  y = clamp(y, 0, maxRows - h);
   return { x, y };
 }
 

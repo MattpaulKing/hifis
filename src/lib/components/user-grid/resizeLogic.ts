@@ -137,3 +137,83 @@ function compressItems() {
   );
 }
 
+function updateCollItemPositionWithPush(collItem: LayoutItem, items: LayoutItem[]) {
+  //TODO: This may need an actual reference
+  const newPosition = getAvailablePosition(
+    collItem,
+    items,
+    gridSettings.maxCols,
+    gridSettings.maxRows
+  );
+  if (newPosition) {
+    collItem.x = newPosition.x;
+    collItem.y = newPosition.y;
+  }
+}
+function handleCollisionsForPreviewItemWithPush(newAttributes: { x: number; y: number }) {
+  const gridItems = Object.values(gridSettings.items);
+  const itemsExceptPreview = gridItems.filter((item) => item.id != previewItem.id);
+  const collItems = getCollisions({ ...previewItem, ...newAttributes }, itemsExceptPreview);
+  collItems.forEach((collItem) => {
+    const itemsExceptCollItem = gridItems.filter((item) => item.id != collItem.id);
+    const items = [
+      ...itemsExceptCollItem.filter((item) => item.id != previewItem.id),
+      { ...previewItem, ...newAttributes }
+    ];
+    updateCollItemPositionWithPush(collItem, items);
+  });
+  previewItem = { ...previewItem, ...newAttributes };
+  applyPreview();
+}
+function movePreviewWithCollisionsWithPush(x: number, y: number) {
+  handleCollisionsForPreviewItemWithPush({ x, y });
+}
+function movePreviewWithCollisionsWithCompress(x: number, y: number) {
+  const gridItems = Object.values(gridSettings.items);
+  let newY = y;
+  const itemsExceptPreview = gridItems.filter((item) => item.id != previewItem.id);
+  while (newY >= 0) {
+    const collItems = getCollisions({ ...previewItem, x, y: newY }, gridItems);
+    if (collItems.length > 0) {
+      const sortedItems = collItems.sort((a, b) => b.y - a.y);
+      let moved = false;
+      sortedItems.forEach((sortItem) => {
+        //if you want to fix sensitivity of grid, change this statement
+        if (y + previewItem.h / 2 >= sortItem.y + sortItem.h / 2) {
+          moved = true;
+          newY = sortItem.y + sortItem.h;
+          sortedItems.forEach((item) => {
+            if (
+              !hasCollisions({ ...item, y: item.y - previewItem.h }, itemsExceptPreview) &&
+              item.y - previewItem.h >= 0
+            ) {
+              item.y -= previewItem.h;
+            }
+          });
+          return false;
+        }
+      });
+      if (!moved) {
+        newY = previewItem.y;
+      }
+      break;
+    }
+    newY--;
+  }
+  if (newY < 0 || y === 0) {
+    newY = 0;
+  }
+  const positionChanged = x != previewItem.x || newY != previewItem.y;
+  previewItem = { ...previewItem, x, y: newY };
+  if (positionChanged) {
+    // compressItems();
+    applyPreview();
+  }
+}
+function movePreviewWithCollisions(x: number, y: number) {
+  if (gridSettings.collision === 'compress') {
+    movePreviewWithCollisionsWithCompress(x, y);
+  } else {
+    movePreviewWithCollisionsWithPush(x, y);
+  }
+}

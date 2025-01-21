@@ -9,12 +9,13 @@
 	import { hasCollisions, getCollisions, getAvailablePosition } from './utils/grid';
 	import { getGridContext } from './utils/gridContext.svelte';
 	import { GridItemTabs } from '.';
-	import { GridItem } from 'svelte-grid-extended';
 	import type { ItemSize, LayoutItem, LayoutItemEntity } from './types';
+	import { on } from 'svelte/events';
 
 	type Props = {
 		item: LayoutItem;
 		entities: LayoutItemEntity[];
+		moveable: boolean;
 		onChange?: (item: LayoutItem) => void;
 		onPreview?: (item: LayoutItem) => void;
 		gridItem: Snippet<[LayoutItemEntity]>;
@@ -30,23 +31,15 @@
 
 	let gridSettings = getGridContext();
 	let active = $state(false);
-	//TODO: Change left, top, width, height, etc. so that they're a derived
-	let left: number = $state(0);
-	let top: number = $state(0);
-	let width: number = $state(0);
-	let height: number = $state(0);
+	let left = $state(0);
+	let top = $state(0);
+	let width = $state(0);
+	let height = $state(0);
 	let activeEntity = $derived(entities.find((entity) => entity.active));
+	let cleanup = () => {};
 
 	onMount(() => {
 		gridSettings.registerItem(item);
-
-		return () => {
-			gridSettings.unregisterItem(item);
-		};
-	});
-
-	// reposition item on grid change
-	$effect(() => {
 		if (!active && gridSettings.itemSize) {
 			const newPosition = calcPosition(item, {
 				itemSize: gridSettings.itemSize,
@@ -57,9 +50,13 @@
 			width = newPosition.width;
 			height = newPosition.height;
 		}
+
 		if (!active && item) {
 			previewItem = item;
 		}
+		return () => {
+			gridSettings.unregisterItem(item);
+		};
 	});
 
 	let previewItem = $state({ ...item });
@@ -86,8 +83,6 @@
 		active = true;
 		initialPointerPosition.left = event.pageX;
 		initialPointerPosition.top = event.pageY;
-		initialPosition = { left, top };
-		pointerShift = { left: event.pageX - left, top: event.pageY - top };
 		itemRef?.setPointerCapture(event.pointerId);
 	}
 	function endInteraction(event: PointerEvent) {
@@ -95,7 +90,8 @@
 		active = false;
 		initialPointerPosition.left = 0;
 		initialPointerPosition.top = 0;
-		itemRef?.releasePointerCapture(event.pointerId);
+
+		console.log(itemRef?.releasePointerCapture(event.pointerId));
 	}
 	// MOVE ITEM LOGIC
 	let initialPosition = $state({ left: 0, top: 0 });
@@ -106,8 +102,7 @@
 		initInteraction(event);
 		initialPosition = { left, top };
 		pointerShift = { left: event.pageX - left, top: event.pageY - top };
-		window.addEventListener('pointermove', move);
-		window.addEventListener('pointerup', moveEnd);
+		cleanup = on(window, 'pointermove', move);
 	}
 
 	function move(event: PointerEvent) {
@@ -137,14 +132,14 @@
 			scroll();
 		}
 		// TODO: throttle this, hasColisions is expensive
-		const { x, y } = snapOnMove(left, top, previewItem, gridSettings);
-		if (gridSettings.collision !== 'none') {
-			movePreviewWithCollisions(x, y);
-		} else {
-			if (!hasCollisions({ ...previewItem, x, y }, Object.values(gridSettings.items))) {
-				previewItem = { ...previewItem, x, y };
-				previewItem.x = x;
-				previewItem.y = y;
+		{
+			const { x, y } = snapOnMove(left, top, previewItem, gridSettings);
+			if (gridSettings.collision !== 'none') {
+				movePreviewWithCollisions(x, y);
+			} else {
+				if (!hasCollisions({ ...previewItem, x, y }, Object.values(gridSettings.items))) {
+					previewItem = { ...previewItem, x, y };
+				}
 			}
 		}
 	}
@@ -228,23 +223,18 @@
 			movePreviewWithCollisionsWithPush(x, y);
 		}
 	}
-	function moveEnd(event: PointerEvent) {
-		if (event.button !== 0) return;
+	function moveEnd(event: PointerEvent, cleanup: () => void) {
+		if (event.button !== 0 || !active) return;
 		pointerShift = { left: 0, top: 0 };
-		window.removeEventListener('pointermove', move);
-		window.removeEventListener('pointerup', moveEnd);
 		endInteraction(event);
+		cleanup();
 	}
 </script>
 
 {#snippet gridItemContent()}
 	<div class="flex w-full place-items-center justify-between">
 		<GridItemTabs {entities}>
-			<div
-				bind:this={itemRef}
-				onpointerdown={moveStart}
-				class="btn btn-sm touch-none select-none px-1 hover:variant-ghost"
-			>
+			<div class="btn btn-sm touch-none select-none px-1 hover:variant-ghost">
 				<img src="/Move.png" class="h-7 w-7 dark:invert" alt="move" />
 			</div>
 			<button class="btn btn-sm touch-none select-none px-1 hover:variant-ghost">
@@ -257,21 +247,24 @@
 	{/if}
 {/snippet}
 
+<svelte:window onpointerup={(e) => moveEnd(e, cleanup)} />
+
 <div
-	class="{classes} {active ? 'opacity-50' : ''} transition-all"
-	style={`position: absolute; left:${left}px; top:${top}px; width: ${width}px; height: ${height}px;`}
+	class="absolute transition-all {classes} {active ? 'opacity-90' : ''}"
+	style={`left:${left}px; top:${top}px; width: ${width}px; height: ${height}px;`}
+	bind:this={itemRef}
+	onpointerdown={moveStart}
 >
 	{@render gridItemContent()}
 </div>
 
 {#if active}
 	<div
-		class="{classes} border opacity-90 transition-all"
+		class="{classes} border opacity-50 transition-all"
 		style={`position: absolute; left:${preview.left}px; top:${preview.top}px;  
 		width: ${preview.width}px; height: ${preview.height}px; z-index: -10;`}
 	>
-		<!-- {@render gridItemContent()} -->
-		<div>hi</div>
+		{@render gridItemContent()}
 	</div>
 {/if}
 
