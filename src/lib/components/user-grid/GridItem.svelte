@@ -25,6 +25,7 @@
 		class: classes,
 		item = $bindable(),
 		entities = $bindable(),
+		moveable,
 		gridItem,
 		onPreview
 	}: Props = $props();
@@ -90,8 +91,7 @@
 		active = false;
 		initialPointerPosition.left = 0;
 		initialPointerPosition.top = 0;
-
-		console.log(itemRef?.releasePointerCapture(event.pointerId));
+		itemRef?.releasePointerCapture(event.pointerId);
 	}
 	// MOVE ITEM LOGIC
 	let initialPosition = $state({ left: 0, top: 0 });
@@ -253,7 +253,7 @@
 	class="absolute transition-all {classes} {active ? 'opacity-90' : ''}"
 	style={`left:${left}px; top:${top}px; width: ${width}px; height: ${height}px;`}
 	bind:this={itemRef}
-	onpointerdown={moveStart}
+	onpointerdown={moveable ? moveStart : null}
 >
 	{@render gridItemContent()}
 </div>
