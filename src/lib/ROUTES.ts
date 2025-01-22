@@ -29,6 +29,9 @@ const SERVERS = {
   "GET /api/v1/clients": `/api/v1/clients`,
   "POST /api/v1/grid": `/api/v1/grid`,
   "GET /api/v1/organizations": `/api/v1/organizations`,
+  "GET /api/v1/search": (params?: { value?: (string) }) => {
+    return `/api/v1/search${appendSp({ value: params?.value })}`
+  },
   "GET /auth/callback": `/auth/callback`
 }
 
@@ -149,8 +152,8 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 */
 export type KIT_ROUTES = {
   PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients/create': 'orgLabel', '/[orgLabel]/users/create': 'orgLabel', '/test': never }
-  SERVERS: { 'GET /api/v1/clients': never, 'POST /api/v1/grid': never, 'GET /api/v1/organizations': never, 'GET /auth/callback': never }
+  SERVERS: { 'GET /api/v1/clients': never, 'POST /api/v1/grid': never, 'GET /api/v1/organizations': never, 'GET /api/v1/search': never, 'GET /auth/callback': never }
   ACTIONS: { 'default /[orgLabel]/clients/create': 'orgLabel', 'default /[orgLabel]/users/create': 'orgLabel' }
   LINKS: Record<string, never>
-  Params: { orgLabel: never }
+  Params: { orgLabel: never, value: never }
 }

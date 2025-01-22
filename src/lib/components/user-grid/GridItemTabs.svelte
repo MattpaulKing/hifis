@@ -54,7 +54,5 @@
 		</div>
 	</div>
 
-	<div class="">
-		{@render children()}
-	</div>
+	{@render children()}
 </div>

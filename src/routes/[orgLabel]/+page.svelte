@@ -1,3 +1,32 @@
 <script lang="ts">
+	import { Grid, GridItem } from '$lib/components/user-grid';
+
 	let { data } = $props();
+
+	let items = $state(data.usersComponents);
+
+	let entities = $state(data.entities);
 </script>
+
+<Grid
+	bounds
+	cols={{
+		xs: 1,
+		sm: 1,
+		md: 2,
+		lg: 3,
+		xl: 3,
+		xxl: 3
+	}}
+	rows={0}
+	gap={32}
+	itemSize={{ width: 32, height: 32 }}
+>
+	{#each items as _, i}
+		<GridItem class="card rounded-token" bind:item={items[i]} bind:entities>
+			{#snippet gridItem(entity)}
+				<div>{entity.label}</div>
+			{/snippet}
+		</GridItem>
+	{/each}
+</Grid>

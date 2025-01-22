@@ -15,20 +15,11 @@
 	type Props = {
 		item: LayoutItem;
 		entities: LayoutItemEntity[];
-		moveable: boolean;
 		onChange?: (item: LayoutItem) => void;
-		onPreview?: (item: LayoutItem) => void;
 		gridItem: Snippet<[LayoutItemEntity]>;
 		class?: string;
 	};
-	let {
-		class: classes,
-		item = $bindable(),
-		entities = $bindable(),
-		moveable,
-		gridItem,
-		onPreview
-	}: Props = $props();
+	let { class: classes, item = $bindable(), entities = $bindable(), gridItem }: Props = $props();
 
 	let gridSettings = getGridContext();
 	let active = $state(false);
@@ -73,6 +64,14 @@
 		item.y = previewItem.y;
 		item.w = previewItem.w;
 		item.h = previewItem.h;
+		let previewPos = calcPosition(previewItem, {
+			gap: gridSettings.gap,
+			itemSize: gridSettings.itemSize
+		});
+		left = previewPos.left;
+		top = previewPos.top;
+		width = previewPos.width;
+		height = previewPos.height;
 	}
 	function scroll() {
 		// TODO: scroll
@@ -131,96 +130,11 @@
 		if (gridSettings.collision === 'none') {
 			scroll();
 		}
-		// TODO: throttle this, hasColisions is expensive
 		{
 			const { x, y } = snapOnMove(left, top, previewItem, gridSettings);
-			if (gridSettings.collision !== 'none') {
-				movePreviewWithCollisions(x, y);
-			} else {
-				if (!hasCollisions({ ...previewItem, x, y }, Object.values(gridSettings.items))) {
-					previewItem = { ...previewItem, x, y };
-				}
+			if (!hasCollisions({ ...previewItem, x, y }, Object.values(gridSettings.items))) {
+				previewItem = { ...previewItem, x, y };
 			}
-		}
-	}
-	function updateCollItemPositionWithPush(collItem: LayoutItem, items: LayoutItem[]) {
-		//TODO: This may need an actual reference
-		const newPosition = getAvailablePosition(
-			collItem,
-			items,
-			gridSettings.maxCols,
-			gridSettings.maxRows
-		);
-		if (newPosition) {
-			collItem.x = newPosition.x;
-			collItem.y = newPosition.y;
-		}
-	}
-	function handleCollisionsForPreviewItemWithPush(newAttributes: { x: number; y: number }) {
-		const gridItems = Object.values(gridSettings.items);
-		const itemsExceptPreview = gridItems.filter((item) => item.id != previewItem.id);
-		const collItems = getCollisions({ ...previewItem, ...newAttributes }, itemsExceptPreview);
-		collItems.forEach((collItem) => {
-			const itemsExceptCollItem = gridItems.filter((item) => item.id != collItem.id);
-			const items = [
-				...itemsExceptCollItem.filter((item) => item.id != previewItem.id),
-				{ ...previewItem, ...newAttributes }
-			];
-			updateCollItemPositionWithPush(collItem, items);
-		});
-		previewItem = { ...previewItem, ...newAttributes };
-		applyPreview();
-	}
-	function movePreviewWithCollisionsWithPush(x: number, y: number) {
-		handleCollisionsForPreviewItemWithPush({ x, y });
-	}
-	function movePreviewWithCollisionsWithCompress(x: number, y: number) {
-		const gridItems = Object.values(gridSettings.items);
-		let newY = y;
-		const itemsExceptPreview = gridItems.filter((item) => item.id != previewItem.id);
-		while (newY >= 0) {
-			const collItems = getCollisions({ ...previewItem, x, y: newY }, gridItems);
-			if (collItems.length > 0) {
-				const sortedItems = collItems.sort((a, b) => b.y - a.y);
-				let moved = false;
-				sortedItems.forEach((sortItem) => {
-					//if you want to fix sensitivity of grid, change this statement
-					if (y + previewItem.h / 2 >= sortItem.y + sortItem.h / 2) {
-						moved = true;
-						newY = sortItem.y + sortItem.h;
-						sortedItems.forEach((item) => {
-							if (
-								!hasCollisions({ ...item, y: item.y - previewItem.h }, itemsExceptPreview) &&
-								item.y - previewItem.h >= 0
-							) {
-								item.y -= previewItem.h;
-							}
-						});
-						return false;
-					}
-				});
-				if (!moved) {
-					newY = previewItem.y;
-				}
-				break;
-			}
-			newY--;
-		}
-		if (newY < 0 || y === 0) {
-			newY = 0;
-		}
-		const positionChanged = x != previewItem.x || newY != previewItem.y;
-		previewItem = { ...previewItem, x, y: newY };
-		if (positionChanged) {
-			// compressItems();
-			applyPreview();
-		}
-	}
-	function movePreviewWithCollisions(x: number, y: number) {
-		if (gridSettings.collision === 'compress') {
-			movePreviewWithCollisionsWithCompress(x, y);
-		} else {
-			movePreviewWithCollisionsWithPush(x, y);
 		}
 	}
 	function moveEnd(event: PointerEvent, cleanup: () => void) {
@@ -234,12 +148,14 @@
 {#snippet gridItemContent()}
 	<div class="flex w-full place-items-center justify-between">
 		<GridItemTabs {entities}>
-			<div class="btn btn-sm touch-none select-none px-1 hover:variant-ghost">
-				<img src="/Move.png" class="h-7 w-7 dark:invert" alt="move" />
+			<div class="flex place-items-center">
+				<span class="touch-none select-none px-1 {item.moveable ? 'opacity-100' : 'opacity-50'}">
+					<img src="/Move.png" class="h-7 w-7 dark:invert" alt="move" />
+				</span>
+				<button class="btn btn-sm touch-none select-none px-1 hover:variant-ghost">
+					<img src="/Resize.png" class="h-7 w-7 dark:invert" alt="resize" />
+				</button>
 			</div>
-			<button class="btn btn-sm touch-none select-none px-1 hover:variant-ghost">
-				<img src="/Resize.png" class="h-7 w-7 dark:invert" alt="resize" />
-			</button>
 		</GridItemTabs>
 	</div>
 	{#if activeEntity}
@@ -247,13 +163,16 @@
 	{/if}
 {/snippet}
 
-<svelte:window onpointerup={(e) => moveEnd(e, cleanup)} />
+<!-- <svelte:window  /> -->
 
 <div
-	class="absolute transition-all {classes} {active ? 'opacity-90' : ''}"
+	class="absolute transition-all {classes} {active ? 'opacity-90' : ''} {item.moveable
+		? 'border'
+		: ''}"
 	style={`left:${left}px; top:${top}px; width: ${width}px; height: ${height}px;`}
 	bind:this={itemRef}
-	onpointerdown={moveable ? moveStart : null}
+	onpointerdown={item.moveable ? moveStart : null}
+	onpointerup={(e) => moveEnd(e, cleanup)}
 >
 	{@render gridItemContent()}
 </div>

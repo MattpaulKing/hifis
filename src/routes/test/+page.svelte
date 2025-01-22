@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Debouncer } from '$lib/api';
 	import { saveUserGrid, Grid, GridItem } from '$lib/components/user-grid';
-	import { innerWidth } from 'svelte/reactivity/window';
 
 	let items = $state([
 		{
@@ -9,20 +8,20 @@
 			label: 'A',
 			x: 0,
 			y: 0,
-			h: 10,
-			w: 20,
-			min: { h: 10, w: 20 },
-			moveable: true,
+			h: 4,
+			w: 10,
+			min: { h: 1, w: 2 },
+			moveable: false,
 			resizeable: true
 		},
 		{
 			id: '2',
 			label: 'B',
-			x: 20,
+			x: 10,
 			y: 0,
-			h: 10,
-			w: 20,
-			min: { h: 10, w: 20 },
+			h: 4,
+			w: 10,
+			min: { h: 1, w: 2 },
 			moveable: true,
 			resizeable: true
 		}
@@ -40,8 +39,21 @@
 	]);
 </script>
 
-<div class="flex h-full w-full">
-	<Grid cols={120} rows={0} itemSize={{ width: 32, height: 32 }} collision="none">
+<div class="flex h-full w-full p-4">
+	<Grid
+		bounds
+		cols={{
+			xs: 1,
+			sm: 1,
+			md: 2,
+			lg: 3,
+			xl: 3,
+			xxl: 3
+		}}
+		rows={0}
+		gap={32}
+		itemSize={{ width: 32, height: 32 }}
+	>
 		{#each items as item, i}
 			<GridItem class="card rounded-token" bind:item={items[i]} bind:entities>
 				{#snippet gridItem(entity)}

@@ -1,5 +1,5 @@
 import { getContext, setContext } from "svelte";
-import type { Collision, GridDimensions, ItemSize, LayoutItem } from "../types";
+import type { GridDimensions, ItemSize, LayoutItem } from "../types";
 
 type GridSettingsParams = {
   cols: number,
@@ -12,7 +12,6 @@ type GridSettingsParams = {
   bounds?: boolean,
   readOnly?: boolean,
   debug?: boolean,
-  collision?: Collision
 }
 
 class GridSettings {
@@ -27,7 +26,6 @@ class GridSettings {
   boundsTo = $state<HTMLDivElement | undefined>()
   readOnly = $state(false)
   debug = $state(false)
-  collision = $state<"compress" | "push" | "none">("none")
   containerWidth: number | null = $state(null);
   containerHeight: number | null = $state(null);
 
@@ -42,7 +40,6 @@ class GridSettings {
     this.bounds = params.bounds ?? false
     this.readOnly = params.readOnly ?? false
     this.debug = params.debug ?? false
-    this.collision = params.collision ?? "none"
   }
   registerItem(item: LayoutItem) {
     if (item.id in this.items) {

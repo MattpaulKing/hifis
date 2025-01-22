@@ -1,4 +1,4 @@
-import { pgTable, uuid, text } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
 import { timestamps } from "../../../../schemas/helpers/timestamps";
 import { organizations } from "../../schema";
 import * as v from "valibot"
@@ -8,6 +8,7 @@ export const clients = pgTable('clients', {
   ...timestamps,
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  dob: timestamp().notNull(),
   phone: text('phone'),
   email: text("email"),
   orgId: uuid("organization_id").references(() => organizations.id).notNull()

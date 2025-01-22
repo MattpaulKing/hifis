@@ -5,9 +5,17 @@
 	import { setGridContext } from './utils/gridContext.svelte';
 	import { findGridSize } from './utils/breakpoints';
 	import type { GridDimensions } from './types';
-	import GridItemTabs from './GridItemTabs.svelte';
 	type Props = {
-		cols: number;
+		cols:
+			| number
+			| {
+					xxl: number;
+					xl: number;
+					lg: number;
+					md: number;
+					sm: number;
+					xs: number;
+			  };
 		rows: number;
 		itemSize: { width: number; height: number };
 		gap?: number;
@@ -23,7 +31,6 @@
 		readOnly?: boolean;
 		debug?: boolean;
 		class?: string;
-		collision?: 'none' | 'push' | 'compress';
 		autoCompress?: boolean;
 		children: Snippet;
 	};
@@ -44,21 +51,27 @@
 		debug,
 		gap = 0,
 		class: classes,
-		collision = 'none',
 		children
 	}: Props = $props();
-
-	let calculatedGridSize: GridDimensions | undefined = $state();
 
 	let gridSettings = setGridContext({
 		cols,
 		rows,
 		itemSize,
 		bounds,
+		gap,
 		readOnly,
-		debug,
-		collision
+		debug
 	});
+
+	let shouldExpandCols = $state(cols === 0);
+	let shouldExpandRows = $state(rows === 0);
+
+	let calculatedGridSize: GridDimensions | undefined = $state(
+		getGridDimensions(Object.values(gridSettings.items))
+	);
+	let _cols = $state(cols === 0 ? calculatedGridSize.cols : cols);
+	let _rows = $state(rows === 0 ? calculatedGridSize.rows : rows);
 
 	let valid = $derived(assertGridOptions({ cols, rows, itemSize }));
 	$inspect(valid);
@@ -69,8 +82,17 @@
 			if (entries.length > 1) {
 				throw new Error('that observer must have only one entry');
 			}
-			calculatedGridSize = getGridDimensions(Object.values(gridSettings.items));
-			gridSettings.cols = calculatedGridSize.cols;
+			let entry = entries[0];
+			const width = entry.contentRect.width;
+			const height = entry.contentRect.height;
+			_cols = findGridSize(cols, width, breakpoints);
+			_rows = findGridSize(rows, height, breakpoints);
+			shouldExpandCols = _cols === 0;
+			shouldExpandRows = _rows === 0;
+			gridSettings.itemSize = {
+				width: itemSize.width ?? (width - (_cols + 1) * gap) / _cols,
+				height: itemSize.height ?? (height - (_rows + 1) * gap) / _rows
+			};
 		});
 		sizeObserver.observe(gridSettings.boundsTo);
 		return () => sizeObserver.disconnect();
@@ -78,7 +100,7 @@
 </script>
 
 <div
-	class="relative! {classes}"
+	class="relative {classes}"
 	bind:this={gridSettings.boundsTo}
 	style={`width: ${gridSettings.containerWidth ? `${gridSettings.containerWidth}px` : '100%'}; 
 	height: ${gridSettings.containerHeight ? `${gridSettings.containerHeight}px` : '100%'};`}
