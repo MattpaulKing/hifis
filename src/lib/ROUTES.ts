@@ -16,6 +16,12 @@ const PAGES = {
   "/[orgLabel]/clients/create": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/clients/create`
   },
+  "/[orgLabel]/services": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}/services`
+  },
+  "/[orgLabel]/services/create": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}/services/create`
+  },
   "/[orgLabel]/users/create": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/users/create`
   },
@@ -41,6 +47,9 @@ const SERVERS = {
 const ACTIONS = {
   "default /[orgLabel]/clients/create": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/clients/create`
+  },
+  "create /[orgLabel]/services/create": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}/services/create?/create`
   },
   "default /[orgLabel]/users/create": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/users/create`
@@ -151,9 +160,9 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 * ```
 */
 export type KIT_ROUTES = {
-  PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients/create': 'orgLabel', '/[orgLabel]/users/create': 'orgLabel', '/test': never }
+  PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients/create': 'orgLabel', '/[orgLabel]/services': 'orgLabel', '/[orgLabel]/services/create': 'orgLabel', '/[orgLabel]/users/create': 'orgLabel', '/test': never }
   SERVERS: { 'GET /api/v1/clients': never, 'POST /api/v1/grid': never, 'GET /api/v1/organizations': never, 'GET /api/v1/search': never, 'GET /auth/callback': never }
-  ACTIONS: { 'default /[orgLabel]/clients/create': 'orgLabel', 'default /[orgLabel]/users/create': 'orgLabel' }
+  ACTIONS: { 'default /[orgLabel]/clients/create': 'orgLabel', 'create /[orgLabel]/services/create': 'orgLabel', 'default /[orgLabel]/users/create': 'orgLabel' }
   LINKS: Record<string, never>
   Params: { orgLabel: never, value: never }
 }

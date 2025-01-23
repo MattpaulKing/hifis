@@ -3,6 +3,7 @@
 		Errors,
 		Field,
 		Input,
+		InputDate,
 		InputLookup,
 		LookupDropdown,
 		Label,
@@ -54,6 +55,11 @@
 <Field {form} path="lastName">
 	<Label label="Last Name" />
 	<Input type="text" onkeydown={() => debouncer.search()} />
+	<Errors />
+</Field>
+<Field {form} path="dob">
+	<Label label="Date of Birth" />
+	<InputDate {form} />
 	<Errors />
 </Field>
 <Field {form} path="phone">

@@ -40,7 +40,7 @@
 	>
 		<input bind:value onkeydown={handleKeydown} class="w-64" type="text" placeholder="Search..." />
 		<div class="input-group-shim">
-			<img src="MagnifyingGlass.png" class="w-5 dark:invert" alt="magnifying-glass" />
+			<img src="/MagnifyingGlass.png" class="w-5 dark:invert" alt="magnifying-glass" />
 		</div>
 	</div>
 	{#if searchMenuOpen}
@@ -52,7 +52,7 @@
 					{:else if searchedItems.length > 0}
 						{#each searchedItems as item}
 							<SearchListItem>
-								<span>{item}</span>
+								<span>{item.label}</span>
 							</SearchListItem>
 						{/each}
 					{:else}
