@@ -11,8 +11,8 @@
 		disabled?: boolean;
 		class?: string;
 		lookupCtx?: {
-			lookups: Lookup[];
-			inputValue: string;
+			lookups?: Lookup[];
+			inputValue?: string;
 		};
 	};
 

@@ -28,7 +28,7 @@ export default $config({
       }
     });
 
-    new sst.x.DevCommand("Auth", {
+    new sst.x.DevCommand("auth", {
       link: [db],
       dev: {
         autostart: true,

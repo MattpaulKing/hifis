@@ -12,14 +12,18 @@ async function getUser(email: string) {
   // Get user from database
   // Return org ID
   const db = drizzle(`postgres://${Resource.db.username}:${Resource.db.password}@${Resource.db.host}:${Resource.db.port}/${Resource.db.database}`)
-  const [user] = await db.select({
-    id: users.id,
-    firstName: users.firstName,
-    lastName: users.lastName,
-    phone: users.phone,
-    email: users.email,
-    orgId: users.orgId
-  }).from(users).where(eq(users.email, email)).limit(1)
+  const [user] = await db
+    .select({
+      id: users.id,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      phone: users.phone,
+      email: users.email,
+      orgId: users.orgId
+    })
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1)
   if (!user) {
     throw Error("Invalid user")
   }

@@ -5,7 +5,7 @@ const LOOKUP_CTX = Symbol("LOOKUP_CTX")
 type Args = {
   lookups: Lookup[] | undefined,
   value: string | string[]
-  inputValue: string | undefined
+  inputValue?: string
 }
 
 class LookupStore {

@@ -11,7 +11,7 @@ declare global {
     interface Locals {
       subject: {
         type: "user";
-        properties: typeof users.$inferSelect
+        properties: Omit<typeof users.$inferSelect, "createdAt", "updatedAt", "deletedAt">
       },
       db: PostgresJsDatabase
     }

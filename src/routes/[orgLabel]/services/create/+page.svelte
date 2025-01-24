@@ -5,7 +5,10 @@
 		FormContainer,
 		initClientForm,
 		Input,
-		Label
+		InputRichText,
+		InputLookup,
+		Label,
+		LookupDropdown
 	} from '$lib/components/forms';
 	import { route } from '$lib/ROUTES';
 	import { servicesFormSchema } from '../schema';
@@ -30,6 +33,17 @@
 	<Field {form} path="label">
 		<Label label="Name"></Label>
 		<Input type="text" />
+		<Errors />
+	</Field>
+	<Field {form} path="category" lookupCtx={{}}>
+		<Label label="Service Category"></Label>
+		<InputLookup apiRoute={route('GET /api/v1/organizations/services/category')} />
+		<LookupDropdown />
+		<Errors />
+	</Field>
+	<Field class="col-span-2" {form} path="description">
+		<Label label="Description"></Label>
+		<InputRichText />
 		<Errors />
 	</Field>
 	<Field {form} path="email">

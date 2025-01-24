@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { getField } from './context.svelte';
-	import { route, type KIT_ROUTES } from '$lib/ROUTES';
 	import { getLookups } from '..';
 	import type { Lookup } from '$lib/interfaces/Lookup';
 	type Props = {
-		apiRoute: keyof KIT_ROUTES['SERVERS'];
+		apiRoute: string;
 		restProps?: Record<keyof HTMLInputElement, string>;
 	};
 	let { apiRoute, ...restProps }: Props = $props();
@@ -19,9 +18,9 @@
 		timeout = setTimeout(fetchLookups, 400);
 	}
 	async function fetchLookups() {
-		let fetchedLookups = await fetch(
-			`${route(apiRoute)}?search=${store.inputValue}&lookups=true`
-		).then(async (r) => (await r.json()) as Lookup[]);
+		let fetchedLookups = await fetch(`${apiRoute}?search=${store.inputValue}&lookups=true`).then(
+			async (r) => (await r.json()) as Lookup[]
+		);
 
 		if (Array.isArray($value) && $value.length > 0) {
 			let selectedLookups = store.lookups.filter((lookup) => $value.includes(lookup?.id));
@@ -36,7 +35,7 @@
 	}
 	function onkeydown(e: KeyboardEvent) {
 		$focused = true;
-		if (e.key === 'Escape') {
+		if (e.key === 'Escape' || (e.key === 'Tab' && store.lookups.length === 0)) {
 			$focused = false;
 			return;
 		}
