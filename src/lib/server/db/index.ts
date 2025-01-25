@@ -1,1 +1,2 @@
-export { db, dbURI } from "./client"
+export { db } from "./client"
+export { single } from "./query/single"

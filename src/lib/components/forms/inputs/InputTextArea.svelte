@@ -6,11 +6,12 @@
 </script>
 
 <textarea
-	name={path}
-	class="input {classes}"
-	aria-invalid={$errors ? 'true' : 'false'}
+	autocomplete="off"
+	class="textarea {classes}"
 	readonly={$disabled}
+	name={path}
+	title={$value}
 	bind:value={$value}
+	aria-invalid={$errors ? 'true' : 'false'}
 	{...restProps}
->
-</textarea>
+></textarea>

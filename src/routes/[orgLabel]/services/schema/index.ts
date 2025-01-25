@@ -10,7 +10,7 @@ export const services = pgTable('services', {
   address: text('address').notNull(),
   phone: text('phone'),
   email: text("email"),
-  category: text("category").notNull(),
+  category: uuid("category").notNull(),
   description: text("description"),
   orgId: uuid("organization_id").references(() => organizations.id, { onUpdate: "cascade", onDelete: "restrict" }).notNull()
 })
@@ -21,7 +21,7 @@ export const servicesFormSchema = v.object({
   address: v.pipe(v.string("Address is required")),
   phone: v.string(),
   email: v.nullable(v.pipe(v.string(), v.email("Invalid email format"))),
-  category: v.pipe(v.string("Category is required"), v.minLength(1, "Category is required")),
+  category: v.pipe(v.string("Category is required"), v.uuid()),
   description: v.string(),
   orgId: v.pipe(v.string(), v.uuid())
 })

@@ -7,7 +7,8 @@
 		InputLookup,
 		LookupDropdown,
 		Label,
-		getFormMsgStore
+		getFormMsgStore,
+		FormBtns
 	} from '$lib/components/forms';
 	import { route } from '$lib/ROUTES';
 	import { Debouncer } from '$lib/api';
@@ -83,7 +84,4 @@
 	<LookupDropdown />
 	<Errors />
 </Field>
-<div class="col-span-2 mt-6 flex justify-between">
-	<div></div>
-	<button class="variant-filled-success btn"> Save </button>
-</div>
+<FormBtns></FormBtns>

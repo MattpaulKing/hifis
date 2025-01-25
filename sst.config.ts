@@ -21,6 +21,7 @@ export default $config({
     });
     const db = new sst.aws.Postgres("db", {
       vpc, dev: {
+        host: "localhost",
         username: "postgres",
         password: "postgres",
         database: "postgres",

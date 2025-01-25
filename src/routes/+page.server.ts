@@ -5,6 +5,7 @@ import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
   if (subject) {
+    console.log(subject)
     const [org] = await db
       .select({ label: organizations.label })
       .from(organizations)

@@ -1,16 +1,16 @@
 <script lang="ts" generics="T extends Record<string, unknown>">
 	import { setFormCtx } from './inputs/context.svelte';
 	import { getFormMsgStore, LoadingSpinner } from '.';
+	import { fade } from 'svelte/transition';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 
 	let {
 		form,
 		action,
 		disabled = false,
+		drawerOpen = false,
 		enctype = 'application/x-www-form-urlencoded',
-		bordered = true,
 		children,
 		class: classes,
 		title,
@@ -20,8 +20,8 @@
 		form: SuperForm<T>;
 		action: string;
 		disabled?: boolean;
+		drawerOpen?: boolean;
 		enctype?: 'application/x-www-form-urlencoded' | 'multipart/form-data';
-		bordered?: boolean;
 		children: any;
 		class?: string;
 		title?: Snippet;
@@ -34,12 +34,23 @@
 	let msgStore = getFormMsgStore();
 </script>
 
-<div
-	in:fade
-	class="relative flex h-min w-fit flex-wrap md:flex-nowrap {bordered
-		? 'card border-surface-200-700-token border shadow-lg shadow-surface-500'
-		: ''}"
->
+{#if drawerOpen}
+	<div
+		in:fade
+		class="card border-surface-200-700-token relative flex h-full w-full flex-wrap border md:flex-nowrap"
+	>
+		{@render formContent()}
+	</div>
+{:else}
+	<div
+		in:fade
+		class="card border-surface-200-700-token relative flex h-min w-fit flex-wrap border shadow-lg shadow-surface-500 md:flex-nowrap"
+	>
+		{@render formContent()}
+	</div>
+{/if}
+
+{#snippet formContent()}
 	<div class="absolute right-0 top-0 z-50 flex w-full flex-col items-end">
 		{#if msgStore.current?.msg}
 			<div
@@ -74,4 +85,4 @@
 			{@render children()}
 		</form>
 	</div>
-</div>
+{/snippet}

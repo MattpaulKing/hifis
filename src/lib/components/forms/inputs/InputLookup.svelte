@@ -43,14 +43,20 @@
 	}
 </script>
 
-<input
-	type="search"
-	autocomplete="off"
-	class="input"
-	readonly={$disabled}
-	title={store.inputValue}
-	bind:value={store.inputValue}
-	aria-invalid={$errors ? 'true' : 'false'}
-	{...restProps}
-	{onkeydown}
-/>
+<div class="input-group input-group-divider grid-cols-[auto_auto_1fr] [&>div]:px-3">
+	<input
+		type="text"
+		autocomplete="off"
+		class="input"
+		readonly={$disabled}
+		title={store.inputValue}
+		bind:value={store.inputValue}
+		aria-invalid={$errors ? 'true' : 'false'}
+		{...restProps}
+		onfocus={() => ($focused = true)}
+		{onkeydown}
+	/>
+	<div class="input-group-shim">
+		<img src="/MagnifyingGlass.png" class="w-5 dark:invert" alt="magnifying-glass" />
+	</div>
+</div>

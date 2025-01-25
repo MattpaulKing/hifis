@@ -19,6 +19,9 @@ const PAGES = {
   "/[orgLabel]/services": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/services`
   },
+  "/[orgLabel]/services/categories/create": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}/services/categories/create`
+  },
   "/[orgLabel]/services/create": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/services/create`
   },
@@ -39,6 +42,7 @@ const SERVERS = {
   "GET /api/v1/search": (params?: { value?: (string) }) => {
     return `/api/v1/search${appendSp({ value: params?.value })}`
   },
+  "GET /api/v1/services/categories": `/api/v1/services/categories`,
   "GET /api/v1/user/grid": `/api/v1/user/grid`,
   "GET /auth/callback": `/auth/callback`
 }
@@ -49,6 +53,9 @@ const SERVERS = {
 const ACTIONS = {
   "default /[orgLabel]/clients/create": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/clients/create`
+  },
+  "create /[orgLabel]/services/categories/create": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}/services/categories/create?/create`
   },
   "create /[orgLabel]/services/create": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/services/create?/create`
@@ -162,9 +169,9 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 * ```
 */
 export type KIT_ROUTES = {
-  PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients/create': 'orgLabel', '/[orgLabel]/services': 'orgLabel', '/[orgLabel]/services/create': 'orgLabel', '/[orgLabel]/users/create': 'orgLabel', '/test': never }
-  SERVERS: { 'GET /api/v1/clients': never, 'GET /api/v1/organizations': never, 'GET /api/v1/organizations/services': never, 'GET /api/v1/organizations/services/category': never, 'GET /api/v1/search': never, 'GET /api/v1/user/grid': never, 'GET /auth/callback': never }
-  ACTIONS: { 'default /[orgLabel]/clients/create': 'orgLabel', 'create /[orgLabel]/services/create': 'orgLabel', 'default /[orgLabel]/users/create': 'orgLabel' }
+  PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients/create': 'orgLabel', '/[orgLabel]/services': 'orgLabel', '/[orgLabel]/services/categories/create': 'orgLabel', '/[orgLabel]/services/create': 'orgLabel', '/[orgLabel]/users/create': 'orgLabel', '/test': never }
+  SERVERS: { 'GET /api/v1/clients': never, 'GET /api/v1/organizations': never, 'GET /api/v1/organizations/services': never, 'GET /api/v1/organizations/services/category': never, 'GET /api/v1/search': never, 'GET /api/v1/services/categories': never, 'GET /api/v1/user/grid': never, 'GET /auth/callback': never }
+  ACTIONS: { 'default /[orgLabel]/clients/create': 'orgLabel', 'create /[orgLabel]/services/categories/create': 'orgLabel', 'create /[orgLabel]/services/create': 'orgLabel', 'default /[orgLabel]/users/create': 'orgLabel' }
   LINKS: Record<string, never>
   Params: { orgLabel: never, value: never }
 }

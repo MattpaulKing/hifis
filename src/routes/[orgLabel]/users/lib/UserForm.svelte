@@ -8,7 +8,8 @@
 		InputLookup,
 		LookupDropdown,
 		Label,
-		getFormMsgStore
+		getFormMsgStore,
+		FormBtns
 	} from '$lib/components/forms';
 	import { route, type KIT_ROUTES } from '$lib/ROUTES';
 	import type { Infer, SuperForm } from 'sveltekit-superforms';
@@ -66,14 +67,15 @@
 		<LookupDropdown />
 		<Errors />
 	</Field>
-	<div class="col-span-2 mt-6 flex justify-between">
-		<div></div>
-		<button class="variant-filled-success btn">
-			{#if crud === 'create'}
-				Invite
-			{:else}
-				Submit
-			{/if}
-		</button>
-	</div>
+	<FormBtns>
+		{#snippet btnRight()}
+			<button class="variant-filled-success btn">
+				{#if crud === 'create'}
+					Invite
+				{:else}
+					Submit
+				{/if}
+			</button>
+		{/snippet}
+	</FormBtns>
 </FormContainer>
