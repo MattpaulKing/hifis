@@ -18,8 +18,6 @@
 		}
 		return null;
 	});
-
-	$inspect(drawerStore);
 </script>
 
 {#if drawerStore.isOpen === true}
