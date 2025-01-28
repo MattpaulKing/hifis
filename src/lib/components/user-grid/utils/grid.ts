@@ -27,13 +27,8 @@ export function getAvailablePosition(currentItem: LayoutItem, items: LayoutItem[
   x: number;
   y: number;
 } | null {
-  let { cols, rows } = getGridDimensions(items);
-  if (maxCols < Infinity)
-    cols = maxCols;
-  if (maxRows < Infinity)
-    rows = maxRows;
-  for (let y = 0; y <= rows - currentItem.h; y++) {
-    for (let x = 0; x <= cols - currentItem.w; x++) {
+  for (let y = 0; y <= maxRows - currentItem.h; y++) {
+    for (let x = 0; x <= maxCols - currentItem.w; x++) {
       const item = { ...currentItem, x, y };
       if (!hasCollisions(item, items)) {
         const newPosition = { x, y };
@@ -41,9 +36,5 @@ export function getAvailablePosition(currentItem: LayoutItem, items: LayoutItem[
       }
     }
   }
-  if (maxRows === Infinity)
-    return { x: 0, y: rows };
-  if (maxCols === Infinity)
-    return { x: cols, y: 0 };
   return null;
 }

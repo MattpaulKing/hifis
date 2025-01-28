@@ -1,11 +1,10 @@
 import { getContext, setContext } from "svelte";
 import type { GridDimensions, ItemSize, LayoutItem } from "../types";
+import { getAvailablePosition } from "./grid";
 
 type GridSettingsParams = {
   cols: number,
   rows: number,
-  maxCols?: number,
-  maxRows?: number,
   gap?: number,
   items?: Record<string, LayoutItem>,
   itemSize: ItemSize,
@@ -15,10 +14,8 @@ type GridSettingsParams = {
 }
 
 export class GridSettings {
-  cols = $state(0)
+  cols = $state<number>(0)
   rows = $state(0)
-  maxCols = $state(Infinity)
-  maxRows = $state(Infinity)
   gap = $state(0)
   items = $state<Record<string, LayoutItem>>({})
   itemSize = $state<ItemSize>({ width: 0, height: 0 })
@@ -26,14 +23,17 @@ export class GridSettings {
   boundsTo = $state<HTMLDivElement | undefined>()
   readOnly = $state(false)
   debug = $state(false)
-  containerWidth: number | null = $state(null);
-  containerHeight: number | null = $state(null);
-
+  maxDimensions = $derived.by(() => {
+    let rect = this.boundsTo?.getBoundingClientRect()
+    if (!rect) return { cols: this.cols, rows: this.rows }
+    return {
+      cols: Math.round(rect.width / this.itemSize.width),
+      rows: Math.round(rect.height / this.itemSize.height),
+    }
+  })
   constructor(params: GridSettingsParams) {
     this.cols = params.cols
     this.rows = params.rows
-    this.maxCols = params.maxCols ?? this.maxCols
-    this.maxRows = params.maxRows ?? this.maxRows
     this.gap = params.gap ?? this.gap
     this.items = params.items ?? this.items
     this.itemSize = params.itemSize
@@ -58,6 +58,26 @@ export class GridSettings {
       rows = Math.max(rows, item.y + item.h);
     });
     return { cols, rows };
+  }
+  getFirstAvailablePosition(w: number, h: number): {
+    x: number;
+    y: number;
+  } | null {
+    let rect = this.boundsTo?.getBoundingClientRect()
+    console.log('rect', rect)
+    if (!rect) return null
+    let maxCols = Math.round(rect.width / (this.itemSize.width + this.gap)) - 1
+    let maxRows = Math.round(rect.height / (this.itemSize.height + this.gap)) - 1
+    return getAvailablePosition({
+      id: '',
+      x: 0,
+      y: 0,
+      w,
+      h,
+      min: { w: 32, h: 32 },
+      moveable: true,
+      resizeable: true,
+    }, Object.values(this.items), maxCols, maxRows);
   }
 }
 

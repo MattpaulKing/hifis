@@ -24,6 +24,7 @@
 	onMount(() => {
 		controller.init();
 		gridSettings.registerItem(controller.item);
+
 		return () => {
 			gridSettings.unregisterItem(controller.item);
 		};

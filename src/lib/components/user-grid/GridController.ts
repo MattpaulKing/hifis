@@ -17,11 +17,9 @@ export class GridController implements GridControllerType {
       y: 0,
       w,
       h,
+      min: { w: 32, h: 32 },
       moveable: true,
-      resizable: true,
-      invalidate: () => {
-        /* .. */
-      }
+      resizeable: true,
     }, Object.values(items), maxCols, maxRows);
   }
   compress() {
