@@ -2,8 +2,8 @@
 	import { onMount, type Snippet } from 'svelte';
 	import { assertGridOptions } from './utils/assert';
 	import { getGridDimensions } from './utils/grid';
-	import { setGridContext } from './utils/gridContext.svelte';
 	import { findGridSize } from './utils/breakpoints';
+	import { setGridContext } from '.';
 	import type { GridDimensions } from './types';
 	type Props = {
 		cols:

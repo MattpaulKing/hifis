@@ -14,7 +14,7 @@ type GridSettingsParams = {
   debug?: boolean,
 }
 
-class GridSettings {
+export class GridSettings {
   cols = $state(0)
   rows = $state(0)
   maxCols = $state(Infinity)

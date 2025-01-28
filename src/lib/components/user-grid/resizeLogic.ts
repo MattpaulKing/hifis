@@ -2,67 +2,67 @@
 let initialSize = { width: 0, height: 0 };
 let minSize: ItemSize;
 let maxSize: ItemSize;
+//
+// $effect(() => {
+//   if (gridSettings.itemSize) {
+//     minSize = {
+//       width: coordinate2size(item.min.w, gridSettings.itemSize.width, gridSettings.gap),
+//       height: coordinate2size(item.min.h, gridSettings.itemSize.height, gridSettings.gap)
+//     };
+//     if (!item.max) return;
+//     maxSize = {
+//       width: coordinate2size(item.max.w, gridSettings.itemSize.width, gridSettings.gap),
+//       height: coordinate2size(item.max.h, gridSettings.itemSize.height, gridSettings.gap)
+//     };
+//   }
+// });
 
-$effect(() => {
-  if (gridSettings.itemSize) {
-    minSize = {
-      width: coordinate2size(item.min.w, gridSettings.itemSize.width, gridSettings.gap),
-      height: coordinate2size(item.min.h, gridSettings.itemSize.height, gridSettings.gap)
-    };
-    if (!item.max) return;
-    maxSize = {
-      width: coordinate2size(item.max.w, gridSettings.itemSize.width, gridSettings.gap),
-      height: coordinate2size(item.max.h, gridSettings.itemSize.height, gridSettings.gap)
-    };
-  }
-});
+// let _resizable = $derived(!gridSettings.readOnly && item.resizeable);
 
-let _resizable = $derived(!gridSettings.readOnly && item.resizeable);
-
-function resizeStart(event: PointerEvent) {
-  if (event.button !== 0) return;
-  event.stopPropagation();
-  initInteraction(event);
-  initialSize = { width, height };
-  window.addEventListener('pointermove', resize);
-  window.addEventListener('pointerup', resizeEnd);
-}
-function resize(event: PointerEvent) {
-  if (!gridSettings.itemSize) {
-    throw new Error('Grid is not mounted yet');
-  }
-  width = event.pageX + initialSize.width - initialPointerPosition.left;
-  height = event.pageY + initialSize.height - initialPointerPosition.top;
-  if (gridSettings.bounds && gridSettings.boundsTo) {
-    const parentRect = gridSettings.boundsTo.getBoundingClientRect();
-    if (width + left > parentRect.width) {
-      width = parentRect.width - left;
-    }
-    if (height + top > parentRect.height) {
-      height = parentRect.height - top;
-    }
-  }
-  if (minSize) {
-    width = Math.max(width, minSize.width);
-    height = Math.max(height, minSize.height);
-  }
-  if (item.max) {
-    width = Math.min(width, maxSize.width);
-    height = Math.min(height, maxSize.height);
-  }
-  if (gridSettings.collision === 'none') {
-    scroll;
-  }
-  // TODO: throttle this, hasColisions is expensive
-  const { w, h } = snapOnResize(width, height, previewItem, gridSettings);
-  if (gridSettings.collision !== 'none') {
-    resizePreviewWithCollisions(w, h);
-  } else {
-    if (!hasCollisions({ ...previewItem, w, h }, Object.values(gridSettings.items))) {
-      previewItem = { ...previewItem, w, h };
-    }
-  }
-}
+// function resizeStart(event: PointerEvent) {
+//   if (event.button !== 0) return;
+//   event.stopPropagation();
+//   initInteraction(event);
+//   initialSize = { width, height };
+//   window.addEventListener('pointermove', resize);
+//   window.addEventListener('pointerup', resizeEnd);
+// }
+// function resize(event: PointerEvent) {
+//   if (!gridSettings.itemSize) {
+//     throw new Error('Grid is not mounted yet');
+//   }
+//   width = event.pageX + initialSize.width - initialPointerPosition.left;
+//   height = event.pageY + initialSize.height - initialPointerPosition.top;
+//   if (gridSettings.bounds && gridSettings.boundsTo) {
+//     const parentRect = gridSettings.boundsTo.getBoundingClientRect();
+//     if (width + left > parentRect.width) {
+//       width = parentRect.width - left;
+//     }
+//     if (height + top > parentRect.height) {
+//       height = parentRect.height - top;
+//     }
+//   }
+//   if (minSize) {
+//     width = Math.max(width, minSize.width);
+//     height = Math.max(height, minSize.height);
+//   }
+//   if (item.max) {
+//     width = Math.min(width, maxSize.width);
+//     height = Math.min(height, maxSize.height);
+//   }
+//   if (gridSettings.collision === 'none') {
+//     scroll;
+//   }
+//   // TODO: throttle this, hasColisions is expensive
+//   const { w, h } = snapOnResize(width, height, previewItem, gridSettings);
+//   if (gridSettings.collision !== 'none') {
+//     resizePreviewWithCollisions(w, h);
+//   } else {
+//     if (!hasCollisions({ ...previewItem, w, h }, Object.values(gridSettings.items))) {
+//       previewItem = { ...previewItem, w, h };
+//     }
+//   }
+// }
 function resizePreviewWithCollisionsWithPush(w: number, h: number) {
   handleCollisionsForPreviewItemWithPush({ w, h });
 }
