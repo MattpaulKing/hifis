@@ -1,6 +1,5 @@
 import { calcPosition, coordinate2size, snapOnMove } from "./utils/item";
 import { on } from "svelte/events";
-import { GridItem } from "svelte-grid-extended"
 import { getGridContext } from "./utils/GridContext.svelte";
 import { hasCollisions } from "./utils/grid";
 import type { ItemSize, LayoutItem, LayoutItemEntity } from "./types";
@@ -17,8 +16,10 @@ export default class {
   moveableItemRef = $state<HTMLElement>()
   entities = $state<LayoutItemEntity[]>([])
   activeEntity = $derived(this.entities.find((entity) => entity.active));
-  cleanupMove = $state<null | (() => void)>(null)
-  cleanupMoveEnd = $state<null | (() => void)>(null)
+  cleanupMoveMouse = $state<null | (() => void)>(null)
+  cleanupMoveEndMouse = $state<null | (() => void)>(null)
+  cleanupMoveTouch = $state<null | (() => void)>(null)
+  cleanupMoveEndTouch = $state<null | (() => void)>(null)
   itemSize = $state<ItemSize>({ height: 64, width: 64 })
   gap = $state(64)
   bounds = $state(false)
@@ -75,6 +76,7 @@ export default class {
       this.previewItem = this.item;
     }
   }
+
   applyPreview() {
     this.item.x = this.previewItem.x;
     this.item.y = this.previewItem.y;
@@ -85,29 +87,33 @@ export default class {
     this.width = this.preview.width;
     this.height = this.preview.height;
   }
-  initInteraction(event: PointerEvent) {
+  initInteraction({ pageX, pageY }: PointerEvent | TouchEvent["touches"][0]) {
     this.previewItem = { ...this.item }
     this.active = true;
-    this.initialPointerPosition.left = event.pageX;
-    this.initialPointerPosition.top = event.pageY;
-    this.moveableItemRef?.setPointerCapture(event.pointerId);
+    this.initialPointerPosition.left = pageX;
+    this.initialPointerPosition.top = pageY;
+    this.initialPosition = { left: this.left, top: this.top };
+    this.initialPointerPosition = { left: pageX, top: pageY }
   }
-  endInteraction(event: PointerEvent) {
+  endInteraction() {
     this.applyPreview();
     this.active = false;
     this.initialPointerPosition.left = 0;
     this.initialPointerPosition.top = 0;
-    this.moveableItemRef?.releasePointerCapture(event.pointerId);
   }
-  moveStart(event: PointerEvent) {
+  moveStartTouch(e: TouchEvent) {
+    this.initInteraction(e.touches[0])
+    this.cleanupMoveTouch = on(window, 'touchmove', (e) => this.move(e.touches[0]))
+    this.cleanupMoveEndTouch = on(window, 'touchend', () => this.moveEndTouch())
+  }
+  moveStartMouse(event: PointerEvent) {
     if (event.button !== 0) return;
     this.initInteraction(event);
-    this.initialPosition = { left: this.left, top: this.top };
-    this.initialPointerPosition = { left: event.pageX, top: event.pageY }
-    this.cleanupMove = on(window, 'pointermove', (e) => this.move(e));
-    this.cleanupMoveEnd = on(window, 'pointerup', (e) => this.moveEnd(e))
+    this.moveableItemRef?.setPointerCapture(event.pointerId);
+    this.cleanupMoveMouse = on(window, 'pointermove', (e) => this.move(e));
+    this.cleanupMoveEndMouse = on(window, 'pointerup', (e) => this.moveEndMouse(e))
   }
-  move(event: PointerEvent) {
+  move(event: PointerEvent | Touch) {
     if (!this.settings.itemSize) {
       throw new Error('Grid is not mounted yet');
     }
@@ -129,7 +135,6 @@ export default class {
       }
     }
     this.left = _left;
-    console.log('ran')
     this.top = _top;
     //TODO: implement scroll
     // scroll();
@@ -140,13 +145,22 @@ export default class {
       }
     }, 100)
   }
-  moveEnd(event: PointerEvent) {
+  moveEndMouse(event: PointerEvent) {
     if (event.button !== 0 || !this.active) return;
-    this.endInteraction(event);
-    if (!this.cleanupMove || !this.cleanupMoveEnd) throw Error("No Cleanup")
-    this.cleanupMove();
+    this.endInteraction();
+    this.moveableItemRef?.releasePointerCapture(event.pointerId);
+    if (!this.cleanupMoveMouse || !this.cleanupMoveEndMouse) throw Error("No Cleanup")
+    this.cleanupMoveMouse();
     clearInterval(this.throttleInterval)
-    this.cleanupMoveEnd()
+    this.cleanupMoveEndMouse()
+  }
+  moveEndTouch() {
+    if (!this.active) return
+    this.endInteraction()
+    if (!this.cleanupMoveTouch || !this.cleanupMoveEndTouch) throw Error("No Cleanup")
+    this.cleanupMoveTouch();
+    clearInterval(this.throttleInterval)
+    this.cleanupMoveEndTouch()
   }
   scroll() {
     // TODO: scroll

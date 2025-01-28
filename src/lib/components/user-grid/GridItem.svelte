@@ -62,8 +62,8 @@
 		: ''} {item.moveable ? 'border' : ''}"
 	style={`left:${controller.left}px; top:${controller.top}px; width: ${controller.width}px; height: ${controller.height}px;`}
 	bind:this={controller.moveableItemRef}
-	onpointerdown={(e) => (controller.item.moveable ? controller.moveStart(e) : null)}
-	onpointerup={controller.moveEnd}
+	onpointerdown={(e) => (controller.item.moveable ? controller.moveStartMouse(e) : null)}
+	ontouchstart={(e) => (controller.item.moveable ? controller.moveStartTouch(e) : null)}
 >
 	{@render gridItemContent()}
 </div>

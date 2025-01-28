@@ -74,7 +74,6 @@
 	let _rows = $state(rows === 0 ? calculatedGridSize.rows : rows);
 
 	let valid = $derived(assertGridOptions({ cols, rows, itemSize }));
-	$inspect(valid);
 
 	onMount(() => {
 		if (!gridSettings.boundsTo) return;
