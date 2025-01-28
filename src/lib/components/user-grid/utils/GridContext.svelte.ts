@@ -50,10 +50,10 @@ export class GridSettings {
   unregisterItem(item: LayoutItem) {
     delete this.items[item.id];
   }
-  getGridDimensions(items: LayoutItem[]): GridDimensions {
+  getGridDimensions(): GridDimensions {
     let cols = 0;
     let rows = 0;
-    items.forEach((item) => {
+    Object.values(this.items).forEach((item) => {
       cols = Math.max(cols, item.x + item.w);
       rows = Math.max(rows, item.y + item.h);
     });

@@ -6,16 +6,7 @@
 	import { setGridContext } from '.';
 	import type { GridDimensions } from './types';
 	type Props = {
-		cols:
-			| number
-			| {
-					xxl: number;
-					xl: number;
-					lg: number;
-					md: number;
-					sm: number;
-					xs: number;
-			  };
+		cols: number;
 		rows: number;
 		itemSize: { width: number; height: number };
 		gap?: number;

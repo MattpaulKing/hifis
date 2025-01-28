@@ -20,10 +20,6 @@ export default class {
   cleanupMoveEndMouse = $state<null | (() => void)>(null)
   cleanupMoveTouch = $state<null | (() => void)>(null)
   cleanupMoveEndTouch = $state<null | (() => void)>(null)
-  itemSize = $state<ItemSize>({ height: 64, width: 64 })
-  gap = $state(64)
-  bounds = $state(false)
-  boundsTo = $state<HTMLElement>()
   settings = getGridContext()
   minSize: ItemSize = $derived.by(() => {
     return {

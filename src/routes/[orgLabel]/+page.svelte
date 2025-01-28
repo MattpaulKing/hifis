@@ -8,20 +8,7 @@
 	let entities = $state(data.entities);
 </script>
 
-<Grid
-	bounds
-	cols={{
-		xs: 1,
-		sm: 1,
-		md: 2,
-		lg: 3,
-		xl: 3,
-		xxl: 3
-	}}
-	rows={0}
-	gap={32}
-	itemSize={{ width: 32, height: 32 }}
->
+<Grid bounds cols={0} rows={0} gap={32} itemSize={{ width: 32, height: 32 }}>
 	{#each items as _, i}
 		<GridItem class="card rounded-token" bind:item={items[i]} bind:entities>
 			{#snippet gridItem(entity)}
