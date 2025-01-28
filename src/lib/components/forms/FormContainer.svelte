@@ -58,7 +58,9 @@
 				class="flex h-fit w-fit max-w-64 border p-2 rounded-token {msgStore.current.status ===
 				'error'
 					? 'variant-soft-error border-error-400-500-token'
-					: ''}"
+					: msgStore.current.status === 'success'
+						? 'variant-filled-success border-success-400-500-token font-bold'
+						: ''}"
 			>
 				<span>
 					{msgStore.current.msg}

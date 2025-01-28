@@ -13,6 +13,7 @@
 	let timeout: ReturnType<typeof setTimeout>;
 
 	function handleSearch() {
+		$focused = true;
 		store.searching = true;
 		if (timeout) clearTimeout(timeout);
 		timeout = setTimeout(fetchLookups, 400);
@@ -26,7 +27,7 @@
 			let selectedLookups = store.lookups.filter((lookup) => $value.includes(lookup?.id));
 			fetchedLookups = fetchedLookups.filter((lookup) => !$value?.includes(lookup.id));
 			store.lookups = [...selectedLookups, ...fetchedLookups];
-		} else if (typeof $value === 'string' && $value.length > 0) {
+		} else if (typeof $value === 'string') {
 			fetchedLookups = fetchedLookups.filter((lookup) => lookup.id !== $value);
 			let selectedLookup = store.lookups.find((lookup) => lookup?.id === $value);
 			store.lookups = [selectedLookup, ...fetchedLookups];
@@ -34,7 +35,6 @@
 		store.searching = false;
 	}
 	function onkeydown(e: KeyboardEvent) {
-		$focused = true;
 		if (e.key === 'Escape' || (e.key === 'Tab' && store.lookups.length === 0)) {
 			$focused = false;
 			return;
@@ -43,7 +43,11 @@
 	}
 </script>
 
-<div class="input-group input-group-divider grid-cols-[auto_auto_1fr] [&>div]:px-3">
+<div
+	class="input-group {$disabled
+		? 'border-none'
+		: ''} input-group-divider grid-cols-[auto_auto_1fr] [&>div]:px-3"
+>
 	<input
 		type="text"
 		autocomplete="off"
@@ -53,7 +57,7 @@
 		bind:value={store.inputValue}
 		aria-invalid={$errors ? 'true' : 'false'}
 		{...restProps}
-		onfocus={() => ($focused = true)}
+		onfocus={handleSearch}
 		{onkeydown}
 	/>
 	<div class="input-group-shim">

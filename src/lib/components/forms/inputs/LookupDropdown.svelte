@@ -25,6 +25,8 @@
 			}
 		}
 	}
+
+	$inspect(store.lookups);
 </script>
 
 {#if !$disabled && $focused}

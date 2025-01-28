@@ -1,6 +1,6 @@
 import { json } from "@sveltejs/kit";
 import { serviceCategories } from "$routes/[orgLabel]/services/categories/schema";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, SQL, sql } from "drizzle-orm";
 import type { RequestHandler } from "./$types";
 
 type ApiParams = {
@@ -12,22 +12,21 @@ type ApiParams = {
 export const GET: RequestHandler = async ({ url: { searchParams }, locals: { db } }) => {
   let params = Object.fromEntries(searchParams) as ApiParams
   let res: typeof serviceCategories.$inferSelect[] = []
+  let filters: SQL[] = []
   if (params.id) {
-    const [serviceCategory] = await db
-      .select()
-      .from(serviceCategories)
-      .where(eq(serviceCategories.id, params.id))
-      .limit(1)
-    res = [serviceCategory]
+    filters.push(eq(serviceCategories.id, params.id))
   }
   if (params.search) {
-    res = await db
-      .select()
-      .from(serviceCategories)
-      .where(sql`
+    filters.push(sql`
         to_tsvector('english', ${serviceCategories.label}) 
-        @@ to_tsquery('english', ${params.search.replaceAll(" ", " | ")})
+        @@ websearch_to_tsquery('simple', ${params.search.replaceAll(" ", " | ")})
       `)
   }
+  res = await db
+    .select()
+    .from(serviceCategories)
+    .where(and(...filters))
+    .limit(params.lookups ? 5 : -1)
+
   return json(res)
 }

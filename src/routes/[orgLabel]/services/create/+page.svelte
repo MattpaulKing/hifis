@@ -31,7 +31,7 @@
 		await drawerStore.open({
 			ref: ServiceCategoriesCreatePage as Component,
 			href: route('/[orgLabel]/services/categories/create', { orgLabel }),
-			width: 'w-1/4'
+			width: 'xl:w-1/4'
 		});
 	}
 </script>
@@ -53,7 +53,7 @@
 				onclick={async () => await openServiceCategoriesAdd()}>+</button
 			>
 		</Label>
-		<InputLookup apiRoute={route('GET /api/v1/organizations/services/category')} />
+		<InputLookup apiRoute={route('GET /api/v1/services/categories')} />
 		<LookupDropdown />
 		<Errors />
 	</Field>

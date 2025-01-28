@@ -2,16 +2,18 @@ import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
 import { timestamps } from "../../../../schemas/helpers/timestamps";
 import { organizations } from "../../schema";
 import * as v from "valibot"
+import { sql, type SQL } from "drizzle-orm";
 
 export const clients = pgTable('clients', {
   id: uuid('id').primaryKey().defaultRandom().notNull(),
   ...timestamps,
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
+  label: text("label").generatedAlwaysAs((): SQL => sql`${clients.firstName}|| ' ' ||  ${clients.lastName}`).notNull(),
   dob: timestamp().notNull(),
   phone: text('phone'),
   email: text("email"),
-  orgId: uuid("organization_id").references(() => organizations.id).notNull()
+  orgId: uuid("organization_id").references(() => organizations.id, { onUpdate: 'cascade', onDelete: 'restrict' }).notNull()
 })
 
 export const clientsFormSchema = v.object({
