@@ -1,7 +1,7 @@
-import { calcPosition, coordinate2size, snapOnMove } from "./utils/item";
+import { calcPosition, coordinate2position, coordinate2size, snapOnMove } from "./utils/item";
 import { on } from "svelte/events";
 import { getGridContext } from "./utils/GridContext.svelte";
-import { hasCollisions } from "./utils/grid";
+import { getAvailablePosition, hasCollisions } from "./utils/grid";
 import type { ItemSize, LayoutItem, LayoutItemEntity } from "./types";
 
 export default class {
@@ -23,19 +23,19 @@ export default class {
   settings = getGridContext()
   minSize: ItemSize = $derived.by(() => {
     return {
-      width: coordinate2size(this.item.min.w, this.settings.itemSize.width, this.settings.gap),
-      height: coordinate2size(this.item.min.h, this.settings.itemSize.height, this.settings.gap)
+      width: coordinate2size(this.item.min.width, this.settings.itemSize.width, this.settings.gap),
+      height: coordinate2size(this.item.min.height, this.settings.itemSize.height, this.settings.gap)
     };
   });
   maxSize: ItemSize = $derived.by(() => {
     return {
       width: coordinate2size(
-        this.item.max?.w ?? Infinity,
+        this.item.max?.width ?? Infinity,
         this.settings.itemSize.width,
         this.settings.gap
       ),
       height: coordinate2size(
-        this.item.max?.h ?? Infinity,
+        this.item.max?.height ?? Infinity,
         this.settings.itemSize.height,
         this.settings.gap
       )
@@ -57,14 +57,22 @@ export default class {
   }
   init() {
     if (!this.active && this.settings.itemSize) {
-      const newPosition = calcPosition(this.item, {
+      const position = calcPosition(this.item, {
         itemSize: this.settings.itemSize,
         gap: this.settings.gap
-      });
-      this.left = newPosition.left;
-      this.top = newPosition.top;
-      this.width = newPosition.width;
-      this.height = newPosition.height;
+      })
+      if (this.isOutsideBounds(position)) {
+        let newCoords = this.getFirstAvailableCoords(this)
+        if (newCoords) {
+          this.left = coordinate2position(newCoords.x, this.settings.itemSize.width, this.settings.gap)
+          this.top = coordinate2position(newCoords.y, this.settings.itemSize.height, this.settings.gap)
+        }
+      } else {
+        this.left = position.left;
+        this.top = position.top;
+      }
+      this.width = position.width;
+      this.height = position.height;
       this.initialPosition = { left: this.left, top: this.top }
     }
 
@@ -72,12 +80,36 @@ export default class {
       this.previewItem = this.item;
     }
   }
+  private isOutsideBounds({ width, left }: { width: number, left: number }) {
+    let rect = this.settings.boundsTo?.getBoundingClientRect()
+    if (!rect) return false
+    return ((width + left) > rect.width + rect.left)
+  }
+  private getFirstAvailableCoords({ width, height }: { width: number, height: number }): {
+    x: number;
+    y: number;
+  } | null {
+    let rect = this.settings.boundsTo?.getBoundingClientRect()
+    if (!rect) return null
+    let maxCols = Math.round(rect.width / (this.settings.itemSize.width + this.settings.gap)) - 1
+    let maxRows = Math.round(rect.height / (this.settings.itemSize.height + this.settings.gap)) - 1
+    return getAvailablePosition({
+      id: '',
+      x: 0,
+      y: 0,
+      width,
+      height,
+      min: { width: 32, height: 32 },
+      moveable: true,
+      resizeable: true,
+    }, Object.values(this.settings.items), maxCols, maxRows);
+  }
 
   applyPreview() {
     this.item.x = this.previewItem.x;
     this.item.y = this.previewItem.y;
-    this.item.w = this.previewItem.w;
-    this.item.h = this.previewItem.h;
+    this.item.width = this.previewItem.width;
+    this.item.height = this.previewItem.height;
     this.left = this.preview.left;
     this.top = this.preview.top;
     this.width = this.preview.width;

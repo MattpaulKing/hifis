@@ -21,10 +21,11 @@
 	let gridSettings = getGridContext();
 	let controller = new GridItemState({ item, entities });
 
+	//TODO: EVERYTHING IN GRIDITEMSTATE HAS TO GO THROUGH ITEM
+
 	onMount(() => {
 		controller.init();
 		gridSettings.registerItem(controller.item);
-
 		return () => {
 			gridSettings.unregisterItem(controller.item);
 		};

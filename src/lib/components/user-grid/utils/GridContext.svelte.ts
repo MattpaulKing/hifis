@@ -1,6 +1,6 @@
 import { getContext, setContext } from "svelte";
-import type { GridDimensions, ItemSize, LayoutItem } from "../types";
 import { getAvailablePosition } from "./grid";
+import type { GridDimensions, ItemSize, LayoutItem } from "../types";
 
 type GridSettingsParams = {
   cols: number,
@@ -9,6 +9,7 @@ type GridSettingsParams = {
   items?: Record<string, LayoutItem>,
   itemSize: ItemSize,
   bounds?: boolean,
+  boundsTo?: HTMLDivElement,
   readOnly?: boolean,
   debug?: boolean,
 }
@@ -38,6 +39,7 @@ export class GridSettings {
     this.items = params.items ?? this.items
     this.itemSize = params.itemSize
     this.bounds = params.bounds ?? false
+    this.boundsTo = params.boundsTo ?? undefined
     this.readOnly = params.readOnly ?? false
     this.debug = params.debug ?? false
   }
@@ -54,31 +56,13 @@ export class GridSettings {
     let cols = 0;
     let rows = 0;
     Object.values(this.items).forEach((item) => {
-      cols = Math.max(cols, item.x + item.w);
-      rows = Math.max(rows, item.y + item.h);
+      cols = Math.max(cols, item.x + item.width);
+      rows = Math.max(rows, item.y + item.height);
     });
     return { cols, rows };
   }
-  getFirstAvailablePosition(w: number, h: number): {
-    x: number;
-    y: number;
-  } | null {
-    let rect = this.boundsTo?.getBoundingClientRect()
-    console.log('rect', rect)
-    if (!rect) return null
-    let maxCols = Math.round(rect.width / (this.itemSize.width + this.gap)) - 1
-    let maxRows = Math.round(rect.height / (this.itemSize.height + this.gap)) - 1
-    return getAvailablePosition({
-      id: '',
-      x: 0,
-      y: 0,
-      w,
-      h,
-      min: { w: 32, h: 32 },
-      moveable: true,
-      resizeable: true,
-    }, Object.values(this.items), maxCols, maxRows);
-  }
+
+
 }
 
 const GRID_CTX = Symbol('GRID_CTX');

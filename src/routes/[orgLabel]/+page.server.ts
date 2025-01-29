@@ -10,8 +10,8 @@ export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
         label: 'A',
         x: 1,
         y: 1,
-        h: 4,
-        w: 10,
+        height: 4,
+        width: 10,
         min: { h: 1, w: 2 },
         moveable: true,
         resizeable: true
@@ -21,8 +21,8 @@ export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
         label: 'B',
         x: 11,
         y: 1,
-        h: 4,
-        w: 10,
+        height: 4,
+        width: 10,
         min: { h: 1, w: 2 },
         moveable: true,
         resizeable: true

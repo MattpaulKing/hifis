@@ -14,8 +14,8 @@ export type LayoutItemEntity = { id: string; label: string, active: boolean }
  * Item position in grid units
  */
 export type Size = {
-  w: number;
-  h: number;
+  width: number;
+  height: number;
 };
 /**
  * Item position in grid units

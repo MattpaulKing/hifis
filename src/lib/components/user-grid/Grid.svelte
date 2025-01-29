@@ -37,7 +37,7 @@
 </script>
 
 <div class="relative h-full w-full {classes}" bind:this={gridSettings.boundsTo}>
-	{#if gridSettings.itemSize}
+	{#if gridSettings.itemSize && gridSettings.boundsTo}
 		{@render children()}
 	{/if}
 </div>
