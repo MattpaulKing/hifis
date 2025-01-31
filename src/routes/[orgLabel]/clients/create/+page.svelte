@@ -10,7 +10,7 @@
 		FormBtns,
 		FormContainer,
 		FormCard,
-		initClientForm
+		initForm
 	} from '$lib/components/forms';
 	import ClientsKeepAdding from '$routes/[orgLabel]/clients/lib/ClientsAddMoreDialog.svelte';
 	import { getModalStore } from '$lib/components/modal/context.js';
@@ -20,8 +20,8 @@
 	import { page } from '$app/state';
 
 	let { data } = $props();
-	let form = initClientForm({
-		form: data.clientForm,
+	let form = initForm({
+		form: data.clientContactForm,
 		schema: clientsFormSchema,
 		opts: {
 			onUpdate({ form }) {
@@ -30,28 +30,32 @@
 						id: 'clients-create',
 						type: 'component',
 						ref: ClientsKeepAdding,
-						props: () => ({ orgLabel: data.orgLabel, clientId: form.data.id }),
+						props: () => ({ orgLabel: data.org.label, clientId: form.data.id }),
 						routes: { from: page.url.toString(), to: page.url.toString() }
 					});
 				}
 			}
 		}
 	});
+
+	let { form: formData } = form;
 	let stepperStore = new StepperStore({
 		pages: [
 			{
 				label: 'contact',
-				href: route('/[orgLabel]/clients/create', { orgLabel: data.orgLabel })
+				href: route('/[orgLabel]/clients/create', { orgLabel: data.org.label })
 			},
 			{
 				label: 'services',
-				href: route('/[orgLabel]/clients/create', { orgLabel: data.orgLabel }).concat('?some=1'),
+				href: route('/[orgLabel]/clients/[clientId=uuid]', {
+					orgLabel: data.org.label,
+					clientId: $formData.id
+				}).concat('?i=1'),
 				disabled: true
 			}
 		],
 		expanded: true
 	});
-	let { form: formData } = form;
 	let possibleDuplicates = $state([]);
 	let debouncer = new Debouncer({ callback: fetchDuplicates });
 	let msgStore = getFormMsgStore();
@@ -84,7 +88,7 @@
 		<FormContainer
 			class="min-w-96 max-w-lg"
 			{form}
-			action={route('default /[orgLabel]/clients/create', { orgLabel: data.orgLabel })}
+			action={route('default /[orgLabel]/clients/create', { orgLabel: data.org.label })}
 		>
 			{#snippet title()}
 				<span class="w-fit"> Add Client </span>

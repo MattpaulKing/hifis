@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { initClientForm } from '$lib/components/forms/index.js';
+	import { initForm } from '$lib/components/forms/index.js';
 	import { UserForm } from '../lib';
 	import { usersFormSchema } from '../schema';
 
 	let { data } = $props();
-	let form = initClientForm({
+	let form = initForm({
 		form: data.userForm,
 		schema: usersFormSchema,
 		opts: {

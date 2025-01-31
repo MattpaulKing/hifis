@@ -7,7 +7,7 @@
 		FormBtns,
 		FormContainer,
 		getFormMsgStore,
-		initClientForm,
+		initForm,
 		Input,
 		InputTextArea,
 		Label
@@ -16,7 +16,7 @@
 	import { serviceCategoriesFormSchema } from '../schema';
 
 	let { data } = $props();
-	let form = initClientForm({
+	let form = initForm({
 		form: data.serviceCategoryForm,
 		schema: serviceCategoriesFormSchema,
 		opts: {

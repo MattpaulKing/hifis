@@ -15,8 +15,7 @@ export const load: PageServerLoad = async ({ params: { orgLabel }, locals: { sub
   const today = new Date()
   let id = crypto.randomUUID()
   return {
-    orgLabel,
-    clientForm: await superValidate({
+    clientContactForm: await superValidate({
       id,
       dob: new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()),
     }, valibot(clientsFormSchema), { errors: false }),

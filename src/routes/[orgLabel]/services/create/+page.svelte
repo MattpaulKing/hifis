@@ -4,7 +4,7 @@
 		Errors,
 		Field,
 		FormContainer,
-		initClientForm,
+		initForm,
 		Input,
 		InputTextArea,
 		InputLookup,
@@ -19,7 +19,7 @@
 
 	let { data } = $props();
 	const orgLabel = data.org.label;
-	let form = initClientForm({
+	let form = initForm({
 		form: data.serviceForm,
 		schema: servicesFormSchema,
 		opts: {

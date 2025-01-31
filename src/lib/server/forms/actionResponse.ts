@@ -1,5 +1,5 @@
 import { message, type Infer, type SuperValidated } from "sveltekit-superforms"
-import type { ISchema } from "$lib/components/forms/initClientForm.svelte"
+import type { ISchema } from "$lib/components/forms/initForm.svelte"
 
 export const ar = {
   invalid: ({ form, msg = 'Please check the fields for errors' }: { form: SuperValidated<Infer<ISchema>>, msg?: string }) => {
