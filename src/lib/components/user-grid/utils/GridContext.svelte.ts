@@ -61,8 +61,6 @@ export class GridSettings {
     });
     return { cols, rows };
   }
-
-
 }
 
 const GRID_CTX = Symbol('GRID_CTX');

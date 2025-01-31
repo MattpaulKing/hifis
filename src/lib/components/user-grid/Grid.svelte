@@ -34,6 +34,7 @@
 		readOnly,
 		debug
 	});
+	$inspect(gridSettings.maxDimensions.rows);
 </script>
 
 <div class="relative h-full w-full {classes}" bind:this={gridSettings.boundsTo}>

@@ -27,13 +27,12 @@ export function snapOnMove(left: number, top: number, item: LayoutItem, { itemSi
   return { x, y };
 }
 
-export function snapOnResize(width: number, height: number, item: LayoutItem, gridParams: SnapGridParams): Size {
-  const { itemSize, gap } = gridParams;
+export function snapOnResize(w: number, h: number, item: LayoutItem, { itemSize, gap, maxDimensions }: SnapGridParams): Size {
   const { x, y } = item;
-  let w = position2coordinate(width + gap * 2, itemSize.width, gap);
-  let h = position2coordinate(height + gap * 2, itemSize.height, gap);
-  w = clamp(w, 0, gridParams.maxDimensions.cols - x);
-  h = clamp(h, 0, gridParams.maxDimensions.rows - y);
+  let width = position2coordinate(w + gap * 2, itemSize.width, gap);
+  let height = position2coordinate(h + gap * 2, itemSize.height, gap);
+  width = clamp(width, 0, maxDimensions.cols - x);
+  height = clamp(height, 0, maxDimensions.rows - y);
   return { width, height };
 }
 export function calcPosition(item: LayoutItem, options: {

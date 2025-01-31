@@ -21,8 +21,6 @@
 	let gridSettings = getGridContext();
 	let controller = new GridItemState({ item, entities });
 
-	//TODO: EVERYTHING IN GRIDITEMSTATE HAS TO GO THROUGH ITEM
-
 	onMount(() => {
 		controller.init();
 		gridSettings.registerItem(controller.item);
@@ -45,7 +43,15 @@
 				>
 					<img src="/Move.png" class="h-7 w-7 dark:invert" alt="move" />
 				</button>
-				<button class="btn btn-sm touch-none select-none px-1 hover:variant-ghost">
+				<button
+					onpointerdown={(e) => {
+						e.stopImmediatePropagation();
+						if (controller.item.resizeable) {
+							controller.resizeMouseStart(e);
+						}
+					}}
+					class="btn btn-sm touch-none select-none px-1 hover:variant-ghost"
+				>
 					<img src="/Resize.png" class="h-7 w-7 dark:invert" alt="resize" />
 				</button>
 			</div>
