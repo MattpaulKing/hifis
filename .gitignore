@@ -25,3 +25,5 @@ vite.config.ts.timestamp-*
 
 # sst
 .sst
+
+persist.json
