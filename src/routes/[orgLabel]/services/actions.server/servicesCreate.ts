@@ -9,10 +9,12 @@ export default async function(e: RequestEvent) {
   const form = await superValidate(request, valibot(servicesFormSchema))
   if (!form.valid) return ar.invalid({ form })
   try {
+    const { id, ...serviceFormData } = form.data
     const [insertedService] = await db
       .insert(services)
-      .values(form.data)
+      .values(serviceFormData)
       .returning()
+    form.data.id = insertedService.id
   } catch (e) {
     console.log(e)
     return ar.dbError({ form })

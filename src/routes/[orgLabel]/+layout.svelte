@@ -4,6 +4,7 @@
 	import { setFormMsgStore } from '$lib/components/forms';
 	import { NavBarSearch } from '$lib/components/nav-bar-search';
 	import { setUser, UserAvatar, UserMenu } from '$lib/components/user';
+	import { Modal, setModalStore } from '$lib/components/modal';
 
 	let { data, children } = $props();
 	let userMenuOpen = $state(false);
@@ -14,9 +15,11 @@
 	}
 	setFormMsgStore();
 	setDrawerStore({ isOpen: false });
+	setModalStore();
 </script>
 
 <Drawer />
+<Modal />
 <div class="h-screen w-screen overflow-hidden">
 	<div class="flex h-14 w-full place-items-center justify-between bg-surface-500 px-8">
 		<span class="h3 font-bold">HIFIS</span>

@@ -17,10 +17,12 @@ export const actions = {
     const form = await superValidate(request, valibot(serviceCategoriesFormSchema))
     if (!form.valid) return ar.invalid({ form })
     try {
+      const { id, ...serviceCategoryFormData } = form.data
       const [serviceCategoryInserted] = await db
         .insert(serviceCategories)
-        .values(form.data)
+        .values(serviceCategoryFormData)
         .returning()
+      form.data.id = serviceCategoryInserted.id
     } catch (e) {
       console.log(e)
       return ar.dbError({ form })

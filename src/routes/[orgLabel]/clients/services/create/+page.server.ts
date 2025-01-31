@@ -5,7 +5,8 @@ import { defaultLookupCtx } from "$lib/interfaces";
 import { clients } from "../../schema";
 import { eq } from "drizzle-orm";
 import { services } from "$routes/[orgLabel]/services/schema";
-import type { PageServerLoad } from "./$types";
+import { clientServiceCreate } from "./actions.server";
+import type { Actions, PageServerLoad } from "./$types";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
 type SearchParams = {
@@ -24,6 +25,10 @@ export const load: PageServerLoad = async ({ url: { searchParams }, locals: { db
     lookups: await getLookups({ db, params }),
   }
 }
+
+export const actions = {
+  default: async (e) => await clientServiceCreate(e)
+} satisfies Actions
 
 async function getLookups({ db, params }: { db: PostgresJsDatabase, params: SearchParams }) {
   let lookups = { client: defaultLookupCtx(), service: defaultLookupCtx() }
