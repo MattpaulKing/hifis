@@ -9,6 +9,7 @@ function defaultFormOptions<T extends ISchema>(validator: T) {
   return {
     validators: valibot(validator),
     dataType: "json",
+    applyAction: true,
     errorSelector: '[aria-invalid="true"],[data-invalid]',
     scrollToError: "smooth" as const,
     stickyNavbar: ".app-bar" as const,
@@ -26,14 +27,11 @@ export default function <T extends ISchema>({ form, schema, opts = {} }:
   return superForm(form, {
     //@ts-ignore
     ...defaultFormOptions(schema),
-    onResult({ result }) {
-      if (result.status && result?.status >= 400 && result?.status < 500) {
-        msgStore.setMsg({ msg: "Invalid fields", status: "error" })
-      } else if (result.status && result.status >= 500) {
-        msgStore.setMsg({ msg: "Error", status: "error" })
-      } else {
-        console.log(result)
+    onUpdated({ form }) {
+      if (form.valid) {
         msgStore.setMsg({ msg: "Success", status: "success" })
+      } else {
+        msgStore.setMsg({ msg: "Error", status: "error" })
       }
     },
     ...opts

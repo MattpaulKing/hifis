@@ -13,8 +13,7 @@
 		children,
 		class: classes,
 		title,
-		btns,
-		stepper
+		btns
 	}: {
 		form: SuperForm<T>;
 		action: string;
@@ -37,14 +36,14 @@
 		{#if msgStore.current?.msg}
 			<div
 				transition:fade
-				class="flex h-fit w-fit max-w-64 border p-2 rounded-token {msgStore.current.status ===
-				'error'
-					? 'variant-soft-error border-error-400-500-token'
+				class="badge m-4 flex h-fit w-fit p-2
+        {msgStore.current.status === 'error'
+					? 'variant-soft-error'
 					: msgStore.current.status === 'success'
-						? 'variant-filled-success border-success-400-500-token font-bold'
+						? 'variant-filled-success'
 						: ''}"
 			>
-				<span>
+				<span class="text-base font-medium">
 					{msgStore.current.msg}
 				</span>
 			</div>

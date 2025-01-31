@@ -17,7 +17,7 @@ class FormMsg {
     if (!id) {
       id = crypto.randomUUID()
     }
-    this.queue.push({ id, msg, status })
+    this.queue.unshift({ id, msg, status })
     this.timeoutMap.set(
       id,
       setTimeout(() => {

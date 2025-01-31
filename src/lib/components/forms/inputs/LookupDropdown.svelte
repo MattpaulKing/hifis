@@ -36,7 +36,7 @@
 		class="relative z-20"
 	>
 		<div
-			class="card border-surface-400-500-token absolute flex h-fit max-h-28 min-w-full flex-col space-y-1 overflow-y-auto border px-2 py-4"
+			class="card border-surface-400-500-token absolute flex h-fit max-h-28 min-w-full flex-col space-y-1 overflow-y-auto border py-4 pl-4 pr-2"
 		>
 			{#if store.searching}
 				{@render searchPlaceholder()}
