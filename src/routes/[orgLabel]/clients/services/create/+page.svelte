@@ -51,7 +51,7 @@
 		action={route('create /[orgLabel]/services/categories/create', { orgLabel: data.org.label })}
 	>
 		{#snippet title()}
-			<span>Add a Service Category</span>
+			<span>Attach a Client to a Service</span>
 		{/snippet}
 		<Field
 			{form}
