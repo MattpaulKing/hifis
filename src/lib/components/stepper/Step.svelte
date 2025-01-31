@@ -17,7 +17,7 @@
 <a
 	href={page.href}
 	{onclick}
-	class="{idx === stepperStore.pageIdx
+	class="{idx === stepperStore.activeIdx
 		? 'variant-filled text-white dark:variant-filled dark:text-black'
 		: page.disabled
 			? 'bg-surface-200-700-token text-surface-500-400-token pointer-events-none'

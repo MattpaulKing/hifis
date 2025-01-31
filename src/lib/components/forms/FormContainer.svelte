@@ -9,7 +9,6 @@
 		form,
 		action,
 		disabled = false,
-		drawerOpen = false,
 		enctype = 'application/x-www-form-urlencoded',
 		children,
 		class: classes,
@@ -20,7 +19,6 @@
 		form: SuperForm<T>;
 		action: string;
 		disabled?: boolean;
-		drawerOpen?: boolean;
 		enctype?: 'application/x-www-form-urlencoded' | 'multipart/form-data';
 		children: any;
 		class?: string;
@@ -34,23 +32,7 @@
 	let msgStore = getFormMsgStore();
 </script>
 
-{#if drawerOpen}
-	<div
-		in:fade
-		class="card border-surface-200-700-token relative flex h-full w-full flex-wrap border md:flex-nowrap"
-	>
-		{@render formContent()}
-	</div>
-{:else}
-	<div
-		in:fade
-		class="card border-surface-200-700-token relative flex h-min w-fit flex-wrap border shadow-lg shadow-surface-500 md:flex-nowrap"
-	>
-		{@render formContent()}
-	</div>
-{/if}
-
-{#snippet formContent()}
+<div class="relative flex flex-col p-6 {classes ?? ''}">
 	<div class="absolute right-0 top-0 z-50 flex w-full flex-col items-end">
 		{#if msgStore.current?.msg}
 			<div
@@ -68,23 +50,20 @@
 			</div>
 		{/if}
 	</div>
-	{@render stepper?.()}
-	<div class="flex flex-col p-6 {classes ?? ''}">
-		{#if $delayed}
-			<LoadingSpinner />
-		{/if}
-		<div class="flex w-full justify-between">
-			<h3 class="h3 font-bold">{@render title?.()}</h3>
-			{@render btns?.()}
-		</div>
-		<form
-			class="flex w-full flex-col lg:grid lg:grid-cols-2 lg:gap-x-4"
-			method="POST"
-			{action}
-			use:enhance
-			{enctype}
-		>
-			{@render children()}
-		</form>
+	{#if $delayed}
+		<LoadingSpinner />
+	{/if}
+	<div class="flex w-full justify-between">
+		<h3 class="h3 font-bold">{@render title?.()}</h3>
+		{@render btns?.()}
 	</div>
-{/snippet}
+	<form
+		class="flex w-full flex-col lg:grid lg:grid-cols-2 lg:gap-x-4"
+		method="POST"
+		{action}
+		use:enhance
+		{enctype}
+	>
+		{@render children()}
+	</form>
+</div>

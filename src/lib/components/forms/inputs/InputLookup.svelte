@@ -4,9 +4,10 @@
 	import type { Lookup } from '$lib/interfaces/Lookup';
 	type Props = {
 		apiRoute: string;
+		onKeydown?: (e: KeyboardEvent) => void;
 		restProps?: Record<keyof HTMLInputElement, string>;
 	};
-	let { apiRoute, ...restProps }: Props = $props();
+	let { apiRoute, onKeydown, ...restProps }: Props = $props();
 	let { value, focused, disabled, errors } = getField<string | undefined>();
 	let store = getLookups();
 
@@ -30,7 +31,10 @@
 		} else if (typeof $value === 'string') {
 			fetchedLookups = fetchedLookups.filter((lookup) => lookup.id !== $value);
 			let selectedLookup = store.lookups.find((lookup) => lookup?.id === $value);
-			store.lookups = [selectedLookup, ...fetchedLookups];
+			if (selectedLookup) {
+				fetchedLookups.unshift(selectedLookup);
+			}
+			store.lookups = fetchedLookups;
 		}
 		store.searching = false;
 	}
@@ -39,6 +43,7 @@
 			$focused = false;
 			return;
 		}
+		onKeydown?.(e);
 		handleSearch();
 	}
 </script>

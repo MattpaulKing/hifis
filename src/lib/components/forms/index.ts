@@ -1,5 +1,6 @@
 export { default as LoadingSpinner } from "./LoadingSpinner.svelte"
 export { default as FormContainer } from "./FormContainer.svelte"
+export { default as FormCard } from "./FormCard.svelte"
 export { default as FormTitle } from "./FormTitle.svelte"
 export { default as FormBtns } from "./FormBtns.svelte"
 export { default as Field } from "./Field.svelte"
