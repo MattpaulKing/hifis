@@ -13,11 +13,11 @@ export const actions = {
 export const load: PageServerLoad = async ({ params: { orgLabel }, locals: { subject } }) => {
   const userOrgId = subject.properties.orgId
   const today = new Date()
+  let id = crypto.randomUUID()
   return {
     orgLabel,
     clientForm: await superValidate({
-      id: crypto.randomUUID(),
-      orgId: userOrgId,
+      id,
       dob: new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()),
     }, valibot(clientsFormSchema), { errors: false }),
     lookups: {

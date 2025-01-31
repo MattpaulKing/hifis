@@ -1,6 +1,7 @@
 <script lang="ts">
 	/* 
  TODO:
+ 0. Figure out how to reset formData's id
  1. Finish resize logic
  */
 </script>

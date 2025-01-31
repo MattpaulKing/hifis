@@ -8,11 +8,13 @@ export default async function(e: RequestEvent) {
   const { request, locals: { db } } = e
   const form = await superValidate(request, valibot(clientsFormSchema))
   if (!form.valid) return ar.invalid({ form })
+  const { id, ...clientData } = form.data
   try {
     const [insertedClient] = await db
       .insert(clients)
-      .values(form.data)
+      .values(clientData)
       .returning()
+    form.data = insertedClient
   } catch (e) {
     console.log(e)
     return ar.dbError({ form })

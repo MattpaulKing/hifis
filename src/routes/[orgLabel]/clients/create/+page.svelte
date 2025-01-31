@@ -19,10 +19,7 @@
 	let { data } = $props();
 	let form = initClientForm({
 		form: data.clientForm,
-		schema: clientsFormSchema,
-		opts: {
-			resetForm: true
-		}
+		schema: clientsFormSchema
 	});
 	let stepperStore = new StepperStore({
 		pages: [
@@ -51,11 +48,10 @@
 			msgStore.setMsg({ msg: 'There may be duplicates', status: 'error' });
 		}
 	}
-	//TODO: Show the duplicates somewhere
 </script>
 
 <FormCard>
-	<Stepper title="Steps" {stepperStore}>
+	<Stepper title="Details" {stepperStore}>
 		{#each stepperStore.pages as page, idx}
 			<Step {stepperStore} {idx} {page}>
 				{#if stepperStore.expanded}
