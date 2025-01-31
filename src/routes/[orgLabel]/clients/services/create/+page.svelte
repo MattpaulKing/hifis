@@ -5,10 +5,10 @@
 		Errors,
 		Field,
 		FormBtns,
+		FormCard,
 		FormContainer,
 		getFormMsgStore,
 		initClientForm,
-		Input,
 		InputLookup,
 		InputTextArea,
 		Label,
@@ -44,41 +44,42 @@
 	}
 </script>
 
-<FormContainer
-	class="w-full max-w-lg"
-	{form}
-	action={route('create /[orgLabel]/services/categories/create', { orgLabel: data.org.label })}
-	drawerOpen={drawerStore.isOpen}
->
-	{#snippet title()}
-		<span>Add a Service Category</span>
-	{/snippet}
-	<Field
+<FormCard drawerOpen={drawerStore.isOpen}>
+	<FormContainer
+		class="w-full max-w-lg"
 		{form}
-		path="clientId"
-		disabled={!!data.lookups.client.inputValue}
-		lookupCtx={data.lookups.client}
+		action={route('create /[orgLabel]/services/categories/create', { orgLabel: data.org.label })}
 	>
-		<Label label="Client"></Label>
-		<InputLookup apiRoute={route('GET /api/v1/clients')} />
-		<LookupDropdown />
-		<Errors />
-	</Field>
-	<Field
-		{form}
-		path="serviceId"
-		disabled={!!data.lookups.service.inputValue}
-		lookupCtx={data.lookups.service}
-	>
-		<Label label="Service"></Label>
-		<InputLookup apiRoute={route('GET /api/v1/services')} />
-		<LookupDropdown />
-		<Errors />
-	</Field>
-	<Field {form} path="description" class="col-span-2">
-		<Label label="Description"></Label>
-		<InputTextArea />
-		<Errors />
-	</Field>
-	<FormBtns></FormBtns>
-</FormContainer>
+		{#snippet title()}
+			<span>Add a Service Category</span>
+		{/snippet}
+		<Field
+			{form}
+			path="clientId"
+			disabled={!!data.lookups.client.inputValue}
+			lookupCtx={data.lookups.client}
+		>
+			<Label label="Client"></Label>
+			<InputLookup onKeydown={() => debouncer.search()} apiRoute={route('GET /api/v1/clients')} />
+			<LookupDropdown />
+			<Errors />
+		</Field>
+		<Field
+			{form}
+			path="serviceId"
+			disabled={!!data.lookups.service.inputValue}
+			lookupCtx={data.lookups.service}
+		>
+			<Label label="Service"></Label>
+			<InputLookup apiRoute={route('GET /api/v1/services')} />
+			<LookupDropdown />
+			<Errors />
+		</Field>
+		<Field {form} path="description" class="col-span-2">
+			<Label label="Description"></Label>
+			<InputTextArea />
+			<Errors />
+		</Field>
+		<FormBtns></FormBtns>
+	</FormContainer>
+</FormCard>

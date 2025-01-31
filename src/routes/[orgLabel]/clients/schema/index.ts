@@ -1,11 +1,11 @@
-import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { timestamps } from "../../../../schemas/helpers/timestamps";
-import { organizations } from "../../schema";
-import * as v from "valibot"
 import { sql, type SQL } from "drizzle-orm";
+import { uuidPK } from "../../../../schemas/helpers";
+import * as v from "valibot"
 
 export const clients = pgTable('clients', {
-  id: uuid('id').primaryKey().defaultRandom().notNull(),
+  ...uuidPK,
   ...timestamps,
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
@@ -13,7 +13,6 @@ export const clients = pgTable('clients', {
   dob: timestamp().notNull(),
   phone: text('phone'),
   email: text("email"),
-  orgId: uuid("organization_id").references(() => organizations.id, { onUpdate: 'cascade', onDelete: 'restrict' }).notNull()
 })
 
 export const clientsFormSchema = v.object({
@@ -30,5 +29,4 @@ export const clientsFormSchema = v.object({
       ), 'Client must be at least 18 years old')),
   phone: v.nullable(v.pipe(v.string(), v.trim())),
   email: v.nullable(v.pipe(v.string(), v.email())),
-  orgId: v.pipe(v.string(), v.uuid())
 })

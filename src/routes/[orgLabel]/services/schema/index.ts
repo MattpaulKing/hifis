@@ -1,10 +1,10 @@
 import { pgTable, uuid, text } from "drizzle-orm/pg-core";
-import { timestamps } from "../../../../schemas/helpers/timestamps";
 import { organizations } from "../../schema";
+import { uuidPK, timestamps } from "../../../../schemas/helpers";
 import * as v from "valibot"
 
 export const services = pgTable('services', {
-  id: uuid('id').primaryKey().defaultRandom().notNull(),
+  ...uuidPK,
   ...timestamps,
   label: text('label').notNull(),
   address: text('address').notNull(),

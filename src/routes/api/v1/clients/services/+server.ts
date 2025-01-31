@@ -23,6 +23,7 @@ function groupServicesByClient(rows: ClientsAndServicesQueryRes[]) {
     if (service) {
       acc[client.id].services.push(service)
     }
+    console.log(client)
     return acc
   }, {} as Record<string, typeof clients.$inferSelect & { services: typeof services.$inferSelect[] }>)
   return Object.values(groupedRows)
