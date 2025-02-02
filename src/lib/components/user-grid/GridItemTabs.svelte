@@ -1,17 +1,18 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { LayoutItemEntity } from './types';
+	import type { TabEntity } from './GridItemTabsState.svelte';
+	import type { GridItemTabsState } from '.';
 	type Props = {
-		entities: LayoutItemEntity[];
+		tabState: GridItemTabsState;
 		tabRef?: HTMLDivElement;
-		onclick?: (t: LayoutItemEntity) => void;
+		onclick?: (t: TabEntity) => void;
 		onAdd?: () => void;
 		onpointerdown?: ((e: PointerEvent) => void) | null;
 		onpointerup?: (e: PointerEvent) => void;
-		children: Snippet;
+		children?: Snippet;
 	};
 	let {
-		entities,
+		tabState,
 		tabRef = $bindable(),
 		onpointerup,
 		onpointerdown,
@@ -20,8 +21,8 @@
 		children
 	}: Props = $props();
 
-	function onkeydown(e: KeyboardEvent, t: LayoutItemEntity) {
-		if (e.key === 'Tab' || e.key === 'Escape') return;
+	function onkeydown(e: KeyboardEvent, t: TabEntity) {
+		if (e.key !== 'Enter' && e.key !== 'Space') return;
 		onclick?.(t);
 	}
 </script>
@@ -33,43 +34,45 @@
 	class="border-surface-500-400-token flex w-full place-items-center justify-between border-b px-1 pb-1 pt-1 rounded-tl-token rounded-tr-token"
 >
 	<div class="flex place-items-center gap-x-2">
-		{#each entities as entity}
-			{@render tab(entity)}
+		{#each tabState.entities as entity, i}
+			<div
+				role="tab"
+				tabindex="0"
+				onclick={(e) => {
+					e.stopImmediatePropagation();
+					tabState.setActive(i);
+					onclick?.(entity);
+				}}
+				onkeydown={(e) => onkeydown(e, entity)}
+				title={entity.label}
+				class="{entity.active
+					? 'variant-filled rounded-tl-token rounded-tr-token'
+					: 'rounded-token hover:bg-surface-400-500-token'} relative flex min-w-16 place-items-center justify-between px-3 py-1"
+			>
+				<span class="truncate">{entity.label}</span>
+				<div class="ml-4">
+					<button
+						class="btn-icon btn-icon-sm absolute right-0.5 top-0 my-0 h-5 w-5 font-bold hover:variant-filled {entity.active
+							? 'hover:invert'
+							: ''}"
+					>
+						<span class="">x</span>
+					</button>
+				</div>
+			</div>
 		{/each}
 		<span class="divider-vertical border-surface-500-400-token mr-0 h-4 w-1"></span>
 		<div class="flex place-items-center justify-end">
-			<button onclick={onAdd} class="btn-icon btn-icon-sm h-5 w-5 font-bold hover:variant-filled"
-				>+</button
-			>
-		</div>
-	</div>
-
-	{@render children()}
-</div>
-
-{#snippet tab(t: LayoutItemEntity)}
-	<div
-		role="tab"
-		tabindex="0"
-		onclick={(e) => {
-			e.stopImmediatePropagation();
-			onclick?.(t);
-		}}
-		onkeydown={(e) => onkeydown(e, t)}
-		title={t.label}
-		class="{t.active
-			? 'variant-filled rounded-tl-token rounded-tr-token'
-			: 'rounded-token hover:bg-surface-400-500-token'} relative flex min-w-16 place-items-center justify-between px-3 py-1"
-	>
-		<span class="truncate">{t.label}</span>
-		<div class="ml-4">
 			<button
-				class="btn-icon btn-icon-sm absolute right-0.5 top-0 my-0 h-5 w-5 font-bold hover:variant-filled {t.active
-					? 'hover:invert'
-					: ''}"
+				onclick={() => {
+					tabState.setAddActive();
+					onAdd?.();
+				}}
+				class="btn-icon btn-icon-sm h-5 w-5 font-bold {tabState.activeAdd
+					? 'variant-filled '
+					: 'hover:variant-filled'}">+</button
 			>
-				<span class="">x</span>
-			</button>
 		</div>
 	</div>
-{/snippet}
+	{@render children?.()}
+</div>

@@ -19,8 +19,6 @@ export default class {
   initialPosition = $state({ left: 0, top: 0 })
   initialSize = $state({ width: 0, height: 0 })
   moveableItemRef = $state<HTMLElement>()
-  entities = $state<LayoutItemEntity[]>([])
-  activeEntity = $derived(this.entities.find((entity) => entity.active));
   cleanupMoveMouse = $state<null | (() => void)>(null)
   cleanupMoveEndMouse = $state<null | (() => void)>(null)
   cleanupMoveTouch = $state<null | (() => void)>(null)
@@ -56,11 +54,10 @@ export default class {
       gap: this.settings.gap
     })
   );
-  constructor({ item, entities }:
-    { item: LayoutItem, entities: LayoutItemEntity[] }) {
+  constructor({ item }:
+    { item: LayoutItem }) {
     this.item = item
     this.previewItem = { ...item }
-    this.entities = entities
   }
   init() {
     if (!this.active && this.settings.itemSize) {

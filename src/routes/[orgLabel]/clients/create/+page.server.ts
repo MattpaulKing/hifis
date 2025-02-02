@@ -1,29 +1,21 @@
 import { superValidate } from "sveltekit-superforms";
 import { valibot } from "sveltekit-superforms/adapters";
-import { clientsFormSchema } from "../schema";
 import { clientCreate } from "../actions.server";
+import { clientContactFormSchema } from "../schema";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const actions = {
-  default: async (e) => {
+  create: async (e) => {
     return await clientCreate(e)
   }
 } satisfies Actions
 
-export const load: PageServerLoad = async ({ params: { orgLabel }, locals: { subject } }) => {
-  const userOrgId = subject.properties.orgId
+export const load: PageServerLoad = async ({ }) => {
   const today = new Date()
-  let id = crypto.randomUUID()
   return {
     clientContactForm: await superValidate({
-      id,
+      id: crypto.randomUUID(),
       dob: new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()),
-    }, valibot(clientsFormSchema), { errors: false }),
-    lookups: {
-      org: [{
-        id: userOrgId,
-        label: orgLabel
-      }]
-    }
+    }, valibot(clientContactFormSchema), { errors: false }),
   }
 }

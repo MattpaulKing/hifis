@@ -9,7 +9,6 @@ export type LayoutItem = Size & Position & {
   resizeable: boolean;
 };
 
-export type LayoutItemEntity = { id: string; label: string, active: boolean }
 /**
  * Item position in grid units
  */

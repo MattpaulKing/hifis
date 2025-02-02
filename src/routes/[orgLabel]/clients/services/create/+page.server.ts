@@ -1,7 +1,7 @@
 import { superValidate } from "sveltekit-superforms";
 import { valibot } from "sveltekit-superforms/adapters";
 import { clientsServicesFormSchema } from "../schema";
-import { defaultLookupCtx } from "$lib/interfaces";
+import { lookupCtxDefault } from "$lib/interfaces";
 import { clients } from "../../schema";
 import { eq } from "drizzle-orm";
 import { services } from "$routes/[orgLabel]/services/schema";
@@ -17,6 +17,10 @@ type SearchParams = {
 export const load: PageServerLoad = async ({ url: { searchParams }, locals: { db } }) => {
   let params: SearchParams = Object.fromEntries(searchParams)
   return {
+    disabledFields: {
+      clientId: 'clientId' in params,
+      serviceId: 'serviceId' in params,
+    },
     clientServiceForm: await superValidate({
       id: crypto.randomUUID(),
       clientId: params.clientId,
@@ -27,11 +31,11 @@ export const load: PageServerLoad = async ({ url: { searchParams }, locals: { db
 }
 
 export const actions = {
-  default: async (e) => await clientServiceCreate(e)
+  create: async (e) => await clientServiceCreate(e)
 } satisfies Actions
 
 async function getLookups({ db, params }: { db: PostgresJsDatabase, params: SearchParams }) {
-  let lookups = { client: defaultLookupCtx(), service: defaultLookupCtx() }
+  let lookups = { client: lookupCtxDefault(), service: lookupCtxDefault() }
   if (params.clientId) {
     let [clientLookup] = await db
       .select({ id: clients.id, label: clients.label })

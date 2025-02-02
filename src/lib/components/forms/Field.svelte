@@ -2,7 +2,7 @@
 	import { getFormCtx, setField } from './inputs/context.svelte';
 	import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 	import type { Snippet } from 'svelte';
-	import type { Lookup } from '$lib/interfaces/Lookup';
+	import type { Lookup, LookupFieldCtx } from '$lib/interfaces/Lookup';
 	import { setLookups } from './inputs/LookupStore.svelte';
 	type Props = {
 		form: SuperForm<T>;
@@ -10,10 +10,7 @@
 		children: Snippet;
 		disabled?: boolean;
 		class?: string;
-		lookupCtx?: {
-			lookups?: Lookup[];
-			inputValue?: string;
-		};
+		lookupCtx?: LookupFieldCtx;
 	};
 
 	let { form, path, class: classes, disabled = false, lookupCtx, children }: Props = $props();
@@ -21,7 +18,7 @@
 	let { disabled: formDisabled } = getFormCtx();
 	let { value, focused, disabled: _disabled, errors } = setField({ form, path });
 	if (lookupCtx) {
-		setLookups({ value: $value, lookups: lookupCtx.lookups, inputValue: lookupCtx.inputValue });
+		setLookups({ value: $value, ...lookupCtx });
 	}
 	$_disabled = disabled || $_disabled || $formDisabled;
 

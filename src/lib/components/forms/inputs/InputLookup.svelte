@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getField } from './context.svelte';
-	import { getLookups } from '..';
+	import { getLookups } from './LookupStore.svelte';
 	import type { Lookup } from '$lib/interfaces/Lookup';
 	type Props = {
 		apiRoute: string;
@@ -23,19 +23,7 @@
 		let fetchedLookups = await fetch(`${apiRoute}?search=${store.inputValue}&lookups=true`).then(
 			async (r) => (await r.json()) as Lookup[]
 		);
-
-		if (Array.isArray($value) && $value.length > 0) {
-			let selectedLookups = store.lookups.filter((lookup) => $value.includes(lookup?.id));
-			fetchedLookups = fetchedLookups.filter((lookup) => !$value?.includes(lookup.id));
-			store.lookups = [...selectedLookups, ...fetchedLookups];
-		} else if (typeof $value === 'string') {
-			fetchedLookups = fetchedLookups.filter((lookup) => lookup.id !== $value);
-			let selectedLookup = store.lookups.find((lookup) => lookup?.id === $value);
-			if (selectedLookup) {
-				fetchedLookups.unshift(selectedLookup);
-			}
-			store.lookups = fetchedLookups;
-		}
+    store.filterFetchedLookups({ fetchedLookups, $value })
 		store.searching = false;
 	}
 	function onkeydown(e: KeyboardEvent) {
@@ -65,7 +53,7 @@
 		onfocus={handleSearch}
 		{onkeydown}
 	/>
-	<div class="input-group-shim">
+	<div class="input-group-shim pointer-events-none select-none">
 		<img src="/MagnifyingGlass.png" class="w-5 dark:invert" alt="magnifying-glass" />
 	</div>
 </div>

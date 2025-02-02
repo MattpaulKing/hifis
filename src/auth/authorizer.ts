@@ -5,7 +5,7 @@ import { PasswordUI } from "@openauthjs/openauth/ui/password"
 import { subjects } from "$lib/auth/subjects"
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Resource } from "sst";
-import { users } from "../schemas"
+import { organizations, users } from "../schemas"
 import { eq } from "drizzle-orm"
 
 async function getUser(email: string) {
@@ -19,9 +19,11 @@ async function getUser(email: string) {
       lastName: users.lastName,
       phone: users.phone,
       email: users.email,
-      orgId: users.orgId
+      orgId: users.orgId,
+      orgLabel: organizations.label
     })
     .from(users)
+    .leftJoin(organizations, eq(organizations.id, users.orgId))
     .where(eq(users.email, email))
     .limit(1)
   if (!user) {

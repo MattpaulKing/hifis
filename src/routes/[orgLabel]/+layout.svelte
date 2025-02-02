@@ -7,15 +7,16 @@
 	import { Modal, setModalStore } from '$lib/components/modal';
 
 	let { data, children } = $props();
-	let userMenuOpen = $state(false);
+
+	setFormMsgStore();
+	setDrawerStore({ isOpen: false });
+	setModalStore();
 	setUser(data.user);
+	let userMenuOpen = $state(false);
 
 	function onUserAvatarClick() {
 		userMenuOpen = !userMenuOpen;
 	}
-	setFormMsgStore();
-	setDrawerStore({ isOpen: false });
-	setModalStore();
 </script>
 
 <Drawer />

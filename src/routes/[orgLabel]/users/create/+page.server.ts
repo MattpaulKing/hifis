@@ -5,7 +5,7 @@ import { userCreate } from "./actions.server"
 import type { Actions, PageServerLoad } from "./$types"
 
 export const actions = {
-  default: async (e) => {
+  create: async (e) => {
     return await userCreate(e)
   }
 } satisfies Actions

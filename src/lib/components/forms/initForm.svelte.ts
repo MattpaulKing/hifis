@@ -1,9 +1,9 @@
 import { valibot } from "sveltekit-superforms/adapters"
 import { superForm, type FormOptions, type Infer, type SuperValidated } from "sveltekit-superforms"
 import { setFormMsgStore } from "."
-import type { ObjectEntries, ObjectSchema } from "valibot"
+import type { ErrorMessage, ObjectEntries, ObjectIssue, ObjectSchema } from "valibot"
 
-export type ISchema = ObjectSchema<ObjectEntries, string | undefined>
+export type ISchema = ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
 
 function defaultFormOptions<T extends ISchema>(validator: T) {
   return {

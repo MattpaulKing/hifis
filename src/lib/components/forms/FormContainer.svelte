@@ -31,7 +31,7 @@
 	let msgStore = getFormMsgStore();
 </script>
 
-<div class="relative flex flex-col p-6 {classes ?? ''}">
+<div in:fade class="relative flex flex-col p-6 {classes ?? ''}">
 	<div class="absolute right-0 top-0 z-50 flex w-full flex-col items-end">
 		{#if msgStore.current?.msg}
 			<div

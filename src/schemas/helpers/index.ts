@@ -1,2 +1,2 @@
-export { uuidPK } from "./uuidPK"
-export { timestamps } from "./timestamps"
+export { default as uuidPK } from "./uuidPK"
+export { default as timestamps } from "./timestamps"

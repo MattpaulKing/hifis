@@ -1,30 +1,48 @@
-import { eq } from "drizzle-orm"
-import { clients, clientsFormSchema } from "../schema"
+import { eq, exists } from "drizzle-orm"
+import { clients, clientContactFormSchema } from "../schema"
 import { single } from "$lib/server/db"
 import { services } from "$routes/[orgLabel]/services/schema"
-import { clientsServices } from "../services/schema"
+import { clientsServices, clientsServicesFormSchema } from "../services/schema"
 import { superValidate } from "sveltekit-superforms"
 import { valibot } from "sveltekit-superforms/adapters"
+import clientUpdate from "../actions.server/clientUpdate"
 import type { Actions, PageServerLoad } from "./$types"
 
-export const load: PageServerLoad = async ({ params: { clientId }, locals: { db } }) => {
+// type Params = 
+
+export const load: PageServerLoad = async ({ url: { searchParams }, params: { clientId }, locals: { db } }) => {
+  let params = Object.fromEntries(searchParams)
+  params.clientId = clientId
   return {
     client: {
-      contact: await db
+      ...await db
         .select()
         .from(clients)
         .where(eq(clients.id, clientId))
-        .then(single),
+        .then(single)
+        .then(async contact => ({
+          contact,
+          contactForm: await superValidate({
+            ...contact
+          }, valibot(clientContactFormSchema))
+        })),
       services: await db
         .select()
-        .from(clientsServices)
-        .leftJoin(services, eq(services.id, clientsServices.serviceId))
-        .where(eq(clientsServices.clientId, clientId)),
-      clientContactForm: await superValidate(valibot(clientsFormSchema))
-    }
+        .from(services)
+        .where(
+          exists(
+            db.select()
+              .from(clientsServices)
+              .where(eq(clientsServices.clientId, clientId))
+          )),
+      serviceForm: await superValidate({
+        id: crypto.randomUUID(),
+        clientId: clientId,
+      }, valibot(clientsServicesFormSchema), { errors: false })
+    },
   }
 }
 
 export const actions = {
-
+  update: async (e) => await clientUpdate(e)
 } satisfies Actions

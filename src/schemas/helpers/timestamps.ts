@@ -1,7 +1,8 @@
 import { timestamp } from "drizzle-orm/pg-core"
 
-export const timestamps = {
+const timestamps = {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp("updated_at").$onUpdateFn(() => new Date()),
   deletedAt: timestamp("deleted_at"),
 }
+export default timestamps

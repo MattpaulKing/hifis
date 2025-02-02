@@ -1,4 +1,4 @@
-import { pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, unique, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidPK } from "../../../../../schemas/helpers";
 import { clients } from "../../schema";
 import { services } from "../../../services/schema";
@@ -10,7 +10,9 @@ export const clientsServices = pgTable("clients_services", {
   clientId: uuid("client_id").notNull().references(() => clients.id, { onUpdate: "cascade", onDelete: "restrict" }),
   serviceId: uuid("service_id").notNull().references(() => services.id, { onUpdate: "cascade", onDelete: "restrict" }),
   description: text("description").notNull()
-})
+}, (t) => [{
+  uniqueConstraint: unique('unique_client_id_service_id').on(t.clientId, t.serviceId)
+}])
 
 export const clientsServicesFormSchema = v.object({
   id: v.pipe(v.string(), v.uuid()),
