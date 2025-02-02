@@ -1,5 +1,5 @@
 import { pgTable, text } from "drizzle-orm/pg-core";
-import { uuidPK, timestamps } from "../../../../../schemas/helpers";
+import { uuidPK, timestamps } from "$src/schemas/helpers";
 import * as v from "valibot"
 
 export const serviceCategories = pgTable('service_categories', {

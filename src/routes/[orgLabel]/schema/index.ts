@@ -1,6 +1,6 @@
-import { pgTable, text } from "drizzle-orm/pg-core";
-import { uuidPK, timestamps } from "../../../schemas/helpers";
 import * as v from "valibot"
+import { pgTable, text } from "drizzle-orm/pg-core";
+import { timestamps, uuidPK } from "$src/schemas/helpers";
 
 export const organizations = pgTable("organizations", {
   ...uuidPK,

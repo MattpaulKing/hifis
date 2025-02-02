@@ -11,6 +11,7 @@ const config = {
     alias: {
       '$routes': './src/routes',
       '$api': './src/routes/api/v1',
+      '$src': './src'
     },
     adapter: adapter()
   }

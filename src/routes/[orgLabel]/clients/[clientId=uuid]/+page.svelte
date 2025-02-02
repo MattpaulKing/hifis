@@ -14,12 +14,16 @@
 		expanded: true
 	});
 	let tabState = new GridItemTabsState({
-		entities: data.client.services.map(({ id, label }, i) => ({
+		entities: Object.values(data.client.services).map(({ id, label }, i) => ({
 			id,
 			label,
 			active: i == 0
 		}))
 	});
+	let activeService = $derived.by(() => {
+		return data.client.services[tabState.entities[tabState.activeIdx].id];
+	});
+	$inspect(activeService);
 </script>
 
 <FormCard>
@@ -41,14 +45,22 @@
 		></ClientContactForm>
 	{:else if stepperStore.activePage.label === 'services'}
 		<GridItemTabs {tabState} />
-		{#if tabState.activeAdd}
+		{#if tabState.activeIdx >= 0}
+			<div class="grid grid-cols-3 p-4">
+				<span class="col-span-2 text-lg font-bold">
+					{activeService.label}
+				</span>
+				<span>{activeService.orgLabel}</span>
+				<span>{activeService.categoryLabel}</span>
+			</div>
+		{:else}
 			<ClientsServicesForm
 				clientServiceForm={data.client.serviceForm}
 				lookups={{
 					client: lookupCtxFromSingle(data.client.contact),
 					service: {
 						...lookupCtxDefault(),
-						excludedIds: data.client.services.map(({ id }) => id)
+						excludedIds: Object.keys(data.client.services)
 					}
 				}}
 				disabledFields={{ clientId: true }}

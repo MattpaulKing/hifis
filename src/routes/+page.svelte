@@ -1,8 +1,8 @@
 <script lang="ts">
 	/* 
  TODO:
- 0. 
- 1. Finish resize logic
+  0. Service Events / Form logic
+  1. Finish resize logic
  */
 </script>
 

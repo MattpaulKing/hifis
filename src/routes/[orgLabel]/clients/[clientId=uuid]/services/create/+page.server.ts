@@ -2,10 +2,10 @@ import { superValidate } from "sveltekit-superforms";
 import { valibot } from "sveltekit-superforms/adapters";
 import { clientsServicesFormSchema } from "../schema";
 import { lookupCtxDefault } from "$lib/interfaces";
-import { clients } from "../../schema";
 import { eq } from "drizzle-orm";
 import { services } from "$routes/[orgLabel]/services/schema";
 import { clientServiceCreate } from "./actions.server";
+import { clients } from "$routes/[orgLabel]/clients/schema";
 import type { Actions, PageServerLoad } from "./$types";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 

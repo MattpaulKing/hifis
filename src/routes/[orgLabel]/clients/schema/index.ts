@@ -1,7 +1,7 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { sql, type SQL } from "drizzle-orm";
-import { timestamps, uuidPK } from "../../../../schemas/helpers";
 import * as v from "valibot"
+import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { timestamps, uuidPK } from "$src/schemas/helpers";
+import { sql, type SQL } from "drizzle-orm";
 
 export const clients = pgTable('clients', {
   ...uuidPK,

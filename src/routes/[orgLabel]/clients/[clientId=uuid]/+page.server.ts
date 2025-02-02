@@ -1,4 +1,4 @@
-import { eq, exists } from "drizzle-orm"
+import { eq, exists, getTableColumns } from "drizzle-orm"
 import { clients, clientContactFormSchema } from "../schema"
 import { single } from "$lib/server/db"
 import { services } from "$routes/[orgLabel]/services/schema"
@@ -7,6 +7,8 @@ import { superValidate } from "sveltekit-superforms"
 import { valibot } from "sveltekit-superforms/adapters"
 import clientUpdate from "../actions.server/clientUpdate"
 import type { Actions, PageServerLoad } from "./$types"
+import { serviceCategories } from "$routes/[orgLabel]/services/categories/schema"
+import { organizations } from "$routes/[orgLabel]/schema"
 
 // type Params = 
 
@@ -27,14 +29,20 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
           }, valibot(clientContactFormSchema))
         })),
       services: await db
-        .select()
+        .select({
+          ...getTableColumns(services),
+          categoryLabel: serviceCategories.label,
+          orgLabel: organizations.label
+        })
         .from(services)
+        .leftJoin(organizations, eq(organizations.id, services.orgId))
+        .leftJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
         .where(
           exists(
             db.select()
               .from(clientsServices)
               .where(eq(clientsServices.clientId, clientId))
-          )),
+          )).then(rowsToMap),
       serviceForm: await superValidate({
         id: crypto.randomUUID(),
         clientId: clientId,
@@ -46,3 +54,13 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
 export const actions = {
   update: async (e) => await clientUpdate(e)
 } satisfies Actions
+
+function rowsToMap<T extends { id: string }>(rows: T[]): Record<string, T> {
+  let res: Record<string, T> = {}
+  for (let i = 0; i < rows.length; i++) {
+    if (!(rows[i].id in res)) {
+      res[rows[i].id] = rows[i]
+    }
+  }
+  return res
+}

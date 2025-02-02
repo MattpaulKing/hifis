@@ -1,6 +1,7 @@
 import { pgTable, uuid, text } from "drizzle-orm/pg-core";
-import { organizations } from "../../schema";
-import { uuidPK, timestamps } from "../../../../schemas/helpers";
+import { organizations } from "$src/schemas";
+import { uuidPK, timestamps } from "$src/schemas/helpers";
+import { serviceCategories } from "$src/schemas";
 import * as v from "valibot"
 
 export const services = pgTable('services', {
@@ -10,7 +11,7 @@ export const services = pgTable('services', {
   address: text('address').notNull(),
   phone: text('phone'),
   email: text("email"),
-  category: uuid("category").notNull(),
+  categoryId: uuid("category_id").notNull().references(() => serviceCategories.id, { onUpdate: "cascade", onDelete: "restrict" }),
   description: text("description"),
   orgId: uuid("organization_id").references(() => organizations.id, { onUpdate: "cascade", onDelete: "restrict" }).notNull()
 })

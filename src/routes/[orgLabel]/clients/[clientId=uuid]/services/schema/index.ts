@@ -1,8 +1,7 @@
-import { pgTable, text, unique, uuid } from "drizzle-orm/pg-core";
-import { timestamps, uuidPK } from "../../../../../schemas/helpers";
-import { clients } from "../../schema";
-import { services } from "../../../services/schema";
 import * as v from "valibot"
+import { clients, services } from "$src/schemas";
+import { timestamps, uuidPK } from "$src/schemas/helpers";
+import { pgTable, text, unique, uuid } from "drizzle-orm/pg-core";
 
 export const clientsServices = pgTable("clients_services", {
   ...uuidPK,
