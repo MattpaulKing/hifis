@@ -1,1 +1,1 @@
-export { default as servicesCreate } from "./servicesCreate"
+export { default as serviceCreate } from "./serviceCreate"

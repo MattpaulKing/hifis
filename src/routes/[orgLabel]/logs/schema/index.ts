@@ -1,7 +1,7 @@
 import * as v from "valibot"
 import { pgTable, text, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidPK } from "$src/schemas/helpers";
-import { services, organizations, clients } from "$src/schemas";
+import { services, clients } from "$src/schemas";
 
 export const logs = pgTable("logs", {
   ...uuidPK,
@@ -13,7 +13,6 @@ export const logsRelations = pgTable("logs_relations", {
   ...uuidPK,
   ...timestamps,
   logId: uuid("log_id").notNull().references(() => logs.id, { onUpdate: "cascade", onDelete: "restrict" }),
-  orgId: uuid("organization_id").references(() => organizations.id, { onUpdate: "cascade", onDelete: "restrict" }),
   serviceId: uuid("service_id").references(() => services.id, { onUpdate: "cascade", onDelete: "restrict" }),
   clientId: uuid("client_id").references(() => clients.id, { onUpdate: "cascade", onDelete: "restrict" }),
 })
@@ -21,7 +20,6 @@ export const logsRelations = pgTable("logs_relations", {
 export const logsFormSchema = v.object({
   id: v.pipe(v.string(), v.uuid()),
   note: v.pipe(v.string(), v.minLength(2, "Note is required")),
-  orgIds: v.array(v.pipe(v.string(), v.uuid())),
-  serviceIds: v.array(v.pipe(v.string(), v.uuid())),
-  clientIds: v.array(v.pipe(v.string(), v.uuid()))
+  serviceIds: v.fallback(v.array(v.pipe(v.string(), v.uuid())), []),
+  clientIds: v.fallback(v.array(v.pipe(v.string(), v.uuid())), [])
 })

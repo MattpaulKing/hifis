@@ -31,7 +31,7 @@ export const GET: RequestHandler = async ({ url: { searchParams }, locals: { db 
       ${clients}
     where
       to_tsvector('english', ${clients.firstName} || ' ' || ${clients.lastName}) 
-      @@ to_tsquery('english', ${value.replaceAll(" ", " | ")})
+      @@ to_tsquery('english', ${value.trim().replaceAll(" ", " | ")})
   `) as { rows: SearchData[] }
   if (data.length <= 0) return json({ type: "success", data: [] })
   return json({

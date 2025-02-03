@@ -17,6 +17,14 @@ class LookupStore {
     this.inputValue = inputValue ?? ''
     this.excludedIds = excludedIds ?? []
   }
+  selectedLookups({ $value }: { $value: string | string[] | undefined }) {
+    if (!$value) return []
+    if (Array.isArray($value)) {
+      return this.lookups.filter(lookup => $value.includes(lookup.id))
+    } else {
+      return this.lookups.filter(lookup => $value === lookup.id)
+    }
+  }
   filterFetchedLookups({ fetchedLookups, $value }: { fetchedLookups: Lookup[], $value: string[] | string | undefined }) {
     if (Array.isArray($value) && $value.length > 0) {
       this.filterLookupsForArray({ fetchedLookups, $value })

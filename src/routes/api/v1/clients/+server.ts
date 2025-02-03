@@ -26,7 +26,7 @@ export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams 
       .from(clients)
       .where(sql`
         to_tsvector('english', ${clients.firstName} || ' ' || ${clients.lastName}) 
-        @@ to_tsquery('english', ${params.search.replaceAll(" ", " | ")})
+        @@ to_tsquery('english', ${params.search.trim().replaceAll(" ", " | ")})
       `)
   }
   if (params.lookups) {

@@ -3,13 +3,14 @@
 	import { Step, Stepper, StepperStore } from '$lib/components/stepper';
 	import { GridItemTabs, GridItemTabsState } from '$lib/components/user-grid';
 	import { lookupCtxDefault, lookupCtxFromSingle } from '$lib/interfaces/lookups';
+	import { LogForm } from '$routes/[orgLabel]/logs/lib';
 	import { ClientContactForm } from '../lib';
-	import { ClientsServicesForm } from '../services/lib';
+	import { ClientsServicesForm } from './services/lib';
 
 	let { data } = $props();
 
 	let stepperStore = new StepperStore({
-		labels: ['contact', 'services'],
+		labels: ['contact', 'services', 'logs'],
 		searchKey: 'i',
 		expanded: true
 	});
@@ -23,7 +24,7 @@
 	let activeService = $derived.by(() => {
 		return data.client.services[tabState.entities[tabState.activeIdx].id];
 	});
-	$inspect(activeService);
+	let logsPageState = $state<'create' | 'read'>('create');
 </script>
 
 <FormCard>
@@ -50,8 +51,11 @@
 				<span class="col-span-2 text-lg font-bold">
 					{activeService.label}
 				</span>
-				<span>{activeService.orgLabel}</span>
-				<span>{activeService.categoryLabel}</span>
+				<span class="col-start-3 row-start-1">{activeService.orgLabel}</span>
+				<span class="row-start-2">{activeService.categoryLabel}</span>
+				<span class="row-start-3 mt-2"
+					>{activeService.clientsServicesDescription ?? 'No description'}</span
+				>
 			</div>
 		{:else}
 			<ClientsServicesForm
@@ -65,6 +69,19 @@
 				}}
 				disabledFields={{ clientId: true }}
 			></ClientsServicesForm>
+		{/if}
+	{:else if stepperStore.activePage.label === 'logs'}
+		{#if logsPageState === 'read'}
+			<div></div>
+		{:else if logsPageState === 'create'}
+			<LogForm
+				logForm={data.client.logForm}
+				mode="create"
+				lookups={{
+					clients: lookupCtxFromSingle(data.client.contact),
+					services: lookupCtxDefault()
+				}}
+			></LogForm>
 		{/if}
 	{/if}
 </FormCard>

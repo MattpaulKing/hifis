@@ -1,16 +1,17 @@
-import { eq, exists, getTableColumns } from "drizzle-orm"
+import { eq, getTableColumns } from "drizzle-orm"
 import { clients, clientContactFormSchema } from "../schema"
 import { single } from "$lib/server/db"
 import { services } from "$routes/[orgLabel]/services/schema"
-import { clientsServices, clientsServicesFormSchema } from "../services/schema"
 import { superValidate } from "sveltekit-superforms"
 import { valibot } from "sveltekit-superforms/adapters"
-import clientUpdate from "../actions.server/clientUpdate"
-import type { Actions, PageServerLoad } from "./$types"
+import { clientUpdate } from "../actions.server"
 import { serviceCategories } from "$routes/[orgLabel]/services/categories/schema"
 import { organizations } from "$routes/[orgLabel]/schema"
-
-// type Params = 
+import { clientsServices } from "$src/schemas"
+import { clientsServicesFormSchema } from "./services/schema"
+import { rowsToMap } from "$src/lib/helpers"
+import { logs, logsFormSchema, logsRelations } from "$routes/[orgLabel]/logs/schema"
+import type { Actions, PageServerLoad } from "./$types"
 
 export const load: PageServerLoad = async ({ url: { searchParams }, params: { clientId }, locals: { db } }) => {
   let params = Object.fromEntries(searchParams)
@@ -32,21 +33,44 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
         .select({
           ...getTableColumns(services),
           categoryLabel: serviceCategories.label,
-          orgLabel: organizations.label
+          orgLabel: organizations.label,
+          clientsServicesDescription: clientsServices.description
         })
         .from(services)
         .leftJoin(organizations, eq(organizations.id, services.orgId))
         .leftJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
-        .where(
-          exists(
-            db.select()
-              .from(clientsServices)
-              .where(eq(clientsServices.clientId, clientId))
-          )).then(rowsToMap),
+        .leftJoin(clientsServices, eq(clientsServices.serviceId, services.id))
+        .where(eq(clientsServices.clientId, clientId))
+        .then(rowsToMap),
       serviceForm: await superValidate({
         id: crypto.randomUUID(),
         clientId: clientId,
-      }, valibot(clientsServicesFormSchema), { errors: false })
+      }, valibot(clientsServicesFormSchema), { errors: false }),
+      logs: await db
+        .select({
+          ...getTableColumns(logs),
+          service: {
+            id: services.id,
+            label: services.label,
+          },
+          client: {
+            id: clients.id,
+            label: clients.label,
+          }
+        })
+        .from(logs)
+        .leftJoin(logsRelations, eq(logs.id, logsRelations.logId))
+        .leftJoin(clients, eq(clients.id, logsRelations.clientId))
+        .leftJoin(services, eq(services.id, logsRelations.serviceId))
+        .orderBy(logs.id)
+        .then(x => {
+          console.dir(x, { depth: null })
+          return x
+        }),
+      logForm: await superValidate({
+        id: crypto.randomUUID(),
+        clientIds: [clientId]
+      }, valibot(logsFormSchema), { errors: false })
     },
   }
 }
@@ -54,13 +78,3 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
 export const actions = {
   update: async (e) => await clientUpdate(e)
 } satisfies Actions
-
-function rowsToMap<T extends { id: string }>(rows: T[]): Record<string, T> {
-  let res: Record<string, T> = {}
-  for (let i = 0; i < rows.length; i++) {
-    if (!(rows[i].id in res)) {
-      res[rows[i].id] = rows[i]
-    }
-  }
-  return res
-}

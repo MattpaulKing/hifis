@@ -18,7 +18,7 @@ export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams 
   if (params.search) {
     filters.push(sql`
         to_tsvector('english', ${services.label}) 
-        @@ to_tsquery('english', ${params.search.replaceAll(" ", " | ")})
+        @@ to_tsquery('english', ${params.search.trim().replaceAll(" ", " | ")})
       `)
   }
   let servicesRows = await db

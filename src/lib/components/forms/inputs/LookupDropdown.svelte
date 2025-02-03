@@ -13,6 +13,7 @@
 				store.inputValue = '';
 			} else {
 				$value.push(lookup.id);
+				$value = $value;
 				store.inputValue = '';
 			}
 		} else {
@@ -47,7 +48,7 @@
 					<button
 						onclick={() => handleClick({ lookup })}
 						type="button"
-						class="{$value === lookup.id
+						class="{$value === lookup.id || $value.includes(lookup.id)
 							? 'variant-ghost'
 							: ''} px-2 py-1 text-left rounded-token hover:variant-ghost">{lookup.label}</button
 					>

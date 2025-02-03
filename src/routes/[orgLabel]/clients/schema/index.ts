@@ -15,7 +15,7 @@ export const clients = pgTable('clients', {
 })
 
 export const clientContactFormSchema = v.object({
-  id: v.pipe(v.string(), v.uuid()),
+  id: v.fallback(v.pipe(v.string(), v.uuid()), crypto.randomUUID()),
   firstName: v.pipe(v.string(), v.trim(), v.minLength(1, "First Name is required")),
   lastName: v.pipe(v.string(), v.trim(), v.minLength(1, "Last Name is required")),
   dob: v.pipe(

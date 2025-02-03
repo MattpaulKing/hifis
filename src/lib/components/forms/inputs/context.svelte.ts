@@ -1,6 +1,6 @@
 import { getContext, setContext } from "svelte";
 import { writable, type Writable } from "svelte/store";
-import { arrayProxy, formFieldProxy, type FormFieldProxy, type FormPathArrays, type FormPathLeaves, type SuperForm } from "sveltekit-superforms";
+import { arrayProxy, formFieldProxy, type ArrayProxy, type FormFieldProxy, type FormPathArrays, type FormPathLeaves, type SuperForm } from "sveltekit-superforms";
 
 const FORM_CTX = Symbol("DISABLED")
 export function setFormCtx(props: { disabled: boolean }) {
@@ -23,7 +23,8 @@ export function setArrayField<T extends Record<string, unknown>>({ form, path }:
     path,
     focused: writable(false),
     searching: writable(false),
-    disabled: writable(false)
+    disabled: writable(false),
+    isArray: true,
   })
 }
 export function setField<T extends Record<string, unknown>>({ form, path }: { form: SuperForm<T>, path: FormPathLeaves<T> }) {
@@ -36,15 +37,17 @@ export function setField<T extends Record<string, unknown>>({ form, path }: { fo
     path,
     focused: writable(false),
     searching: writable(false),
-    disabled: writable(false)
+    disabled: writable(false),
+    isArray: false
   })
 }
 type FormFieldMetadata = {
   // selected: Writable<LookupOption[]>,
   focused: Writable<boolean>,
   searching: Writable<boolean>,
-  disabled: Writable<boolean>
+  disabled: Writable<boolean>,
+  isArray: boolean
 }
 export function getField<T>() {
-  return getContext(FIELD_CTX) satisfies FormFieldProxy<T> & FormFieldMetadata
+  return getContext(FIELD_CTX) as (FormFieldProxy<T> | (Omit<ArrayProxy<T>, "values"> & { value: Writable<string[]> })) & FormFieldMetadata
 }

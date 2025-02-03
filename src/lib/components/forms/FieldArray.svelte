@@ -1,12 +1,12 @@
 <script lang="ts" generics="T extends Record<string, unknown>">
-	import { getFormCtx, setField } from './inputs/context.svelte';
-	import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
+	import { getFormCtx, setArrayField, setField } from './inputs/context.svelte';
+	import type { FormPathArrays, SuperForm } from 'sveltekit-superforms';
 	import type { Snippet } from 'svelte';
 	import type { LookupFieldCtx } from '$lib/interfaces/Lookup';
 	import { setLookups } from './inputs/LookupStore.svelte';
 	type Props = {
 		form: SuperForm<T>;
-		path: FormPathLeaves<T>;
+		path: FormPathArrays<T>;
 		children: Snippet;
 		disabled?: boolean;
 		class?: string;
@@ -16,7 +16,7 @@
 	let { form, path, class: classes, disabled = false, lookupCtx, children }: Props = $props();
 
 	let { disabled: formDisabled } = getFormCtx();
-	let { value, focused, disabled: _disabled, errors } = setField({ form, path });
+	let { value, focused, disabled: _disabled, errors } = setArrayField({ form, path });
 	if (lookupCtx) {
 		setLookups({ value: $value, ...lookupCtx });
 	}

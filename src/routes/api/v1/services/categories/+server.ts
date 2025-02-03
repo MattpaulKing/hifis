@@ -19,7 +19,7 @@ export const GET: RequestHandler = async ({ url: { searchParams }, locals: { db 
   if (params.search) {
     filters.push(sql`
         to_tsvector('english', ${serviceCategories.label}) 
-        @@ websearch_to_tsquery('simple', ${params.search.replaceAll(" ", " | ")})
+        @@ websearch_to_tsquery('simple', ${params.search.trim().replaceAll(" ", " | ")})
       `)
   }
   res = await db
