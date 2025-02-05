@@ -15,18 +15,20 @@
 	import { route } from '$lib/ROUTES';
 	import { clientsServicesFormSchema } from '../../schema';
 	import { getUser } from '$lib/components/user';
-	import type { LookupFieldCtx } from '$lib/interfaces/Lookup';
-	import type { Infer, SuperValidated } from 'sveltekit-superforms';
+	import type { FormOptions, Infer, SuperValidated } from 'sveltekit-superforms';
+	import type { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
 
 	let {
 		clientServiceForm,
-		lookups,
+		formOpts,
+		lookups = $bindable(),
 		disabledFields
 	}: {
 		clientServiceForm: SuperValidated<Infer<typeof clientsServicesFormSchema>>;
+		formOpts?: FormOptions<Infer<typeof clientsServicesFormSchema>>;
 		lookups: {
-			client: LookupFieldCtx;
-			service: LookupFieldCtx;
+			clients: LookupStore;
+			services: LookupStore;
 		};
 		disabledFields?: {
 			clientId?: boolean;
@@ -36,7 +38,8 @@
 
 	let form = initForm({
 		form: clientServiceForm,
-		schema: clientsServicesFormSchema
+		schema: clientsServicesFormSchema,
+		opts: formOpts
 	});
 
 	let { form: formData } = form;
@@ -59,20 +62,21 @@
 <FormContainer
 	class="w-full max-w-lg"
 	{form}
-	action={route('create /[orgLabel]/clients/services/create', {
-		orgLabel: user.properties.orgLabel
+	action={route('create /[orgLabel]/clients/[clientId=uuid]/services/create', {
+		orgLabel: user.properties.orgLabel,
+		clientId: $formData.clientId
 	})}
 >
 	{#snippet title()}
 		<span>Attach a Client to a Service</span>
 	{/snippet}
-	<Field {form} path="clientId" disabled={disabledFields?.clientId} lookupCtx={lookups.client}>
+	<Field {form} path="clientId" disabled={disabledFields?.clientId} lookups={lookups.clients}>
 		<Label label="Client"></Label>
-		<InputLookup onKeydown={() => debouncer.search()} apiRoute={route('GET /api/v1/clients')} />
+		<InputLookup onkeydown={() => debouncer.search()} apiRoute={route('GET /api/v1/clients')} />
 		<LookupDropdown />
 		<Errors />
 	</Field>
-	<Field {form} path="serviceId" disabled={disabledFields?.serviceId} lookupCtx={lookups.service}>
+	<Field {form} path="serviceId" disabled={disabledFields?.serviceId} lookups={lookups.services}>
 		<Label label="Service"></Label>
 		<InputLookup apiRoute={route('GET /api/v1/services')} />
 		<LookupDropdown />

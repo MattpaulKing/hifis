@@ -13,8 +13,8 @@ export type LayoutItem = Size & Position & {
  * Item position in grid units
  */
 export type Size = {
-  width: number;
-  height: number;
+  widthGridUnits: number;
+  heightGridUnits: number;
 };
 /**
  * Item position in grid units

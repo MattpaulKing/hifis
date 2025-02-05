@@ -7,7 +7,7 @@
 
 <textarea
 	autocomplete="off"
-	class="textarea {classes}"
+	class="input {classes}"
 	readonly={$disabled}
 	name={path}
 	title={$value}

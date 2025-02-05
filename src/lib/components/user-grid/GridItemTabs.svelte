@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { TabEntity } from './GridItemTabsState.svelte';
 	import type { GridItemTabsState } from '.';
+	import { fade } from 'svelte/transition';
 	type Props = {
 		tabState: GridItemTabsState;
 		tabRef?: HTMLDivElement;
@@ -36,6 +37,7 @@
 	<div class="flex place-items-center gap-x-2">
 		{#each tabState.entities as entity, i}
 			<div
+				transition:fade
 				role="tab"
 				tabindex="0"
 				onclick={(e) => {

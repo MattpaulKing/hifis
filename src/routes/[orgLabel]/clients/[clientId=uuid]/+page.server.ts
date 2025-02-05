@@ -1,4 +1,4 @@
-import { eq, getTableColumns } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 import { clients, clientContactFormSchema } from "../schema"
 import { single } from "$lib/server/db"
 import { services } from "$routes/[orgLabel]/services/schema"
@@ -10,7 +10,8 @@ import { organizations } from "$routes/[orgLabel]/schema"
 import { clientsServices } from "$src/schemas"
 import { clientsServicesFormSchema } from "./services/schema"
 import { rowsToMap } from "$src/lib/helpers"
-import { logs, logsFormSchema, logsRelations } from "$routes/[orgLabel]/logs/schema"
+import { logsFormSchema } from "$routes/[orgLabel]/logs/schema"
+import { logsWithClientsAndServices, aggLogsWitsClientsAndServices } from "$routes/[orgLabel]/logs/lib"
 import type { Actions, PageServerLoad } from "./$types"
 
 export const load: PageServerLoad = async ({ url: { searchParams }, params: { clientId }, locals: { db } }) => {
@@ -31,7 +32,8 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
         })),
       services: await db
         .select({
-          ...getTableColumns(services),
+          id: services.id,
+          label: services.label,
           categoryLabel: serviceCategories.label,
           orgLabel: organizations.label,
           clientsServicesDescription: clientsServices.description
@@ -47,26 +49,8 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
         clientId: clientId,
       }, valibot(clientsServicesFormSchema), { errors: false }),
       logs: await db
-        .select({
-          ...getTableColumns(logs),
-          service: {
-            id: services.id,
-            label: services.label,
-          },
-          client: {
-            id: clients.id,
-            label: clients.label,
-          }
-        })
-        .from(logs)
-        .leftJoin(logsRelations, eq(logs.id, logsRelations.logId))
-        .leftJoin(clients, eq(clients.id, logsRelations.clientId))
-        .leftJoin(services, eq(services.id, logsRelations.serviceId))
-        .orderBy(logs.id)
-        .then(x => {
-          console.dir(x, { depth: null })
-          return x
-        }),
+        .query.logs.findMany({ ...logsWithClientsAndServices })
+        .then(aggLogsWitsClientsAndServices),
       logForm: await superValidate({
         id: crypto.randomUUID(),
         clientIds: [clientId]

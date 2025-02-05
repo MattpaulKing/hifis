@@ -1,24 +1,24 @@
 <script lang="ts" generics="T extends Record<string, unknown>">
+	import { LookupStore, setLookups } from './inputs/LookupStore.svelte';
 	import { getFormCtx, setField } from './inputs/context.svelte';
 	import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 	import type { Snippet } from 'svelte';
-	import type { LookupFieldCtx } from '$lib/interfaces/Lookup';
-	import { setLookups } from './inputs/LookupStore.svelte';
+
 	type Props = {
 		form: SuperForm<T>;
 		path: FormPathLeaves<T>;
 		children: Snippet;
 		disabled?: boolean;
 		class?: string;
-		lookupCtx?: LookupFieldCtx;
+		lookups?: LookupStore;
 	};
 
-	let { form, path, class: classes, disabled = false, lookupCtx, children }: Props = $props();
+	let { form, path, class: classes, disabled = false, lookups, children }: Props = $props();
 
 	let { disabled: formDisabled } = getFormCtx();
 	let { value, focused, disabled: _disabled, errors } = setField({ form, path });
-	if (lookupCtx) {
-		setLookups({ value: $value, ...lookupCtx });
+	if (lookups) {
+		setLookups(lookups);
 	}
 	$_disabled = disabled || $_disabled || $formDisabled;
 
@@ -34,7 +34,7 @@
 	onfocusout={handleLostFocus}
 	bind:this={fieldContainer}
 	class="mt-4 flex w-full flex-col justify-end {$errors
-		? '[&>.input-group]:border-error-500-400-token [&>input]:border-error-500-400-token'
+		? '[&>.input-group]:border-error-500-400-token [&>.input]:border-error-500-400-token'
 		: ''} [&>input]:min-h-10 {classes ?? ''}"
 >
 	{@render children()}

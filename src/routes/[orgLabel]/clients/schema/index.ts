@@ -1,7 +1,8 @@
 import * as v from "valibot"
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { timestamps, uuidPK } from "$src/schemas/helpers";
-import { sql, type SQL } from "drizzle-orm";
+import { relations, sql, type SQL } from "drizzle-orm";
+import { logs, services } from "$src/schemas";
 
 export const clients = pgTable('clients', {
   ...uuidPK,
@@ -29,3 +30,9 @@ export const clientContactFormSchema = v.object({
   phone: v.nullable(v.pipe(v.string(), v.trim())),
   email: v.nullable(v.pipe(v.string(), v.email())),
 })
+
+export const clientsRelations = relations(clients, ({ many }) => ({
+  services: many(services),
+  logs: many(logs)
+}))
+

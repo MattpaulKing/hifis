@@ -4,6 +4,7 @@ import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { parse } from "valibot";
 import type { users } from "./schemas";
 import type { UserSubject } from "$lib/user/userContext";
+import * as Schema from "$src/schemas"
 
 // for information about these interfaces
 declare global {
@@ -13,7 +14,7 @@ declare global {
         type: "user";
         properties: UserData
       },
-      db: PostgresJsDatabase
+      db: PostgresJsDatabase<typeof Schema>
     }
     // interface Error {}
     // interface Locals {}

@@ -19,21 +19,21 @@ export function size2coordinate(size: number, cellSize: number, gap: number): nu
 }
 
 export function snapOnMove(left: number, top: number, item: LayoutItem, { itemSize, gap, maxDimensions }: SnapGridParams): Position {
-  const { width, height } = item;
+  const { widthGridUnits, heightGridUnits } = item;
   let x = position2coordinate(left, itemSize.width, gap);
   let y = position2coordinate(top, itemSize.height, gap);
-  x = clamp(x, 0, maxDimensions.cols - width);
-  y = clamp(y, 0, maxDimensions.rows - height);
+  x = clamp(x, 0, maxDimensions.cols - widthGridUnits);
+  y = clamp(y, 0, maxDimensions.rows - heightGridUnits);
   return { x, y };
 }
 
 export function snapOnResize(w: number, h: number, item: LayoutItem, { itemSize, gap, maxDimensions }: SnapGridParams): Size {
   const { x, y } = item;
-  let width = position2coordinate(w + gap * 2, itemSize.width, gap);
-  let height = position2coordinate(h + gap * 2, itemSize.height, gap);
-  width = clamp(width, 0, maxDimensions.cols - x);
-  height = clamp(height, 0, maxDimensions.rows - y);
-  return { width, height };
+  let widthGridUnits = position2coordinate(w + gap * 2, itemSize.width, gap);
+  let heightGridUnits = position2coordinate(h + gap * 2, itemSize.height, gap);
+  widthGridUnits = clamp(widthGridUnits, 0, maxDimensions.cols - x);
+  heightGridUnits = clamp(heightGridUnits, 0, maxDimensions.rows - y);
+  return { widthGridUnits, heightGridUnits };
 }
 export function calcPosition(item: LayoutItem, options: {
   itemSize: ItemSize;
@@ -43,8 +43,8 @@ export function calcPosition(item: LayoutItem, options: {
   return {
     left: coordinate2position(item.x, itemSize.width, gap),
     top: coordinate2position(item.y, itemSize.height, gap),
-    width: coordinate2size(item.width, itemSize.width, gap),
-    height: coordinate2size(item.height, itemSize.height, gap)
+    width: coordinate2size(item.widthGridUnits, itemSize.width, gap),
+    height: coordinate2size(item.heightGridUnits, itemSize.height, gap)
   };
 }
 

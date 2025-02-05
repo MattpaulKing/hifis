@@ -3,7 +3,7 @@
 	import { getFormMsgStore, LoadingSpinner } from '.';
 	import { fade } from 'svelte/transition';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { Snippet } from 'svelte';
+	import { onDestroy, type Snippet } from 'svelte';
 
 	let {
 		form,
@@ -29,6 +29,9 @@
 	setFormCtx({ disabled });
 	let { delayed, enhance } = form;
 	let msgStore = getFormMsgStore();
+	onDestroy(() => {
+		msgStore.clear();
+	});
 </script>
 
 <div in:fade class="relative flex flex-col p-6 {classes ?? ''}">

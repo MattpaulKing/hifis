@@ -13,6 +13,9 @@ const PAGES = {
   "/[orgLabel]": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}`
   },
+  "/[orgLabel]/clients": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}/clients`
+  },
   "/[orgLabel]/clients/[clientId=uuid]": (params: { orgLabel: (string | number), clientId: (Parameters<typeof import('../params/uuid.ts').match>[0]) }) => {
     return `/${params.orgLabel}/clients/${params.clientId}`
   },
@@ -196,7 +199,7 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 * ```
 */
 export type KIT_ROUTES = {
-  PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients/[clientId=uuid]': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/create': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/events': 'orgLabel' | 'clientId', '/[orgLabel]/clients/create': 'orgLabel', '/[orgLabel]/logs': 'orgLabel', '/[orgLabel]/services': 'orgLabel', '/[orgLabel]/services/categories/create': 'orgLabel', '/[orgLabel]/services/create': 'orgLabel', '/[orgLabel]/services/events': 'orgLabel', '/[orgLabel]/users/create': 'orgLabel', '/test': never }
+  PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients': 'orgLabel', '/[orgLabel]/clients/[clientId=uuid]': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/create': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/events': 'orgLabel' | 'clientId', '/[orgLabel]/clients/create': 'orgLabel', '/[orgLabel]/logs': 'orgLabel', '/[orgLabel]/services': 'orgLabel', '/[orgLabel]/services/categories/create': 'orgLabel', '/[orgLabel]/services/create': 'orgLabel', '/[orgLabel]/services/events': 'orgLabel', '/[orgLabel]/users/create': 'orgLabel', '/test': never }
   SERVERS: { 'GET /api/v1/clients': never, 'GET /api/v1/clients/services': never, 'GET /api/v1/organizations': never, 'GET /api/v1/search': never, 'GET /api/v1/services': never, 'GET /api/v1/services/categories': never, 'GET /api/v1/user/grid': never, 'GET /auth/callback': never }
   ACTIONS: { 'update /[orgLabel]/clients/[clientId=uuid]': 'orgLabel' | 'clientId', 'create /[orgLabel]/clients/[clientId=uuid]/services/create': 'orgLabel' | 'clientId', 'create /[orgLabel]/clients/create': 'orgLabel', 'create /[orgLabel]/logs': 'orgLabel', 'update /[orgLabel]/logs': 'orgLabel', 'create /[orgLabel]/services/categories/create': 'orgLabel', 'create /[orgLabel]/services/create': 'orgLabel', 'create /[orgLabel]/users/create': 'orgLabel' }
   LINKS: Record<string, never>

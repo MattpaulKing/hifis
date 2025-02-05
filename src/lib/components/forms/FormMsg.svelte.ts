@@ -34,8 +34,8 @@ class FormMsg {
     this.queue = this.queue.filter(({ id: msgId }) => msgId !== id)
   }
   clear() {
-    for (const timeout of this.timeoutMap.values()) {
-      clearTimeout(timeout)
+    for (const [id, timeout] of this.timeoutMap) {
+      clearTimeout(this.timeoutMap.get(id))
     }
     this.timeoutMap.clear()
     this.queue = []

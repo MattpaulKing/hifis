@@ -23,8 +23,7 @@
 {#if drawerStore.isOpen === true}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
-		aria-modal="true"
-		role="dialog"
+		role="presentation"
 		bind:this={elemBackdrop}
 		class="bg-surface-backdrop-token fixed bottom-0 left-0 right-0 top-0 z-40 flex justify-end"
 		data-testid="drawer-backdrop"

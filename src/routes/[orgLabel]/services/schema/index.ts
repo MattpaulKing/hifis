@@ -1,8 +1,9 @@
+import * as v from "valibot"
 import { pgTable, uuid, text } from "drizzle-orm/pg-core";
-import { organizations } from "$src/schemas";
+import { clients, logs, organizations } from "$src/schemas";
 import { uuidPK, timestamps } from "$src/schemas/helpers";
 import { serviceCategories } from "$src/schemas";
-import * as v from "valibot"
+import { relations } from "drizzle-orm";
 
 export const services = pgTable('services', {
   ...uuidPK,
@@ -26,3 +27,10 @@ export const servicesFormSchema = v.object({
   description: v.string(),
   orgId: v.pipe(v.string(), v.uuid())
 })
+
+export const servicesRelations = relations(services, ({ one, many }) => ({
+  organizations: one(organizations, { fields: [services.orgId], references: [organizations.id] }),
+  serviceCategories: one(serviceCategories, { fields: [services.categoryId], references: [serviceCategories.id] }),
+  logs: many(logs),
+  clients: many(clients)
+}))

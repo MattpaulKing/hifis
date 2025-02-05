@@ -29,9 +29,9 @@ export default function <T extends ISchema>({ form, schema, opts = {} }:
     ...defaultFormOptions(schema),
     onUpdated({ form }) {
       if (form.valid) {
-        msgStore.setMsg({ msg: "Success", status: "success" })
+        msgStore.setMsg({ id: form.id, msg: "Success", status: "success" })
       } else {
-        msgStore.setMsg({ msg: "Error", status: "error" })
+        msgStore.setMsg({ id: form.id, msg: "Error", status: "error" })
       }
     },
     ...opts

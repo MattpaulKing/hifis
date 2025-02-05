@@ -2,6 +2,7 @@ import * as v from "valibot"
 import { clients, services } from "$src/schemas";
 import { timestamps, uuidPK } from "$src/schemas/helpers";
 import { pgTable, text, unique, uuid } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 export const clientsServices = pgTable("clients_services", {
   ...uuidPK,
@@ -12,6 +13,11 @@ export const clientsServices = pgTable("clients_services", {
 }, (t) => [{
   uniqueConstraint: unique('unique_client_id_service_id').on(t.clientId, t.serviceId)
 }])
+
+export const clientsServicesRelations = relations(clientsServices, ({ one }) => ({
+  clients: one(clients, { fields: [clientsServices.clientId], references: [clients.id] }),
+  services: one(services, { fields: [clientsServices.serviceId], references: [services.id] }),
+}))
 
 export const clientsServicesFormSchema = v.object({
   id: v.pipe(v.string(), v.uuid()),

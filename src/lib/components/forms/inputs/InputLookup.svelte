@@ -14,7 +14,6 @@
 		string | string[] | undefined
 	>();
 	let store = getLookups();
-
 	let timeout: ReturnType<typeof setTimeout>;
 
 	function handleSearch(e: Event) {
@@ -32,7 +31,7 @@
 		store.searching = false;
 	}
 	function onkeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape' || (e.key === 'Tab' && store.lookups.length === 0)) {
+		if (e.key === 'Escape') {
 			$focused = false;
 			return;
 		}
@@ -56,9 +55,10 @@
 	{#if isArray && $value && $value.length > 0}
 		<div
 			title={store.lookups.map(({ label }) => label).join(', ')}
-			class="pointer-events-none relative top-1 z-10 flex h-full w-min items-center justify-center"
+			class="pointer-events-none relative z-10 flex h-full w-min items-center justify-center"
 		>
-			<span class="z-10 h-3/4 w-7 border border-gray-600 bg-surface-800 px-2 py-1 rounded-token"
+			<span
+				class="relative -left-0.5 z-10 h-3/4 w-7 border border-gray-600 bg-surface-800 px-2 py-1 rounded-token"
 				>{$value?.length}</span
 			>
 			{#each store.selectedLookups({ $value }) as _, i}

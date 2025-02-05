@@ -1,6 +1,8 @@
 import { and, eq, getTableColumns, SQL, sql } from "drizzle-orm";
 import { json } from "@sveltejs/kit";
 import { services } from "$routes/[orgLabel]/services/schema";
+import { serviceCategories } from "$src/schemas";
+import { organizations } from "$routes/[orgLabel]/schema";
 import type { RequestHandler } from "./$types";
 
 type ApiParams = {
@@ -22,8 +24,16 @@ export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams 
       `)
   }
   let servicesRows = await db
-    .select(params.lookups ? { id: services.id, label: services.label } : getTableColumns(services))
+    .select(params.lookups
+      ? { id: services.id, label: services.label }
+      : {
+        ...getTableColumns(services),
+        categoryLabel: serviceCategories.label,
+        orgLabel: organizations.label
+      })
     .from(services)
+    .leftJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
+    .leftJoin(organizations, eq(organizations.id, services.orgId))
     .where(and(...filters))
 
   return json(servicesRows)

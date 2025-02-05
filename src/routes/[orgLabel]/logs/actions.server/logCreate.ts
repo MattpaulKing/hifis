@@ -1,5 +1,5 @@
 import { ar, validateForm } from "$lib/server/forms"
-import { logs, logsFormSchema, logsRelations } from "../schema";
+import { logs, logsClients, logsFormSchema, logsServices } from "../schema";
 import type { RequestEvent } from "../$types";
 
 export default async function({ request, locals: { db } }: RequestEvent) {
@@ -14,7 +14,7 @@ export default async function({ request, locals: { db } }: RequestEvent) {
     form.data.id = insertedLog.id
     if (serviceIds.length > 0) {
       await db
-        .insert(logsRelations)
+        .insert(logsServices)
         .values(serviceIds.map(serviceId => ({
           logId: insertedLog.id,
           serviceId
@@ -23,7 +23,7 @@ export default async function({ request, locals: { db } }: RequestEvent) {
     }
     if (clientIds.length > 0) {
       await db
-        .insert(logsRelations)
+        .insert(logsClients)
         .values(clientIds.map(clientId => ({
           logId: insertedLog.id,
           clientId

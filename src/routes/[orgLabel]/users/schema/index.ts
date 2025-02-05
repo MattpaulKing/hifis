@@ -2,6 +2,7 @@ import { pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
 import { organizations } from "$src/schemas";
 import { uuidPK, timestamps } from "$src/schemas/helpers";
 import * as v from "valibot"
+import { relations } from "drizzle-orm";
 
 export const users = pgTable('users', {
   ...uuidPK,
@@ -12,6 +13,10 @@ export const users = pgTable('users', {
   email: text("email").notNull(),
   orgId: uuid("organization_id").references(() => organizations.id).notNull()
 });
+
+export const usersRelations = relations(users, ({ many, one }) => ({
+  organizations: many(organizations)
+}))
 
 export const usersFormSchema = v.object({
   id: v.pipe(v.string(), v.uuid()),

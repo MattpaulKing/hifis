@@ -2,17 +2,14 @@ import { getContext, setContext } from "svelte";
 import type { Lookup, LookupFieldCtx } from "$lib/interfaces/Lookup";
 
 const LOOKUP_CTX = Symbol("LOOKUP_CTX")
-type Args = {
-  value: string | string[],
-} & LookupFieldCtx
 
-class LookupStore {
+export class LookupStore {
   inputValue = $state<string>('')
-  lookups = $state<(Lookup)[]>([])
+  lookups = $state<Lookup[]>([])
   excludedIds = $state<string[]>([])
   searching = $state(false)
 
-  constructor({ value, lookups, inputValue, excludedIds }: Args) {
+  constructor({ lookups, inputValue, excludedIds }: LookupFieldCtx) {
     this.lookups = lookups ?? []
     this.inputValue = inputValue ?? ''
     this.excludedIds = excludedIds ?? []
@@ -26,7 +23,7 @@ class LookupStore {
     }
   }
   filterFetchedLookups({ fetchedLookups, $value }: { fetchedLookups: Lookup[], $value: string[] | string | undefined }) {
-    if (Array.isArray($value) && $value.length > 0) {
+    if (Array.isArray($value)) {
       this.filterLookupsForArray({ fetchedLookups, $value })
     } else if (typeof $value === "string") {
       this.filterLookupsForStr({ fetchedLookups, $value })
@@ -34,7 +31,9 @@ class LookupStore {
   }
   private filterLookupsForArray({ fetchedLookups, $value }: { fetchedLookups: Lookup[], $value: string[] }) {
     let selectedLookups = this.lookups.filter((lookup) => $value.includes(lookup.id));
+    console.log('selected', selectedLookups)
     let filteredLookups = fetchedLookups.filter((lookup) => !$value?.includes(lookup.id) && !this.excludedIds.includes(lookup.id))
+    console.log('filtered', filteredLookups)
     this.lookups = [...selectedLookups, ...filteredLookups]
   }
   private filterLookupsForStr({ fetchedLookups, $value }: { fetchedLookups: Lookup[], $value: string }) {
@@ -48,8 +47,8 @@ class LookupStore {
 }
 
 
-export function setLookups({ value, ...lookupCtx }: Args) {
-  return setContext(LOOKUP_CTX, new LookupStore({ value, ...lookupCtx }))
+export function setLookups(lookupStore: LookupStore) {
+  return setContext(LOOKUP_CTX, lookupStore)
 }
 export function getLookups() {
   return getContext<LookupStore>(LOOKUP_CTX)

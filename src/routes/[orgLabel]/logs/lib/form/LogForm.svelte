@@ -14,7 +14,7 @@
 	import { route } from '$src/lib/ROUTES';
 	import { getUser } from '$src/lib/components/user';
 	import type { FormValidated } from '$src/lib/interfaces';
-	import type { LookupFieldCtx } from '$src/lib/interfaces/Lookup';
+	import type { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
 
 	let {
 		logForm,
@@ -23,7 +23,7 @@
 	}: {
 		logForm: FormValidated<typeof logsFormSchema>;
 		mode: 'create' | 'update';
-		lookups: { services: LookupFieldCtx; clients: LookupFieldCtx };
+		lookups: { services: LookupStore; clients: LookupStore };
 	} = $props();
 	let form = initForm({
 		form: logForm,
@@ -38,15 +38,16 @@
 			? route('create /[orgLabel]/logs', { orgLabel: user.properties.orgLabel })
 			: ''
 	);
-	form.errors.subscribe((e) => console.log(e));
+	$inspect(lookups.services);
 </script>
 
 <FormContainer class="min-w-96 max-w-lg" {form} {action}>
-	<FieldArray {form} path="serviceIds" lookupCtx={lookups.services}>
+	<FieldArray {form} path="serviceIds" lookups={lookups.services}>
 		<Label label="Service(s)"></Label>
 		<InputLookup apiRoute={route('GET /api/v1/services')}></InputLookup>
+		<LookupDropdown></LookupDropdown>
 	</FieldArray>
-	<FieldArray {form} path="clientIds" lookupCtx={lookups.clients}>
+	<FieldArray {form} path="clientIds" lookups={lookups.clients}>
 		<Label label="Client(s)"></Label>
 		<InputLookup apiRoute={route('GET /api/v1/clients')}></InputLookup>
 		<LookupDropdown></LookupDropdown>

@@ -5,21 +5,21 @@
 
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
-	import { GridItemState, GridItemTabs } from '.';
+	import { GridItemState, GridItemTabs, GridItemTabsState, type TabEntity } from '.';
 	import { getGridContext } from './utils/GridContext.svelte';
-	import type { LayoutItem, LayoutItemEntity } from './types';
+	import type { LayoutItem } from './types';
 
 	type Props = {
 		item: LayoutItem;
-		entities: LayoutItemEntity[];
+		entities: TabEntity[];
 		onChange?: (item: LayoutItem) => void;
-		gridItem: Snippet<[LayoutItemEntity]>;
+		gridItem: Snippet<[TabEntity]>;
 		class?: string;
 	};
 	let { class: classes, item = $bindable(), entities = $bindable(), gridItem }: Props = $props();
 
 	let gridSettings = getGridContext();
-	let controller = new GridItemState({ item, entities });
+	let controller = new GridItemState({ item });
 
 	onMount(() => {
 		controller.init();
@@ -28,32 +28,33 @@
 			gridSettings.unregisterItem(controller.item);
 		};
 	});
+	let tabState = new GridItemTabsState({
+		entities,
+		entityLabel: ''
+	});
 </script>
 
 {#snippet gridItemContent()}
 	<div class="flex w-full place-items-center justify-between">
-		<GridItemTabs {entities}>
+		<GridItemTabs {tabState}>
 			<div class="flex place-items-center">
 				<button
 					onpointerdown={(e) => {
 						e.stopPropagation();
 						controller.item.moveable = !item.moveable;
 					}}
-					class="touch-none select-none px-1 {item.moveable ? 'opacity-100' : 'opacity-50'}"
+					class="touch-none px-1 {item.moveable ? 'opacity-100' : 'opacity-50'}"
 				>
 					<img src="/Move.png" class="h-7 w-7 dark:invert" alt="move" />
 				</button>
-				<button
+				<div
 					onpointerdown={(e) => {
-						e.stopImmediatePropagation();
-						if (controller.item.resizeable) {
-							controller.resizeMouseStart(e);
-						}
+						controller.item.resizeable ? controller.resizeMouseStart(e) : null;
 					}}
-					class="btn btn-sm touch-none select-none px-1 hover:variant-ghost"
+					class="btn btn-sm touch-none px-1 hover:variant-ghost"
 				>
 					<img src="/Resize.png" class="h-7 w-7 dark:invert" alt="resize" />
-				</button>
+				</div>
 			</div>
 		</GridItemTabs>
 	</div>
@@ -69,7 +70,7 @@
 		? 'opacity-80'
 		: ''} {item.moveable ? 'border' : ''}"
 	style={`left:${controller.left}px; top:${controller.top}px; width: ${controller.width}px; height: ${controller.height}px;`}
-	bind:this={controller.moveableItemRef}
+	bind:this={controller.moveableEl}
 	onpointerdown={(e) => (controller.item.moveable ? controller.moveStartMouse(e) : null)}
 	ontouchstart={(e) => (controller.item.moveable ? controller.moveStartTouch(e) : null)}
 >
