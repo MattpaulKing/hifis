@@ -1,1 +1,1 @@
-export { default as ClientsServicesForm } from "./form/ClientsServicesForm.svelte"
+export { default as ClientServiceForm } from "./form/ClientServiceForm.svelte"

@@ -11,7 +11,7 @@
 	{onclick}
 	class="variant-filled-primary btn btn-sm {!onclick
 		? 'brightness-100!'
-		: ''}  h-10 w-10 rounded-full font-bold hover:text-surface-200-700-token"
+		: ''}  h-8 w-8 rounded-full font-bold hover:text-surface-200-700-token"
 >
 	{initials}
 </button>

@@ -5,7 +5,6 @@ import { getAvailablePosition, hasCollisions } from "./utils/grid";
 import type { ItemSize, LayoutItem } from "./types";
 import type { TabEntity } from "./GridItemTabsState.svelte";
 
-
 export default class {
   active = $state(false);
   left = $state(0);
@@ -22,9 +21,9 @@ export default class {
   cleanupMoveEndMouse = $state<null | (() => void)>(null)
   cleanupMoveTouch = $state<null | (() => void)>(null)
   cleanupMoveEndTouch = $state<null | (() => void)>(null)
-  cleanupResizeMouse = $state<null | (() => void)>(null)
-  cleanupResizeMouseEnd = $state<null | (() => void)>(null)
-  settings = getGridContext()
+  cleanupResizeMouse = $state<void | (() => void)>()
+  cleanupResizeMouseEnd = $state<void | (() => void)>()
+  settings = $state(getGridContext())
   minSize: ItemSize = $derived.by(() => {
     return {
       width: coordinate2size(this.item.min.widthGridUnits, this.settings.itemSize.width, this.settings.gap),
@@ -46,24 +45,23 @@ export default class {
     }
   })
   item = $state({
+    id: "",
     x: 0,
     y: 0,
     heightGridUnits: 0,
     widthGridUnits: 0,
-    id: "",
     min: { widthGridUnits: 0, heightGridUnits: 0 },
     moveable: true,
     resizeable: true
   } as LayoutItem)
-  previewItem = $state({} as LayoutItem)
-  preview = $derived(
-    calcPosition(this.previewItem, {
+  previewItem = $state({ ...this.item } as LayoutItem)
+  preview = $derived.by(() => {
+    return calcPosition(this.previewItem, {
       itemSize: this.settings.itemSize,
       gap: this.settings.gap
     })
-  );
-  constructor({ item }:
-    { item: LayoutItem }) {
+  })
+  constructor({ item }: { item: LayoutItem }) {
     this.item = item
     this.previewItem = { ...item }
   }
@@ -124,22 +122,24 @@ export default class {
     this.item.heightGridUnits = this.previewItem.heightGridUnits;
     this.left = this.preview.left;
     this.top = this.preview.top;
-    this.width = this.preview.width;
-    this.height = this.preview.height;
+    this.width = coordinate2size(this.previewItem.widthGridUnits, this.settings.itemSize.width, this.settings.gap)
+    this.height = coordinate2size(this.previewItem.heightGridUnits, this.settings.itemSize.height, this.settings.gap)
   }
 
 
-  initInteraction({ pageX, pageY }: PointerEvent | TouchEvent["touches"][0]) {
-    this.previewItem = { ...this.item }
+  initInteraction(e: PointerEvent | TouchEvent["touches"][0]) {
     this.active = true;
-    this.initialPosition = { left: this.left, top: this.top };
-    this.initialPointerPosition = { left: pageX, top: pageY }
-    this.initialSize = { height: this.height, width: this.width }
+    this.initialPointerPosition = { left: e.pageX, top: e.pageY }
+    if ("pointerId" in e && this.moveableEl) {
+      this.moveableEl?.setPointerCapture(e.pointerId)
+    }
   }
   endInteraction(event: PointerEvent | Touch) {
     this.active = false;
     this.applyPreview();
-    if ("pointerId" in event) this.moveableEl?.releasePointerCapture(event.pointerId)
+    if ("pointerId" in event) {
+      this.moveableEl?.releasePointerCapture(event.pointerId)
+    }
     if (this.cleanupMoveMouse) this.cleanupMoveMouse()
     if (this.cleanupMoveEndMouse) this.cleanupMoveEndMouse()
     if (this.cleanupMoveTouch) this.cleanupMoveTouch()
@@ -148,14 +148,16 @@ export default class {
     if (this.cleanupResizeMouseEnd) this.cleanupResizeMouseEnd()
   }
   moveStartTouch(e: TouchEvent) {
+    if (this.active) return
     this.initInteraction(e.touches[0])
+    this.initialPosition = { left: this.left, top: this.top }
     this.cleanupMoveTouch = on(window, 'touchmove', (e) => this.move(e.touches[0]))
     this.cleanupMoveEndTouch = on(window, 'touchend', (e) => this.moveEndTouch(e.touches[0]))
   }
   moveStartMouse(event: PointerEvent) {
     if (event.button !== 0 || this.active) return;
     this.initInteraction(event);
-    this.moveableEl?.setPointerCapture(event.pointerId);
+    this.initialPosition = { left: this.left, top: this.top }
     this.cleanupMoveMouse = on(window, 'pointermove', (e) => this.move(e));
     this.cleanupMoveEndMouse = on(window, 'pointerup', (e) => this.moveEndMouse(e))
   }
@@ -202,53 +204,50 @@ export default class {
   }
 
   resizeMouseStart(event: PointerEvent) {
-    if (event.button !== 0 || this.active) return
+    if (event.button !== 0) return
     this.initInteraction(event);
-    this.moveableEl?.setPointerCapture(event.pointerId)
+    this.initialSize = { width: this.width, height: this.height }
     this.cleanupResizeMouse = on(window, 'pointermove', (e) => this.resizeMouse(e))
     this.cleanupResizeMouseEnd = on(window, 'pointerup', (e) => this.resizeMouseEnd(e))
-
   }
-  resizeMouse(event: PointerEvent | Touch) {
+  resizeMouse(event: PointerEvent) {
     if (!this.settings.itemSize) {
       throw new Error('Grid is not mounted yet');
     }
-    let _width = event.pageX + this.initialSize.width - this.initialPointerPosition.left;
-    let _height = event.pageY + this.initialSize.height - this.initialPointerPosition.top;
-    let _left = this.left
-    let _top = this.top
+    this.width = event.pageX + this.initialSize.width - this.initialPointerPosition.left;
+    this.height = event.pageY + this.initialSize.height - this.initialPointerPosition.top;
     if (this.settings.bounds && this.settings.boundsTo) {
       const parentRect = this.settings.boundsTo.getBoundingClientRect();
-      if (_width + _left > parentRect.width) {
-        _width = parentRect.width - _left;
+      if (this.width + this.left > parentRect.width) {
+        this.width = parentRect.width - this.left;
       }
-      if (_height + _top > parentRect.height) {
-        _width = parentRect.height - _top;
+      if (this.height + this.top > parentRect.height) {
+        this.width = parentRect.height - this.top;
       }
     }
-    if (this.minSize && _width < this.minSize.width) {
-      _width = this.minSize.width
-    } if (this.minSize && _height < this.minSize.height) {
-      _height = this.minSize.height
+    if (this.minSize.width > this.width) {
+      this.width = this.minSize.width
+    } else if (this.maxSize.width < this.width) {
+      this.width = this.maxSize.width
     }
-    if (this.maxSize && _width > this.maxSize.width) {
-      _width = this.maxSize.width
-    } if (this.maxSize && _height > this.maxSize.height) {
-      _height = this.maxSize.height
+
+    if (this.minSize.height > this.height) {
+      this.height = this.minSize.height
+    } else if (this.maxSize.height < this.height) {
+      this.height = this.maxSize.height
     }
-    this.width = _width
-    this.height = _height
-    const { widthGridUnits, heightGridUnits } = snapOnResize(this.width, this.height, this.previewItem, {
-      gap: this.settings.gap,
-      itemSize: this.settings.itemSize,
-      maxDimensions: this.settings.maxDimensions
-    });
+
+    const { widthGridUnits, heightGridUnits } = snapOnResize(this.width, this.height, this.previewItem, this.settings);
     if (!hasCollisions({ ...this.previewItem, widthGridUnits, heightGridUnits }, Object.values(this.settings.items))) {
-      this.previewItem = { ...this.previewItem, widthGridUnits, heightGridUnits };
+      this.previewItem = {
+        ...this.previewItem,
+        widthGridUnits,
+        heightGridUnits
+      }
     }
   }
   resizeMouseEnd(event: PointerEvent) {
-    if (event.button !== 0 || !this.active) return;
+    if (event.button !== 0) return;
     this.endInteraction(event);
   }
 }

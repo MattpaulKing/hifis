@@ -45,9 +45,11 @@
 				<div
 					class="bg-surface-400-500-token absolute left-1/2 -z-10 hidden h-full w-0.5 md:block"
 				></div>
-				<div class="flex w-full gap-x-2 gap-y-4 md:flex-col">
-					{@render children()}
-				</div>
+				{#key stepperStore.pages}
+					<div in:slide={{ axis: 'x' }} class="flex w-full gap-x-2 gap-y-4 md:flex-col">
+						{@render children()}
+					</div>
+				{/key}
 			</div>
 		</div>
 	</div>

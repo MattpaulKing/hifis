@@ -1,12 +1,22 @@
-export default function <T>({ fn, retries = 3, baseDelayMs = 400 }: { fn: () => Promise<T>, retries?: number, baseDelayMs?: number }) {
+export default function <T extends Record<string, unknown>>({ route, retries = 3, baseDelayMs = 400 }: { route: string, retries?: number, baseDelayMs?: number }): Promise<T[] | [null]> {
   let attempt = 1
-  async function execute(): Promise<null | T> {
+  let fn = async () => {
+    let res: T[] = []
+    await fetch(route).then(
+      async (r) =>
+        res = await r.json() as T[]
+    );
+    if (!res || res.length === 0) {
+      throw Error('No res');
+    }
+    return res;
+  }
+  async function execute(): Promise<[null] | T[]> {
     try {
       return await fn()
     } catch (error) {
       if (attempt >= retries) {
-        console.log(error)
-        return null
+        return [null]
       }
 
       const delayMs = baseDelayMs * 2 ** attempt

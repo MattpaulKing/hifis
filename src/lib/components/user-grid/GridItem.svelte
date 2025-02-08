@@ -16,7 +16,7 @@
 		gridItem: Snippet<[TabEntity]>;
 		class?: string;
 	};
-	let { class: classes, item = $bindable(), entities = $bindable(), gridItem }: Props = $props();
+	let { class: classes, item, entities, gridItem }: Props = $props();
 
 	let gridSettings = getGridContext();
 	let controller = new GridItemState({ item });
@@ -41,7 +41,7 @@
 				<button
 					onpointerdown={(e) => {
 						e.stopPropagation();
-						controller.item.moveable = !item.moveable;
+						controller.item.moveable = !controller.item.moveable;
 					}}
 					class="touch-none px-1 {item.moveable ? 'opacity-100' : 'opacity-50'}"
 				>

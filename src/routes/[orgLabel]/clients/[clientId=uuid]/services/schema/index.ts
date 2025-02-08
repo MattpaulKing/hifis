@@ -19,7 +19,7 @@ export const clientsServicesRelations = relations(clientsServices, ({ one }) => 
   services: one(services, { fields: [clientsServices.serviceId], references: [services.id] }),
 }))
 
-export const clientsServicesFormSchema = v.object({
+export const clientServiceFormSchema = v.object({
   id: v.pipe(v.string(), v.uuid()),
   clientId: v.pipe(v.string(), v.uuid("Unable to find client")),
   serviceId: v.pipe(v.string(), v.uuid("Unable to find service")),

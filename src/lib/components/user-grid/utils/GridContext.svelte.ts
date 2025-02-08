@@ -1,5 +1,4 @@
 import { getContext, setContext } from "svelte";
-import { getAvailablePosition } from "./grid";
 import type { GridDimensions, ItemSize, LayoutItem } from "../types";
 
 type GridSettingsParams = {
@@ -56,8 +55,8 @@ export class GridSettings {
     let cols = 0;
     let rows = 0;
     Object.values(this.items).forEach((item) => {
-      cols = Math.max(cols, item.x + item.width);
-      rows = Math.max(rows, item.y + item.height);
+      cols = Math.max(cols, item.x + item.widthGridUnits);
+      rows = Math.max(rows, item.y + item.heightGridUnits);
     });
     return { cols, rows };
   }

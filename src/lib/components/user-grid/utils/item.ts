@@ -27,8 +27,9 @@ export function snapOnMove(left: number, top: number, item: LayoutItem, { itemSi
   return { x, y };
 }
 
-export function snapOnResize(w: number, h: number, item: LayoutItem, { itemSize, gap, maxDimensions }: SnapGridParams): Size {
+export function snapOnResize(w: number, h: number, item: LayoutItem, settings: SnapGridParams): Size {
   const { x, y } = item;
+  const { itemSize, gap, maxDimensions } = settings
   let widthGridUnits = position2coordinate(w + gap * 2, itemSize.width, gap);
   let heightGridUnits = position2coordinate(h + gap * 2, itemSize.height, gap);
   widthGridUnits = clamp(widthGridUnits, 0, maxDimensions.cols - x);

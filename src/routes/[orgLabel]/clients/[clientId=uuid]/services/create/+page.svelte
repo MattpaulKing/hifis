@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getDrawerStore } from '$lib/components/drawer';
 	import { FormCard } from '$lib/components/forms';
-	import { ClientsServicesForm } from '../lib';
+	import { ClientServiceForm} from '../lib';
 
 	let { data } = $props();
 	let drawerStore = getDrawerStore();

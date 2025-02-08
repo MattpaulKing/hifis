@@ -13,7 +13,7 @@
 		LookupDropdown
 	} from '$lib/components/forms';
 	import { route } from '$lib/ROUTES';
-	import { clientsServicesFormSchema } from '../../schema';
+	import { clientServiceFormSchema } from '../../schema';
 	import { getUser } from '$lib/components/user';
 	import type { FormOptions, Infer, SuperValidated } from 'sveltekit-superforms';
 	import type { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
@@ -24,8 +24,8 @@
 		lookups = $bindable(),
 		disabledFields
 	}: {
-		clientServiceForm: SuperValidated<Infer<typeof clientsServicesFormSchema>>;
-		formOpts?: FormOptions<Infer<typeof clientsServicesFormSchema>>;
+		clientServiceForm: SuperValidated<Infer<typeof clientServiceFormSchema>>;
+		formOpts?: FormOptions<Infer<typeof clientServiceFormSchema>>;
 		lookups: {
 			clients: LookupStore;
 			services: LookupStore;
@@ -38,7 +38,7 @@
 
 	let form = initForm({
 		form: clientServiceForm,
-		schema: clientsServicesFormSchema,
+		schema: clientServiceFormSchema,
 		opts: formOpts
 	});
 

@@ -36,45 +36,53 @@
 >
 	<div class="flex place-items-center gap-x-2">
 		{#each tabState.entities as entity, i}
-			<div
-				transition:fade
-				role="tab"
-				tabindex="0"
-				onclick={(e) => {
-					e.stopImmediatePropagation();
-					tabState.setActive(i);
-					onclick?.(entity);
-				}}
-				onkeydown={(e) => onkeydown(e, entity)}
-				title={entity.label}
-				class="{entity.active
-					? 'variant-filled rounded-tl-token rounded-tr-token'
-					: 'rounded-token hover:bg-surface-400-500-token'} relative flex min-w-16 place-items-center justify-between px-3 py-1"
-			>
-				<span class="truncate">{entity.label}</span>
-				<div class="ml-4">
-					<button
-						class="btn-icon btn-icon-sm absolute right-0.5 top-0 my-0 h-5 w-5 font-bold hover:variant-filled {entity.active
-							? 'hover:invert'
-							: ''}"
-					>
-						<span class="">x</span>
-					</button>
-				</div>
-			</div>
+			{@render tab({ entity, i })}
 		{/each}
 		<span class="divider-vertical border-surface-500-400-token mr-0 h-4 w-1"></span>
 		<div class="flex place-items-center justify-end">
 			<button
 				onclick={() => {
-					tabState.setAddActive();
+					tabState.pushNew();
 					onAdd?.();
 				}}
-				class="btn-icon btn-icon-sm h-5 w-5 font-bold {tabState.activeAdd
-					? 'variant-filled '
-					: 'hover:variant-filled'}">+</button
+				class="btn-icon btn-icon-sm h-5 w-5 font-bold hover:variant-filled">+</button
 			>
 		</div>
 	</div>
 	{@render children?.()}
 </div>
+
+{#snippet tab({ entity, i }: { entity: TabEntity; i: number })}
+	<div
+		transition:fade
+		role="tab"
+		tabindex="0"
+		onclick={(e) => {
+			e.stopImmediatePropagation();
+			tabState.setActive(i);
+			onclick?.(entity);
+		}}
+		onkeydown={(e) => onkeydown(e, entity)}
+		title={entity.label}
+		class="{entity.active
+			? 'variant-filled rounded-tl-token rounded-tr-token'
+			: 'rounded-token hover:bg-surface-400-500-token'} relative flex min-w-16 place-items-center justify-between px-3 py-1"
+	>
+		<span class="truncate">{entity.label}</span>
+		<div class="ml-4">
+			<button
+				disabled={tabState.entities.length === 1 && entity.tabType === 'new-entity'}
+				onclick={(e) => {
+					e.stopPropagation();
+					if (tabState.entities.length === 1 && entity.tabType === 'new-entity') return;
+					tabState.remove({ entity });
+				}}
+				class="btn-icon btn-icon-sm absolute right-0.5 top-0 my-0 h-5 w-5 font-bold hover:variant-filled {entity.active
+					? 'hover:invert'
+					: ''}"
+			>
+				<span class="">x</span>
+			</button>
+		</div>
+	</div>
+{/snippet}

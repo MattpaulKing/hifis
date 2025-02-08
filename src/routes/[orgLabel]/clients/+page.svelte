@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { route } from '$src/lib/ROUTES.js';
-
 	let { data } = $props();
 </script>
 

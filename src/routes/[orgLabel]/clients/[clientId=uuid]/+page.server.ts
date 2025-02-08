@@ -8,7 +8,7 @@ import { clientUpdate } from "../actions.server"
 import { serviceCategories } from "$routes/[orgLabel]/services/categories/schema"
 import { organizations } from "$routes/[orgLabel]/schema"
 import { clientsServices } from "$src/schemas"
-import { clientsServicesFormSchema } from "./services/schema"
+import { clientServiceFormSchema } from "./services/schema"
 import { rowsToMap } from "$src/lib/helpers"
 import { logsFormSchema } from "$routes/[orgLabel]/logs/schema"
 import { logsWithClientsAndServices, aggLogsWitsClientsAndServices } from "$routes/[orgLabel]/logs/lib"
@@ -36,18 +36,18 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
           label: services.label,
           categoryLabel: serviceCategories.label,
           orgLabel: organizations.label,
-          clientsServicesDescription: clientsServices.description
+          clientServiceDescription: clientsServices.description
         })
         .from(services)
-        .leftJoin(organizations, eq(organizations.id, services.orgId))
-        .leftJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
-        .leftJoin(clientsServices, eq(clientsServices.serviceId, services.id))
+        .innerJoin(organizations, eq(organizations.id, services.orgId))
+        .innerJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
+        .innerJoin(clientsServices, eq(clientsServices.serviceId, services.id))
         .where(eq(clientsServices.clientId, clientId))
         .then(rowsToMap),
       serviceForm: await superValidate({
         id: crypto.randomUUID(),
         clientId: clientId,
-      }, valibot(clientsServicesFormSchema), { errors: false }),
+      }, valibot(clientServiceFormSchema), { errors: false }),
       logs: await db
         .query.logs.findMany({ ...logsWithClientsAndServices })
         .then(aggLogsWitsClientsAndServices),

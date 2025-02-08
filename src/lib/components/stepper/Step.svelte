@@ -25,7 +25,7 @@
 		replaceState(step.getHref(), page.state);
 		_onclick?.(e);
 	}}
-	class="btn btn-sm relative z-50 max-w-28 whitespace-break-spaces rounded-full capitalize transition-colors {idx ===
+	class="btn btn-sm relative z-50 max-w-28 whitespace-break-spaces capitalize transition-colors rounded-token {idx ===
 	stepperStore.activeIdx
 		? 'variant-filled text-white dark:variant-filled dark:text-black'
 		: step.disabled()

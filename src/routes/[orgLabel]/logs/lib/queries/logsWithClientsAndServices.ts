@@ -27,6 +27,7 @@ export function aggLogsWitsClientsAndServices(logs: Awaited<ReturnType<ReturnTyp
   let res = logs.map((row) => ({
     id: row.id,
     createdAt: row.createdAt,
+    label: row.createdAt,
     note: row.note,
     clients: row.logsClients.map(({ clients }) => clients),
     services: row.logsServices.map(({ services }) => services)

@@ -11,6 +11,11 @@ type ApiParams = {
   lookups?: string;
 }
 
+export type ServicesApiResponse = typeof services.$inferSelect & {
+  categoryLabel: string,
+  orgLabel: string
+}
+
 export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams } }) => {
   let params = Object.fromEntries(searchParams) as ApiParams
   let filters: SQL[] = []
@@ -32,8 +37,8 @@ export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams 
         orgLabel: organizations.label
       })
     .from(services)
-    .leftJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
-    .leftJoin(organizations, eq(organizations.id, services.orgId))
+    .innerJoin(serviceCategories, eq(services.categoryId, serviceCategories.id))
+    .innerJoin(organizations, eq(organizations.id, services.orgId))
     .where(and(...filters))
 
   return json(servicesRows)

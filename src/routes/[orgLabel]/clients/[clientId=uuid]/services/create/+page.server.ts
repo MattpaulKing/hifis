@@ -1,6 +1,6 @@
 import { superValidate } from "sveltekit-superforms";
 import { valibot } from "sveltekit-superforms/adapters";
-import { clientsServicesFormSchema } from "../schema";
+import { clientServiceFormSchema } from "../schema";
 import { lookupCtxDefault } from "$lib/interfaces";
 import { eq } from "drizzle-orm";
 import { services } from "$routes/[orgLabel]/services/schema";
@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ url: { searchParams }, locals: { db
       id: crypto.randomUUID(),
       clientId: params.clientId,
       serviceId: params.serviceId,
-    }, valibot(clientsServicesFormSchema), { errors: false }),
+    }, valibot(clientServiceFormSchema), { errors: false }),
     lookups: await getLookups({ db, params }),
   }
 }
