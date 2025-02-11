@@ -45,19 +45,17 @@
 		services: new LookupStore(lookupCtxDefault())
 	});
 
-	//TODO: Add ability to have sub pages for Stepper
+	//TODO: Have a tab with all entities of StepPage type and clicking within the list adds them to the tab
 </script>
 
 <FormCard>
 	{#snippet stepper()}
 		<Stepper title="Client" {stepperStore}>
-			{#key stepperStore.pages}
-				{#each stepperStore.pages as page, idx}
-					<Step {stepperStore} {idx} {page}>
-						{stepperStore.expanded ? page.label : idx + 1}
-					</Step>
-				{/each}
-			{/key}
+			{#each stepperStore.pages as page, idx}
+				<Step {stepperStore} {idx} {page}>
+					{stepperStore.expanded ? page.label : idx + 1}
+				</Step>
+			{/each}
 		</Stepper>
 	{/snippet}
 	{#if stepperStore.activePage.label === 'contact'}
@@ -66,6 +64,7 @@
 	{:else if stepperStore.activePage.label === 'services'}
 		<ClientServicesPanel
 			clientServicesData={data.client.services}
+			clientServicesEvents={data.client.serviceEvents}
 			clientServiceForm={data.client.serviceForm}
 			{clientServicesFormLookups}
 		></ClientServicesPanel>

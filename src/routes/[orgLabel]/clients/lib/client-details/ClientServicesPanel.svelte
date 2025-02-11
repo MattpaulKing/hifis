@@ -11,6 +11,9 @@
 	import type { clientServiceFormSchema } from '../../[clientId=uuid]/services/schema';
 	import type { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
 	import type { ServicesApiResponse } from '$routes/api/v1/services/+server';
+	import type { serviceEvents } from '$src/schemas';
+	import { getUser } from '$src/lib/components/user';
+	import { getModalStore, openModal } from '$src/lib/components/modal';
 
 	type Props = {
 		clientServicesData: Record<
@@ -28,9 +31,17 @@
 			clients: LookupStore;
 			services: LookupStore;
 		};
+		clientServicesEvents: Record<string, (typeof serviceEvents.$inferSelect)[]>;
 	};
+	let {
+		clientServicesData,
+		clientServiceForm,
+		clientServicesFormLookups,
+		clientServicesEvents
+	}: Props = $props();
 	let formMsgStore = getFormMsgStore();
-	let { clientServicesData, clientServiceForm, clientServicesFormLookups }: Props = $props();
+	let user = getUser();
+	let modalStore = getModalStore();
 	let serviceTabState = new GridItemTabsState({
 		entities: Object.values(clientServicesData).map(({ id, label }, i) => ({
 			id,
@@ -42,7 +53,10 @@
 	let clientServices = $state(clientServicesData);
 	let activeService = $derived.by(() => {
 		if (!serviceTabState.activeEntity?.id) return null;
-		return clientServices[serviceTabState.activeEntity.id];
+		return {
+			...clientServices[serviceTabState.activeEntity.id],
+			serviceEvents: clientServicesEvents[serviceTabState.activeEntity.id]
+		};
 	});
 	async function pushClientsService({
 		form
@@ -69,34 +83,63 @@
 			tabType: 'entity'
 		};
 	}
-	//TODO: Add ability to have sub pages for Stepper
 </script>
 
-{#key clientServices}
-	<GridItemTabs tabState={serviceTabState} />
-	{#if activeService}
-		<div in:fade={{ duration: 700 }} class="grid grid-cols-3 bg-inherit p-4">
-			<span class="col-span-2 text-lg font-bold">
-				{activeService.label}
-			</span>
-			<span class="col-start-3 row-start-1">{activeService.orgLabel}</span>
-			<span class="row-start-2">{activeService.categoryLabel}</span>
-			<span class="row-start-3 mt-2"
-				>{activeService.clientServiceDescription ?? 'No description'}</span
-			>
-		</div>
-	{:else}
-		<ClientServiceForm
-			{clientServiceForm}
-			formOpts={{
-				async onUpdate({ form }) {
-					if (!form.valid) return;
-					await pushClientsService({ form });
-					formMsgStore.clear();
-				}
+<GridItemTabs tabState={serviceTabState} />
+{#if activeService}
+	<div in:fade={{ duration: 700 }} class="grid w-fit grid-cols-[auto_1fr] gap-x-4 bg-inherit p-4">
+		<span class="text-lg font-bold">
+			{activeService.label}
+		</span>
+		<span class="justify-self-end text-right">{activeService.orgLabel}</span>
+		<span class="col-span-2">{activeService.categoryLabel}</span>
+		<span class="col-span-2 mt-2">{activeService.clientServiceDescription ?? 'No description'}</span
+		>
+		<span class="mt-4">Upcoming Appointments</span>
+		<a
+			onclick={(e) => {
+				e.preventDefault();
+				openModal({
+					routes: {
+						from: page.url.toString(),
+						to: route('/[orgLabel]/clients/[clientId=uuid]/services/create', {
+							clientId: clientServiceForm.data.clientId,
+							orgLabel: user.properties.orgLabel
+						})
+					},
+					ref: '',
+					modalStore
+				});
 			}}
-			lookups={clientServicesFormLookups}
-			disabledFields={{ clientId: true }}
-		></ClientServiceForm>
-	{/if}
-{/key}
+			href={route('/[orgLabel]/clients/[clientId=uuid]/services/create', {
+				clientId: clientServiceForm.data.clientId,
+				orgLabel: user.properties.orgLabel
+			})}
+			class="variant-ghost border-success-300-600-token btn btn-sm h-min w-min
+      place-self-end justify-self-end border transition-colors hover:variant-filled-success">Add</a
+		>
+		<div class="col-span-2 mt-4 grid h-fit w-full grid-cols-2">
+			{#each activeService.serviceEvents as serviceEvent}
+				<span class="">{serviceEvent.label}</span>
+				<span
+					>{serviceEvent.startTS.toLocaleTimeString()} - {serviceEvent.endTS.toLocaleTimeString()}</span
+				>
+				<span class="col-span-2">{serviceEvent.description}</span>
+				<hr class="col-span-2 mb-4 mt-2" />
+			{/each}
+		</div>
+	</div>
+{:else}
+	<ClientServiceForm
+		{clientServiceForm}
+		formOpts={{
+			async onUpdate({ form }) {
+				if (!form.valid) return;
+				await pushClientsService({ form });
+				formMsgStore.clear();
+			}
+		}}
+		lookups={clientServicesFormLookups}
+		disabledFields={{ clientId: true }}
+	></ClientServiceForm>
+{/if}

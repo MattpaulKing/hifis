@@ -1,6 +1,6 @@
 import * as v from "valibot"
 import { pgTable, uuid, text } from "drizzle-orm/pg-core";
-import { clients, logs, organizations } from "$src/schemas";
+import { clients, logs, organizations, serviceEvents } from "$src/schemas";
 import { uuidPK, timestamps } from "$src/schemas/helpers";
 import { serviceCategories } from "$src/schemas";
 import { relations } from "drizzle-orm";
@@ -31,6 +31,7 @@ export const servicesFormSchema = v.object({
 export const servicesRelations = relations(services, ({ one, many }) => ({
   organizations: one(organizations, { fields: [services.orgId], references: [organizations.id] }),
   serviceCategories: one(serviceCategories, { fields: [services.categoryId], references: [serviceCategories.id] }),
+  serviceEvents: many(serviceEvents),
   logs: many(logs),
   clients: many(clients)
 }))

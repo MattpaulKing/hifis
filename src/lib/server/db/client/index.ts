@@ -6,3 +6,4 @@ export const db = drizzle({
   connection: `postgres://${Resource.db.username}:${Resource.db.password}@${Resource.db.host}:${Resource.db.port}/${Resource.db.database}`,
   schema,
 })
+export type DB = typeof db

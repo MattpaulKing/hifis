@@ -5,5 +5,5 @@ export { serviceCategories, serviceCategoriesRelations } from "../routes/[orgLab
 export { serviceEvents } from "../routes/[orgLabel]/services/events/schema"
 export { clients, clientsRelations } from "../routes/[orgLabel]/clients/schema"
 export { clientsServices, clientsServicesRelations } from "../routes/[orgLabel]/clients/[clientId=uuid]/services/schema"
-export { clientsServiceEvents } from "../routes/[orgLabel]/clients/[clientId=uuid]/services/events/schema"
+export { clientServiceEvents, clientServicesRelations } from "../routes/[orgLabel]/clients/[clientId=uuid]/services/events/schema"
 export { logs, logsRelations, logsClients, logsServices, logsClientsRelations, logsServicesRelations } from "../routes/[orgLabel]/logs/schema"

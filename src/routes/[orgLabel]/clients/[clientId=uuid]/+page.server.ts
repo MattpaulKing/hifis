@@ -7,7 +7,7 @@ import { valibot } from "sveltekit-superforms/adapters"
 import { clientUpdate } from "../actions.server"
 import { serviceCategories } from "$routes/[orgLabel]/services/categories/schema"
 import { organizations } from "$routes/[orgLabel]/schema"
-import { clientsServices } from "$src/schemas"
+import { clientServiceEvents, clientsServices, serviceEvents } from "$src/schemas"
 import { clientServiceFormSchema } from "./services/schema"
 import { rowsToMap } from "$src/lib/helpers"
 import { logsFormSchema } from "$routes/[orgLabel]/logs/schema"
@@ -48,6 +48,21 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
         id: crypto.randomUUID(),
         clientId: clientId,
       }, valibot(clientServiceFormSchema), { errors: false }),
+      serviceEvents: await db
+        .query.clientServiceEvents.findMany({
+          columns: {},
+          with: {
+            serviceEvents: true
+          },
+          where: eq(clientServiceEvents.clientId, clientId)
+        }).then(rows => rows.reduce((servicesEvents, { serviceEvents: serviceEvent }) => {
+          if (serviceEvent.serviceId in serviceEvents) {
+            servicesEvents[serviceEvent.serviceId].push(serviceEvent)
+          } else {
+            servicesEvents[serviceEvent.serviceId] = [serviceEvent]
+          }
+          return servicesEvents
+        }, {} as Record<string, typeof serviceEvents.$inferSelect[]>)),
       logs: await db
         .query.logs.findMany({ ...logsWithClientsAndServices })
         .then(aggLogsWitsClientsAndServices),

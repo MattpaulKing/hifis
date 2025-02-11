@@ -7,7 +7,7 @@ import { services } from "$routes/[orgLabel]/services/schema";
 import { clientServiceCreate } from "./actions.server";
 import { clients } from "$routes/[orgLabel]/clients/schema";
 import type { Actions, PageServerLoad } from "./$types";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { DB } from "$src/lib/server/db/client";
 
 type SearchParams = {
   clientId?: string,
@@ -34,15 +34,15 @@ export const actions = {
   create: async (e) => await clientServiceCreate(e)
 } satisfies Actions
 
-async function getLookups({ db, params }: { db: PostgresJsDatabase, params: SearchParams }) {
-  let lookups = { client: lookupCtxDefault(), service: lookupCtxDefault() }
+async function getLookups({ db, params }: { db: DB, params: SearchParams }) {
+  let lookups = { clients: lookupCtxDefault(), services: lookupCtxDefault() }
   if (params.clientId) {
     let [clientLookup] = await db
       .select({ id: clients.id, label: clients.label })
       .from(clients)
       .where(eq(clients.id, params.clientId))
       .limit(1)
-    lookups.client = {
+    lookups.clients = {
       inputValue: clientLookup.label,
       lookups: [clientLookup]
     }
@@ -52,7 +52,7 @@ async function getLookups({ db, params }: { db: PostgresJsDatabase, params: Sear
       .select({ id: services.id, label: services.label })
       .from(services)
       .where(eq(services.id, params.serviceId))
-    lookups.service = {
+    lookups.services = {
       inputValue: serviceLookup.label,
       lookups: [serviceLookup]
     }

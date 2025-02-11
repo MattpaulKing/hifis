@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import type { Snippet } from 'svelte';
 	import type { TabEntity } from './GridItemTabsState.svelte';
 	import type { GridItemTabsState } from '.';
-	import { fade } from 'svelte/transition';
 	type Props = {
 		tabState: GridItemTabsState;
 		tabRef?: HTMLDivElement;
@@ -81,7 +81,7 @@
 					? 'hover:invert'
 					: ''}"
 			>
-				<span class="">x</span>
+				<span class="z-10">x</span>
 			</button>
 		</div>
 	</div>

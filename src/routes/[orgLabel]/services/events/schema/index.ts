@@ -6,6 +6,7 @@ import { services } from "$src/schemas";
 export const serviceEvents = pgTable("service_events", {
   ...uuidPK,
   ...timestamps,
+  label: text("label").notNull(),
   address: text("address").notNull(),
   spaces: integer("spaces").notNull(),
   startTS: timestamp("start_ts").notNull(),
@@ -16,7 +17,8 @@ export const serviceEvents = pgTable("service_events", {
 
 export const serviceEventsFormSchema = v.object({
   id: v.pipe(v.string(), v.uuid()),
-  address: v.pipe(v.string(), v.minLength(2, "Address is required")),
+  label: v.pipe(v.string(), v.trim(), v.minLength(1, "Label is required")),
+  address: v.pipe(v.string(), v.trim(), v.minLength(2, "Address is required")),
   spaces: v.pipe(v.number(), v.integer("Expected number"), v.minValue(0, "Must be greater than 0")),
   startTS: v.date("Start date is required"),
   endTS: v.date("End date is required"),
