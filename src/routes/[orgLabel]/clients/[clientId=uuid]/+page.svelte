@@ -5,7 +5,7 @@
 	import { lookupCtxDefault, lookupCtxFromSingle } from '$lib/interfaces/lookups';
 	import { LogForm } from '$routes/[orgLabel]/logs/lib';
 	import { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
-	import { ClientContactForm, ClientServicesPanel } from '../lib';
+	import { ClientContactForm, ClientLogsPanel, ClientServicesPanel } from '../lib';
 	import { fade } from 'svelte/transition';
 
 	let { data } = $props();
@@ -14,8 +14,6 @@
 		searchKey: 'i',
 		expanded: true
 	});
-	console.dir(data, { depth: null });
-
 	let clientServicesFormLookups = $state({
 		clients: new LookupStore(lookupCtxFromSingle(data.client.contact)),
 		services: new LookupStore({
@@ -23,30 +21,6 @@
 			excludedIds: Object.keys(data.client.services)
 		})
 	});
-
-	let logsTabState = new GridItemTabsState({
-		entities: Object.values(data.client.logs).map(({ id, createdAt }, i) => ({
-			id,
-			label: createdAt.toLocaleString(),
-			active: i === 0
-		})),
-		entityLabel: 'log'
-	});
-	let clientsLogs = $state(data.client.logs);
-	let activeLog = $derived.by(() => {
-		if (logsTabState.entities[logsTabState.activeIdx].id.length === 0) {
-			return null;
-		} else {
-			return clientsLogs[logsTabState.entities[logsTabState.activeIdx].id];
-		}
-	});
-
-	let clientLogsFormLookups = $state({
-		clients: new LookupStore({ ...lookupCtxFromSingle(data.client.contact), inputValue: '' }),
-		services: new LookupStore(lookupCtxDefault())
-	});
-
-	//TODO: Have a tab with all entities of StepPage type and clicking within the list adds them to the tab
 </script>
 
 <FormCard>
@@ -69,21 +43,11 @@
 			clientServiceForm={data.client.serviceForm}
 			{clientServicesFormLookups}
 		></ClientServicesPanel>
-	{:else if stepperStore.activePage.label === 'logs' && activeLog}
-		<GridItemTabs tabState={logsTabState} />
-		<div in:fade={{ duration: 700 }} class="grid grid-cols-3 bg-inherit p-4">
-			<span class="col-span-2 text-lg font-bold">
-				{activeLog.clients.map(({ label }) => label).join(', ')}
-			</span>
-			<span class="col-start-3 row-start-1">
-				{activeLog.createdAt.toLocaleString()}
-			</span>
-			<span class="row-start-2">
-				{activeLog.services.map(({ label }) => label).join(', ')}
-			</span>
-			<span class="row-start-3 mt-2">{activeLog.note}</span>
-		</div>
-	{:else if stepperStore.activePage.label === 'logs' && !activeLog}
-		<LogForm logForm={data.client.logForm} mode="create" lookups={clientLogsFormLookups}></LogForm>
+	{:else if stepperStore.activePage.label === 'logs'}
+		<ClientLogsPanel
+			logForm={data.client.logForm}
+			clientLogs={data.client.logs}
+			clientContact={data.client.contact}
+		></ClientLogsPanel>
 	{/if}
 </FormCard>

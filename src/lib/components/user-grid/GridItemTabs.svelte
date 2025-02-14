@@ -70,19 +70,20 @@
 	>
 		<span class="truncate">{entity.label}</span>
 		<div class="ml-4">
-			<button
-				disabled={tabState.entities.length === 1 && entity.tabType === 'new-entity'}
-				onclick={(e) => {
-					e.stopPropagation();
-					if (tabState.entities.length === 1 && entity.tabType === 'new-entity') return;
-					tabState.remove({ entity });
-				}}
-				class="btn-icon btn-icon-sm absolute right-0.5 top-0 my-0 h-5 w-5 font-bold hover:variant-filled {entity.active
-					? 'hover:invert'
-					: ''}"
-			>
-				<span class="z-10">x</span>
-			</button>
+			{#if entity.id !== 'all'}
+				<button
+					onclick={(e) => {
+						e.stopPropagation();
+						if (tabState.entities.length === 1 && entity.tabType === 'new-entity') return;
+						tabState.remove({ entity });
+					}}
+					class="btn-icon btn-icon-sm absolute right-0.5 top-0 my-0 h-5 w-5 font-bold hover:variant-filled {entity.active
+						? 'hover:invert'
+						: ''}"
+				>
+					<span class="z-10">x</span>
+				</button>
+			{/if}
 		</div>
 	</div>
 {/snippet}

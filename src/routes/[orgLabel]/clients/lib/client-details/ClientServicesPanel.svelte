@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
+	import { default as ClientServicesFormPage } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/create/+page.svelte';
 	import { GridItemTabs, GridItemTabsState } from '$src/lib/components/user-grid';
 	import { ClientServiceForm } from '../../[clientId=uuid]/services/lib';
 	import { retryExp } from '$src/lib/api';
@@ -119,12 +120,12 @@
 				openModal({
 					routes: {
 						from: page.url.toString(),
-						to: route('/[orgLabel]/clients/[clientId=uuid]/services/edit', {
+						to: `${route('/[orgLabel]/clients/[clientId=uuid]/services/create', {
 							clientId: clientServiceForm.data.clientId,
 							orgLabel: user.properties.orgLabel
-						})
+						})}?clientId=${clientServiceForm.data.clientId}&serviceId=${activeService.id}`
 					},
-					ref: '',
+					ref: ClientServicesFormPage,
 					modalStore
 				});
 			}}

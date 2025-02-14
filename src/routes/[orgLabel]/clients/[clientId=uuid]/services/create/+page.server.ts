@@ -17,10 +17,6 @@ type SearchParams = {
 export const load: PageServerLoad = async ({ url: { searchParams }, locals: { db } }) => {
   let params: SearchParams = Object.fromEntries(searchParams)
   return {
-    disabledFields: {
-      clientId: 'clientId' in params,
-      serviceId: 'serviceId' in params,
-    },
     clientServiceForm: await superValidate({
       id: crypto.randomUUID(),
       clientId: params.clientId,
