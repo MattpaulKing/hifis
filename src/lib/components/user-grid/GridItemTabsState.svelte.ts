@@ -23,6 +23,22 @@ export default class {
     this.entities[this.activeIdx].active = false;
     this.entities.push(this.newEntityTabData())
   }
+  openTab(entity: Partial<TabEntity> & Pick<TabEntity, "id" | "label">) {
+    this.entities[this.activeIdx].active = false
+    let idxMaybe = this.findIdx(entity.id)
+    if (idxMaybe >= 0) {
+      this.entities[idxMaybe].active = true
+    } else {
+      this.entities.push({
+        active: true,
+        tabType: 'entity',
+        ...entity,
+      })
+    }
+  }
+  findIdx(id: string) {
+    return this.entities.findIndex(entity => entity.id === id)
+  }
   remove({ entity }: { entity: TabEntity }) {
     let idx = this.entities.findIndex(({ id }) => id === entity.id)
     if (idx < 0) throw Error("Entity not found")

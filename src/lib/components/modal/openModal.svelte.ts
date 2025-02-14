@@ -1,12 +1,12 @@
 import { getRouteData } from '$lib/urls';
-import type { Component } from 'svelte';
 import type { modalStore as ModalStore } from '.';
+import type { Modal } from './store.svelte';
 
 
 export default async function <T extends { type: "close" | "save" } | undefined>({ routes, ref, modalStore }: {
-  modalStore: ModalStore<Component>,
+  modalStore: ModalStore,
   routes: { from: string, to: string },
-  ref: any,
+  ref: Modal["ref"],
 }) {
   return new Promise<T>(async (resolve) => {
     const data = await getRouteData(routes.to)

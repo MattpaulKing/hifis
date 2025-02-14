@@ -7,13 +7,13 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { getFormMsgStore } from '$src/lib/components/forms';
+	import { getUser } from '$src/lib/components/user';
+	import { getModalStore, openModal } from '$src/lib/components/modal';
+	import type { serviceEvents } from '$src/schemas';
 	import type { FormValidated } from '$src/lib/interfaces';
 	import type { clientServiceFormSchema } from '../../[clientId=uuid]/services/schema';
 	import type { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
 	import type { ServicesApiResponse } from '$routes/api/v1/services/+server';
-	import type { serviceEvents } from '$src/schemas';
-	import { getUser } from '$src/lib/components/user';
-	import { getModalStore, openModal } from '$src/lib/components/modal';
 
 	type Props = {
 		clientServicesData: Record<
@@ -31,31 +31,28 @@
 			clients: LookupStore;
 			services: LookupStore;
 		};
-		clientServicesEvents: Record<string, (typeof serviceEvents.$inferSelect)[]>;
+		clientServiceEventsData: Record<string, (typeof serviceEvents.$inferSelect)[] | undefined>;
 	};
 	let {
 		clientServicesData,
 		clientServiceForm,
 		clientServicesFormLookups,
-		clientServicesEvents
+		clientServiceEventsData
 	}: Props = $props();
 	let formMsgStore = getFormMsgStore();
 	let user = getUser();
 	let modalStore = getModalStore();
 	let serviceTabState = new GridItemTabsState({
-		entities: Object.values(clientServicesData).map(({ id, label }, i) => ({
-			id,
-			label,
-			active: i === 0
-		})),
+		entities: [{ id: 'all', label: 'All Services', active: true }],
 		entityLabel: 'service'
 	});
 	let clientServices = $state(clientServicesData);
 	let activeService = $derived.by(() => {
-		if (!serviceTabState.activeEntity?.id) return null;
+		if (!serviceTabState.activeEntity?.id || !(serviceTabState.activeEntity.id in clientServices))
+			return null;
 		return {
 			...clientServices[serviceTabState.activeEntity.id],
-			serviceEvents: clientServicesEvents[serviceTabState.activeEntity.id]
+			serviceEvents: clientServiceEventsData[serviceTabState.activeEntity.id] ?? []
 		};
 	});
 	async function pushClientsService({
@@ -86,16 +83,65 @@
 </script>
 
 <GridItemTabs tabState={serviceTabState} />
-{#if activeService}
-	<div in:fade={{ duration: 700 }} class="grid w-fit grid-cols-[auto_1fr] gap-x-4 bg-inherit p-4">
-		<span class="text-lg font-bold">
+{#if serviceTabState.activeEntity?.id === 'all'}
+	<div in:fade={{ duration: 700 }} class="flex w-fit min-w-80 flex-col gap-x-4 bg-inherit p-4">
+		<span class="col-span-2 mx-4 text-xl font-bold">All Services</span>
+		<ul class="list mt-2">
+			{#each Object.values(clientServices) as service}
+				<li class="">
+					<button
+						disabled={serviceTabState.findIdx(service.id) >= 0}
+						onclick={() => serviceTabState.openTab(service)}
+						class="btn btn-sm grid w-full grid-cols-2 gap-2 hover:variant-ghost disabled:cursor-not-allowed"
+					>
+						<span class="font-bold"> {service.label}</span>
+						<span class="text-surface-800-100-token justify-self-end text-sm"
+							>{service.orgLabel}</span
+						>
+						<span class="col-span-2 justify-self-start">{service.clientServiceDescription}</span>
+					</button>
+				</li>
+			{/each}
+		</ul>
+	</div>
+{:else if activeService}
+	<div
+		in:fade={{ duration: 700 }}
+		class="grid w-full grid-cols-[minmax(min,1fr)_minmax(120px,min)] gap-x-4 bg-inherit p-4"
+	>
+		<span class="text-xl font-bold">
 			{activeService.label}
 		</span>
-		<span class="justify-self-end text-right">{activeService.orgLabel}</span>
-		<span class="col-span-2">{activeService.categoryLabel}</span>
-		<span class="col-span-2 mt-2">{activeService.clientServiceDescription ?? 'No description'}</span
+
+		<a
+			onclick={(e) => {
+				e.preventDefault();
+				openModal({
+					routes: {
+						from: page.url.toString(),
+						to: route('/[orgLabel]/clients/[clientId=uuid]/services/edit', {
+							clientId: clientServiceForm.data.clientId,
+							orgLabel: user.properties.orgLabel
+						})
+					},
+					ref: '',
+					modalStore
+				});
+			}}
+			href={route('/[orgLabel]/clients/[clientId=uuid]/services/edit', {
+				clientId: clientServiceForm.data.clientId,
+				orgLabel: user.properties.orgLabel
+			})}
+			class="group variant-ghost btn-icon btn-icon-sm h-8 w-8 place-self-end
+      justify-self-end transition-colors rounded-token hover:variant-filled"
 		>
-		<span class="mt-4">Upcoming Appointments</span>
+			<img src="/NotePencil.png" class="p-1 group-hover:filter-none dark:invert" alt="update" />
+		</a> <span class="">{activeService.categoryLabel}</span>
+
+		<span class="col-span-2 mt-4">{activeService.clientServiceDescription ?? 'No description'}</span
+		>
+		<hr class="col-span-2 my-2" />
+		<span class="mt-4 font-bold">Upcoming Appointments</span>
 		<a
 			onclick={(e) => {
 				e.preventDefault();
@@ -115,9 +161,11 @@
 				clientId: clientServiceForm.data.clientId,
 				orgLabel: user.properties.orgLabel
 			})}
-			class="variant-ghost border-success-300-600-token btn btn-sm h-min w-min
-      place-self-end justify-self-end border transition-colors hover:variant-filled-success">Add</a
+			class="variant-outline-success btn-icon btn-icon-sm h-7 w-7 place-self-end
+      justify-self-end transition-colors rounded-token hover:variant-filled-success"
 		>
+			<img src="/Plus.png" class="h-5 w-5 p-1 group-hover:filter-none dark:invert" alt="add" />
+		</a>
 		<div class="col-span-2 mt-4 grid h-fit w-full grid-cols-2">
 			{#each activeService.serviceEvents as serviceEvent}
 				<span class="">{serviceEvent.label}</span>
@@ -127,6 +175,9 @@
 				<span class="col-span-2">{serviceEvent.description}</span>
 				<hr class="col-span-2 mb-4 mt-2" />
 			{/each}
+			{#if activeService.serviceEvents.length === 0}
+				<span class="col-span-2">No upcoming events found...</span>
+			{/if}
 		</div>
 	</div>
 {:else}

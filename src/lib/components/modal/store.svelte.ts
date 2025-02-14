@@ -23,7 +23,7 @@ export default class {
 
   add<P extends Record<string, unknown>>(modal: Omit<Modal<P>, "response" | "id"> & { id?: string, response?: (r: any) => void }) {
     let id = modal.id ?? crypto.randomUUID()
-    //@ts-ignore
+    //@ts-ignoree
     this.queue.push({
       id,
       response: () => null,

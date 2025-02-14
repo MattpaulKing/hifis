@@ -14,6 +14,7 @@
 		searchKey: 'i',
 		expanded: true
 	});
+	console.dir(data, { depth: null });
 
 	let clientServicesFormLookups = $state({
 		clients: new LookupStore(lookupCtxFromSingle(data.client.contact)),
@@ -64,7 +65,7 @@
 	{:else if stepperStore.activePage.label === 'services'}
 		<ClientServicesPanel
 			clientServicesData={data.client.services}
-			clientServicesEvents={data.client.serviceEvents}
+			clientServiceEventsData={data.client.serviceEvents}
 			clientServiceForm={data.client.serviceForm}
 			{clientServicesFormLookups}
 		></ClientServicesPanel>

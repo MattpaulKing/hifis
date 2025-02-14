@@ -115,7 +115,7 @@ export default class {
     }, Object.values(this.settings.items), maxCols, maxRows);
   }
 
-  applyPreview() {
+  private applyPreview() {
     this.item.x = this.previewItem.x;
     this.item.y = this.previewItem.y;
     this.item.widthGridUnits = this.previewItem.widthGridUnits;
@@ -127,14 +127,14 @@ export default class {
   }
 
 
-  initInteraction(e: PointerEvent | TouchEvent["touches"][0]) {
+  private initInteraction(e: PointerEvent | TouchEvent["touches"][0]) {
     this.active = true;
     this.initialPointerPosition = { left: e.pageX, top: e.pageY }
     if ("pointerId" in e && this.moveableEl) {
       this.moveableEl?.setPointerCapture(e.pointerId)
     }
   }
-  endInteraction(event: PointerEvent | Touch) {
+  private endInteraction(event: PointerEvent | Touch) {
     this.active = false;
     this.applyPreview();
     if ("pointerId" in event) {
@@ -161,7 +161,7 @@ export default class {
     this.cleanupMoveMouse = on(window, 'pointermove', (e) => this.move(e));
     this.cleanupMoveEndMouse = on(window, 'pointerup', (e) => this.moveEndMouse(e))
   }
-  move(event: PointerEvent | Touch) {
+  private move(event: PointerEvent | Touch) {
     if (!this.settings.itemSize) {
       throw new Error('Grid is not mounted yet');
     }
@@ -191,11 +191,11 @@ export default class {
       this.previewItem = { ...this.previewItem, x, y };
     }
   }
-  moveEndMouse(event: PointerEvent) {
+  private moveEndMouse(event: PointerEvent) {
     if (event.button !== 0 || !this.active) return;
     this.endInteraction(event);
   }
-  moveEndTouch(event: Touch) {
+  private moveEndTouch(event: Touch) {
     if (!this.active) return
     this.endInteraction(event)
   }
@@ -210,7 +210,7 @@ export default class {
     this.cleanupResizeMouse = on(window, 'pointermove', (e) => this.resizeMouse(e))
     this.cleanupResizeMouseEnd = on(window, 'pointerup', (e) => this.resizeMouseEnd(e))
   }
-  resizeMouse(event: PointerEvent) {
+  private resizeMouse(event: PointerEvent) {
     if (!this.settings.itemSize) {
       throw new Error('Grid is not mounted yet');
     }
@@ -246,8 +246,9 @@ export default class {
       }
     }
   }
-  resizeMouseEnd(event: PointerEvent) {
-    if (event.button !== 0) return;
+  private resizeMouseEnd(event: PointerEvent) {
+    console.log(event.button)
+    if (event.button !== 0 || !this.active) return;
     this.endInteraction(event);
   }
 }

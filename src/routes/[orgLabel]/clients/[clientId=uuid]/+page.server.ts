@@ -55,13 +55,13 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
             serviceEvents: true
           },
           where: eq(clientServiceEvents.clientId, clientId)
-        }).then(rows => rows.reduce((servicesEvents, { serviceEvents: serviceEvent }) => {
-          if (serviceEvent.serviceId in serviceEvents) {
-            servicesEvents[serviceEvent.serviceId].push(serviceEvent)
+        }).then(rows => rows.reduce((agg, { serviceEvents: serviceEvent }) => {
+          if (serviceEvent.serviceId in agg) {
+            agg[serviceEvent.serviceId].push(serviceEvent)
           } else {
-            servicesEvents[serviceEvent.serviceId] = [serviceEvent]
+            agg[serviceEvent.serviceId] = [serviceEvent]
           }
-          return servicesEvents
+          return agg
         }, {} as Record<string, typeof serviceEvents.$inferSelect[]>)),
       logs: await db
         .query.logs.findMany({ ...logsWithClientsAndServices })
