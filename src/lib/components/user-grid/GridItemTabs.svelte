@@ -32,7 +32,7 @@
 	bind:this={tabRef}
 	{onpointerdown}
 	{onpointerup}
-	class="border-surface-500-400-token flex w-full place-items-center justify-between border-b px-1 pb-1 pt-1 rounded-tl-token rounded-tr-token"
+	class="border-surface-500-400-token z-10 flex w-full place-items-center justify-between border-b px-1 pt-1 rounded-tl-token rounded-tr-token"
 >
 	<div class="flex place-items-center gap-x-2">
 		{#each tabState.entities as entity, i}
@@ -65,8 +65,8 @@
 		onkeydown={(e) => onkeydown(e, entity)}
 		title={entity.label}
 		class="{entity.active
-			? 'variant-filled rounded-tl-token rounded-tr-token'
-			: 'rounded-token hover:bg-surface-400-500-token'} relative flex min-w-16 place-items-center justify-between px-3 py-1"
+			? 'variant-filled'
+			: 'hover:bg-surface-400-500-token'} relative flex min-w-16 place-items-center justify-between px-3 py-1 rounded-tl-token rounded-tr-token"
 	>
 		<span class="truncate">{entity.label}</span>
 		<div class="ml-4">
