@@ -14,6 +14,8 @@ export const clientServiceEvents = pgTable("clients_service_events", {
 }])
 
 export const clientServiceEventsFormSchema = v.object({
+  id: v.pipe(v.string(), v.uuid()),
+  serviceId: v.pipe(v.string(), v.uuid()),
   serviceEventId: v.pipe(v.string(), v.uuid("Could not find meeting")),
   clientId: v.pipe(v.string(), v.uuid("Could not find client"))
 })

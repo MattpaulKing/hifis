@@ -17,14 +17,17 @@
 	import { getUser } from '$lib/components/user';
 	import type { FormOptions, Infer, SuperValidated } from 'sveltekit-superforms';
 	import type { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
+	import type { CRUD } from '$src/params/crud';
 
 	let {
 		clientServiceForm,
+		action,
 		formOpts,
 		lookups = $bindable(),
 		disabledFields
 	}: {
 		clientServiceForm: SuperValidated<Infer<typeof clientServiceFormSchema>>;
+		action: CRUD;
 		formOpts?: FormOptions<Infer<typeof clientServiceFormSchema>>;
 		lookups: {
 			clients: LookupStore;
@@ -62,7 +65,8 @@
 <FormContainer
 	class="w-full max-w-lg"
 	{form}
-	action={route('create /[orgLabel]/clients/[clientId=uuid]/services/create', {
+	action={route('default /[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
+		action,
 		orgLabel: user.properties.orgLabel,
 		clientId: $formData.clientId
 	})}

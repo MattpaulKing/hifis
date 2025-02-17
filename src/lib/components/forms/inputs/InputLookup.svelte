@@ -47,19 +47,21 @@
 	aria-expanded={$focused}
 	class="input-group overflow-hidden [&>div]:px-2
   {$disabled ? 'border-none' : ''}
-  {isArray ? 'grid-cols-[auto_auto_auto_1fr]' : 'grid-cols-[auto_auto_1fr]'}"
+  {isArray ? 'grid-cols-[auto_1fr_auto]' : 'grid-cols-[1fr_auto]'}"
 	onfocus={handleSearch}
 	onclick={handleSearch}
 	{onkeydown}
 >
-	{#if isArray && $value && $value.length > 0}
+	{#if isArray && $value}
 		<div
 			title={store.lookups.map(({ label }) => label).join(', ')}
 			class="pointer-events-none relative z-10 flex h-full w-min items-center justify-center"
 		>
 			<span
-				class="relative -left-0.5 z-10 h-3/4 w-7 border border-gray-600 bg-surface-800 px-2 py-1 rounded-token"
-				>{$value?.length}</span
+				class="relative -left-0.5 z-10 h-3/4 w-7 border border-gray-600 bg-surface-800 px-2 py-1 rounded-token {$value.length >
+				0
+					? 'block'
+					: 'hidden'}">{$value.length}</span
 			>
 			{#each store.selectedLookups({ $value }) as _, i}
 				{#if i > 0}

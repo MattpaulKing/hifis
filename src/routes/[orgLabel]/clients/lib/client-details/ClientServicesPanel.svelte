@@ -1,20 +1,19 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import { default as ClientServicesFormPage } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/create/+page.svelte';
+	import { default as ClientServicesFormPage } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]/+page.svelte';
+	import { default as ClientServiceEventsFormPage } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/events/[action=crud]/+page.svelte';
 	import { GridItemTabs, GridItemTabsState } from '$src/lib/components/user-grid';
 	import { ClientServiceForm } from '../../[clientId=uuid]/services/lib';
 	import { retryExp } from '$src/lib/api';
 	import { route } from '$src/lib/ROUTES';
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { getFormMsgStore } from '$src/lib/components/forms';
 	import { getUser } from '$src/lib/components/user';
 	import { getModalStore, openModal } from '$src/lib/components/modal';
 	import type { serviceEvents } from '$src/schemas';
 	import type { FormValidated } from '$src/lib/interfaces';
 	import type { clientServiceFormSchema } from '../../[clientId=uuid]/services/schema';
 	import type { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
-	import type { ServicesApiResponse } from '$routes/api/v1/services/+server';
+	import type { ClientServicesApiResponse } from '$routes/api/v1/clients/services/+server';
 
 	type Props = {
 		clientServicesData: Record<
@@ -40,7 +39,6 @@
 		clientServicesFormLookups,
 		clientServiceEventsData
 	}: Props = $props();
-	let formMsgStore = getFormMsgStore();
 	let user = getUser();
 	let modalStore = getModalStore();
 	let serviceTabState = new GridItemTabsState({
@@ -56,27 +54,19 @@
 			serviceEvents: clientServiceEventsData[serviceTabState.activeEntity.id] ?? []
 		};
 	});
-	async function pushClientsService({
-		form
-	}: {
-		form: FormValidated<typeof clientServiceFormSchema>;
-	}) {
-		let [service] = await retryExp<ServicesApiResponse>({
-			route: `${route('GET /api/v1/services')}?id=${form.data.serviceId}`
+	async function pushClientsService({ serviceId }: { serviceId: string }) {
+		let [clientAndService] = await retryExp<ClientServicesApiResponse[0]>({
+			route: `${route('GET /api/v1/clients/services')}?clientId=${clientServiceForm.data.clientId}&serviceId=${serviceId}`
 		});
-		if (!service)
-			return await goto(page.url, {
-				invalidateAll: true,
-				replaceState: true,
-				noScroll: true
-			});
-		clientServices[service.id] = {
-			...service,
-			clientServiceDescription: form.data.description
+		if (modalStore.showing) modalStore.close();
+		if (!clientAndService) return null;
+		clientServices[serviceId] = {
+			...clientServices[serviceId],
+			...clientAndService.services[0]
 		};
 		serviceTabState.entities[serviceTabState.activeIdx] = {
-			id: form.data.serviceId,
-			label: service.label,
+			id: serviceId,
+			label: clientServices[serviceId].label,
 			active: true,
 			tabType: 'entity'
 		};
@@ -103,6 +93,11 @@
 					</button>
 				</li>
 			{/each}
+			{#if Object.values(clientServices).length === 0}
+				<li>
+					<span class="mx-4">No services attached...</span>
+				</li>
+			{/if}
 		</ul>
 	</div>
 {:else if activeService}
@@ -115,24 +110,30 @@
 		</span>
 
 		<a
-			onclick={(e) => {
+			onclick={async (e) => {
 				e.preventDefault();
-				openModal({
+				await openModal({
 					routes: {
 						from: page.url.toString(),
-						to: `${route('/[orgLabel]/clients/[clientId=uuid]/services/create', {
+						to: `${route('/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
+							action: 'update',
 							clientId: clientServiceForm.data.clientId,
 							orgLabel: user.properties.orgLabel
 						})}?clientId=${clientServiceForm.data.clientId}&serviceId=${activeService.id}`
 					},
 					ref: ClientServicesFormPage,
 					modalStore
+				}).then(async (response) => {
+					if (response?.type === 'save') {
+						pushClientsService({ serviceId: activeService.id });
+					}
 				});
 			}}
-			href={route('/[orgLabel]/clients/[clientId=uuid]/services/edit', {
+			href={`${route('/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
+				action: 'update',
 				clientId: clientServiceForm.data.clientId,
 				orgLabel: user.properties.orgLabel
-			})}
+			})}?clientId=${clientServiceForm.data.clientId}&serviceId=${activeService.id}`}
 			class="group variant-ghost btn-icon btn-icon-sm h-8 w-8 place-self-end
       justify-self-end transition-colors rounded-token hover:variant-filled"
 		>
@@ -149,16 +150,18 @@
 				openModal({
 					routes: {
 						from: page.url.toString(),
-						to: route('/[orgLabel]/clients/[clientId=uuid]/services/create', {
+						to: `${route('/[orgLabel]/clients/[clientId=uuid]/services/events/[action=crud]', {
+							action: 'create',
 							clientId: clientServiceForm.data.clientId,
 							orgLabel: user.properties.orgLabel
-						})
+						})}?serviceId=${activeService.id}`
 					},
-					ref: '',
+					ref: ClientServiceEventsFormPage,
 					modalStore
 				});
 			}}
-			href={route('/[orgLabel]/clients/[clientId=uuid]/services/create', {
+			href={route('/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
+				action: 'create',
 				clientId: clientServiceForm.data.clientId,
 				orgLabel: user.properties.orgLabel
 			})}
@@ -184,11 +187,11 @@
 {:else}
 	<ClientServiceForm
 		{clientServiceForm}
+		action="create"
 		formOpts={{
 			async onUpdate({ form }) {
 				if (!form.valid) return;
-				await pushClientsService({ form });
-				formMsgStore.clear();
+				await pushClientsService({ serviceId: form.data.serviceId });
 			}
 		}}
 		lookups={clientServicesFormLookups}

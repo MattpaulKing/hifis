@@ -1,9 +1,9 @@
 import { clients } from "$routes/[orgLabel]/clients/schema";
-import { clientsServices } from "$routes/[orgLabel]/clients/services/schema";
 import { services } from "$routes/[orgLabel]/services/schema";
 import { and, eq, SQL } from "drizzle-orm";
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { clientsServices } from "$src/schemas";
 
 export type ApiParams = {
   clientId?: string,
@@ -11,23 +11,23 @@ export type ApiParams = {
   lookups?: string
 }
 
-type ClientsAndServicesQueryRes = { client: typeof clients.$inferSelect | null, service: typeof services.$inferSelect | null }
+type ClientsAndServicesQueryRes = { description: string, client: typeof clients.$inferSelect | null, service: typeof services.$inferSelect | null }
 
 function groupServicesByClient(rows: ClientsAndServicesQueryRes[]) {
   let groupedRows = rows.reduce((acc, row) => {
-    const { client, service } = row
+    const { client, service, description: clientServiceDescription } = row
     if (!client) return acc
     if (!acc[client.id]) {
       acc[client.id] = { ...client, services: [] }
     }
     if (service) {
-      acc[client.id].services.push(service)
+      acc[client.id].services.push({ ...service, clientServiceDescription })
     }
-    console.log(client)
     return acc
-  }, {} as Record<string, typeof clients.$inferSelect & { services: typeof services.$inferSelect[] }>)
+  }, {} as Record<string, typeof clients.$inferSelect & { services: (typeof services.$inferSelect & { clientServiceDescription: string })[] }>)
   return Object.values(groupedRows)
 }
+export type ClientServicesApiResponse = ReturnType<typeof groupServicesByClient>
 
 export const GET: RequestHandler = async ({ url: { searchParams }, locals: { db } }) => {
   let params: ApiParams = Object.fromEntries(searchParams)
@@ -35,14 +35,15 @@ export const GET: RequestHandler = async ({ url: { searchParams }, locals: { db 
   let filters: SQL[] = []
 
   if (params.clientId) {
-    filters.push(eq(clientsServices.clientId, clients.id))
+    filters.push(eq(clientsServices.clientId, params.clientId))
   }
   if (params.serviceId) {
-    filters.push(eq(clientsServices.serviceId, services.id))
+    filters.push(eq(clientsServices.serviceId, params.serviceId))
   }
 
   let clientsAndServices = await db
     .select({
+      description: clientsServices.description,
       client: clients,
       service: services
     })

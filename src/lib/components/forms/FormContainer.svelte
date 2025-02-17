@@ -27,16 +27,16 @@
 	} = $props();
 
 	setFormCtx({ disabled });
-	let { delayed, enhance } = form;
+	let { delayed, enhance, formId } = form;
 	let msgStore = getFormMsgStore();
 	onDestroy(() => {
-		msgStore.clear();
+		msgStore.remove($formId);
 	});
 </script>
 
 <div in:fade class="relative flex flex-col p-6 {classes ?? ''}">
 	<div class="absolute right-0 top-0 z-50 flex w-full flex-col items-end">
-		{#if msgStore.current?.msg}
+		{#if msgStore.current && msgStore.current.id === $formId}
 			<div
 				transition:fade
 				class="badge m-4 flex h-fit w-fit p-2

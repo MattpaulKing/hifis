@@ -1,2 +1,2 @@
 export { ar } from "./actionResponse"
-export { default as validateForm, insertFormData } from "./validateForm"
+export { default as validateForm, insertFormData, updateFormData } from "./validateForm"

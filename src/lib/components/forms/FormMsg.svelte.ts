@@ -3,7 +3,7 @@ import { getContext, onDestroy, setContext } from "svelte"
 type IMessage = { id: string, msg: string, status: "error" | "success" | "in-entry" }
 
 class FormMsg {
-  private queue: IMessage[] = $state([])
+  queue: IMessage[] = $state([])
   current = $derived<IMessage | undefined>(this.queue[0] ?? undefined)
   timeoutMap = new Map<string, ReturnType<typeof setTimeout>>()
 

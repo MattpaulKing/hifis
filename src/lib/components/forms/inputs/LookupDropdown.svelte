@@ -26,6 +26,7 @@
 			}
 		}
 	}
+	$inspect(path, store.lookups);
 </script>
 
 {#if !$disabled && $focused}
@@ -50,8 +51,12 @@
 						type="button"
 						class="{$value === lookup.id || $value.includes(lookup.id)
 							? 'variant-ghost'
-							: ''} px-2 py-1 text-left rounded-token hover:variant-ghost">{lookup.label}</button
+							: ''} flex flex-col px-2 py-1 text-left rounded-token hover:variant-ghost"
 					>
+						<span>{lookup.label}</span>
+						<span class={lookup.description ? 'block' : 'hidden'}>{lookup.description}</span>
+						<span class={lookup.description ? 'block' : 'hidden'}>{lookup.descriptionExtra}</span>
+					</button>
 				{/each}
 			{:else}
 				<span class="h-28">Nothing found ...</span>

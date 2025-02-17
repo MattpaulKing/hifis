@@ -33,7 +33,7 @@
 	onfocusout={handleLostFocus}
 	bind:this={fieldContainer}
 	class="mt-4 flex w-full flex-col justify-end {$errors
-		? '[&>.input-group]:border-error-500-400-token [&>input]:border-error-500-400-token'
+		? '[&>.input-group]:border-error-500-400-token [&>.input]:border-error-500-400-token'
 		: ''} [&>input]:min-h-10 {classes ?? ''}"
 >
 	{@render children()}

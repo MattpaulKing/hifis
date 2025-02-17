@@ -1,7 +1,8 @@
 <script lang="ts">
 	/* 
  TODO:
-  1. Service Events / Form logic
+  0. Finish log update / delete 
+  1. Service Events creation has a bug since I can't return all the ids of the various events
   2. Finish resize logic
  */
 </script>

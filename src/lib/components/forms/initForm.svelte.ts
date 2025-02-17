@@ -1,7 +1,8 @@
 import { valibot } from "sveltekit-superforms/adapters"
 import { superForm, type FormOptions, type Infer, type SuperValidated } from "sveltekit-superforms"
-import { setFormMsgStore } from "."
+import { getFormMsgStore } from "."
 import type { ErrorMessage, ObjectEntries, ObjectIssue, ObjectSchema } from "valibot"
+import { getModalStore } from "../modal"
 
 export type ISchema = ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
 
@@ -23,17 +24,22 @@ function defaultFormOptions<T extends ISchema>(validator: T) {
 export default function <T extends ISchema>({ form, schema, opts = {} }:
   { form: SuperValidated<Infer<T>, any, Infer<T>>, schema: T, opts?: FormOptions<Infer<T>, any, Infer<T>> }
 ) {
-  let msgStore = setFormMsgStore()
+  let msgStore = getFormMsgStore()
+  let modalStore = getModalStore()
   return superForm(form, {
     //@ts-ignore
     ...defaultFormOptions(schema),
-    onUpdated({ form }) {
-      if (form.valid) {
+    ...opts,
+    onResult(e) {
+      if (e.result.type === "success") {
         msgStore.setMsg({ id: form.id, msg: "Success", status: "success" })
-      } else {
+        modalStore.queue[0]?.response({ type: "save" })
+      } else if (e.result.type === "error" || e.result.type === "failure") {
         msgStore.setMsg({ id: form.id, msg: "Error", status: "error" })
       }
+      if (opts.onResult) {
+        opts.onResult(e)
+      }
     },
-    ...opts
   })
 }

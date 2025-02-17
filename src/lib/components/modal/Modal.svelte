@@ -4,10 +4,9 @@
 	import { slide } from 'svelte/transition';
 	import { getModalStore } from './context';
 	import type { Modal } from './store.svelte';
-	import type { Component, ComponentProps } from 'svelte';
 
 	let modals = getModalStore();
-	let ActiveModal: null | Modal<Component, ComponentProps<Component>> = $state(null);
+	let ActiveModal: null | Modal = $state(null);
 
 	function restoreModalOnForward(e: PopStateEvent & { currentTarget: Window }) {
 		if (e.currentTarget.location.search.includes('modal=true') && modals.lastPop) {

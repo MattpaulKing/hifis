@@ -13,5 +13,5 @@
 </script>
 
 <FormCard drawerOpen={drawerStore.isOpen}>
-	<ClientServiceForm clientServiceForm={data.clientServiceForm} {lookups} />
+	<ClientServiceForm clientServiceForm={data.clientServiceForm} action={data.action} {lookups} />
 </FormCard>

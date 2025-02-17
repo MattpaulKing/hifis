@@ -1,12 +1,9 @@
 <script lang="ts">
 	import { FormCard } from '$lib/components/forms';
 	import { Step, Stepper, StepperStore } from '$lib/components/stepper';
-	import { GridItemTabs, GridItemTabsState } from '$lib/components/user-grid';
 	import { lookupCtxDefault, lookupCtxFromSingle } from '$lib/interfaces/lookups';
-	import { LogForm } from '$routes/[orgLabel]/logs/lib';
 	import { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
 	import { ClientContactForm, ClientLogsPanel, ClientServicesPanel } from '../lib';
-	import { fade } from 'svelte/transition';
 
 	let { data } = $props();
 	let stepperStore = new StepperStore({

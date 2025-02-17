@@ -31,9 +31,9 @@ export class LookupStore {
   }
   private filterLookupsForArray({ fetchedLookups, $value }: { fetchedLookups: Lookup[], $value: string[] }) {
     let selectedLookups = this.lookups.filter((lookup) => $value.includes(lookup.id));
-    console.log('selected', selectedLookups)
-    let filteredLookups = fetchedLookups.filter((lookup) => !$value?.includes(lookup.id) && !this.excludedIds.includes(lookup.id))
-    console.log('filtered', filteredLookups)
+    console.log(selectedLookups)
+    let filteredLookups = fetchedLookups.filter((lookup) => !$value.includes(lookup.id) && !this.excludedIds.includes(lookup.id))
+    console.log(filteredLookups)
     this.lookups = [...selectedLookups, ...filteredLookups]
   }
   private filterLookupsForStr({ fetchedLookups, $value }: { fetchedLookups: Lookup[], $value: string }) {
