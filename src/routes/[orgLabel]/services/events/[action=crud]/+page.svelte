@@ -10,15 +10,23 @@
 		Input,
 		InputNumber,
 		Label,
-		InputDateTime
+		InputDateTime,
+		InputTextArea
 	} from '$src/lib/components/forms';
-	import { serviceEventsFormSchema } from './schema/index.js';
+	import { route } from '$src/lib/ROUTES.js';
+	import { serviceEventsFormSchema } from '../schema/index.js';
 	let { data } = $props();
 	let form = initForm({ form: data.serviceEventForm, schema: serviceEventsFormSchema });
 </script>
 
 <FormCard>
-	<FormContainer {form} action="">
+	<FormContainer
+		{form}
+		action={route('default /[orgLabel]/services/events/[action=crud]', {
+			orgLabel: data.org.label,
+			action: data.params.action
+		})}
+	>
 		<FormTitle>
 			<span> </span>
 		</FormTitle>
@@ -40,6 +48,11 @@
 		<Field {form} path="endTS">
 			<Label label="End Date" />
 			<InputDateTime {form} />
+			<Errors />
+		</Field>
+		<Field {form} path="description" class="col-span-2">
+			<Label label="Description" />
+			<InputTextArea />
 			<Errors />
 		</Field>
 		<FormBtns></FormBtns>

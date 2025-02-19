@@ -1,8 +1,9 @@
 import { superValidate } from "sveltekit-superforms";
 import { valibot } from "sveltekit-superforms/adapters";
-import { clientCreate } from "../actions.server";
+import { clientCreate, clientUpdate } from "../actions.server";
 import { clientContactFormSchema } from "../schema";
-import type { Actions, PageServerLoad } from "./$types";
+import type { Actions, PageServerLoad } from "./types";
+import { error } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ }) => {
   const today = new Date()
@@ -14,7 +15,17 @@ export const load: PageServerLoad = async ({ }) => {
 }
 
 export const actions = {
-  create: async (e) => {
-    return await clientCreate(e)
+  default: async (e) => {
+    const { params: { action } } = e
+    switch (action) {
+      case "create":
+        return await clientCreate(e)
+      case "update":
+        return await clientUpdate(e)
+      default:
+        error(404)
+
+
+    }
   }
 } satisfies Actions

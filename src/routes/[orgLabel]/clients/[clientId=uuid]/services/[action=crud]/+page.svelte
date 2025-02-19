@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getDrawerStore } from '$lib/components/drawer';
 	import { FormCard } from '$lib/components/forms';
-	import { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
+	import { LookupStore } from '$src/lib/components/forms';
 	import { ClientServiceForm } from '../lib';
 
 	let { data } = $props();

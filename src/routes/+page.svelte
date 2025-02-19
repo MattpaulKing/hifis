@@ -1,7 +1,7 @@
 <script lang="ts">
 	/* 
  TODO:
-  0. Finish log update / delete 
+  0. Finish log update / delete & figure out caching strategy for lookups
   1. Service Events creation has a bug since I can't return all the ids of the various events
   2. Finish resize logic
  */

@@ -9,7 +9,7 @@
 	import { page } from '$app/state';
 	import { getUser } from '$src/lib/components/user';
 	import { getModalStore, openModal } from '$src/lib/components/modal';
-	import type { serviceEvents } from '$src/schemas';
+	import { serviceEvents } from '$src/schemas';
 	import type { FormValidated } from '$src/lib/interfaces';
 	import type { clientServiceFormSchema } from '../../[clientId=uuid]/services/schema';
 	import type { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
@@ -46,12 +46,13 @@
 		entityLabel: 'service'
 	});
 	let clientServices = $state(clientServicesData);
+	let clientServiceEvents = $state(clientServiceEventsData);
 	let activeService = $derived.by(() => {
 		if (!serviceTabState.activeEntity?.id || !(serviceTabState.activeEntity.id in clientServices))
 			return null;
 		return {
 			...clientServices[serviceTabState.activeEntity.id],
-			serviceEvents: clientServiceEventsData[serviceTabState.activeEntity.id] ?? []
+			serviceEvents: clientServiceEvents[serviceTabState.activeEntity.id] ?? []
 		};
 	});
 	async function pushClientsService({ serviceId }: { serviceId: string }) {
@@ -70,6 +71,20 @@
 			active: true,
 			tabType: 'entity'
 		};
+	}
+	function editServiceRoute(serviceId: string) {
+		return `${route('/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
+			action: 'update',
+			clientId: clientServiceForm.data.clientId,
+			orgLabel: user.properties.orgLabel
+		})}?clientId=${clientServiceForm.data.clientId}&serviceId=${serviceId}`;
+	}
+	function addServiceEventRoute(serviceId: string) {
+		return `${route('/[orgLabel]/clients/[clientId=uuid]/services/events/[action=crud]', {
+			action: 'create',
+			clientId: clientServiceForm.data.clientId,
+			orgLabel: user.properties.orgLabel
+		})}?serviceId=${serviceId}`;
 	}
 </script>
 
@@ -115,11 +130,7 @@
 				await openModal({
 					routes: {
 						from: page.url.toString(),
-						to: `${route('/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
-							action: 'update',
-							clientId: clientServiceForm.data.clientId,
-							orgLabel: user.properties.orgLabel
-						})}?clientId=${clientServiceForm.data.clientId}&serviceId=${activeService.id}`
+						to: editServiceRoute(activeService.id)
 					},
 					ref: ClientServicesFormPage,
 					modalStore
@@ -129,11 +140,7 @@
 					}
 				});
 			}}
-			href={`${route('/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
-				action: 'update',
-				clientId: clientServiceForm.data.clientId,
-				orgLabel: user.properties.orgLabel
-			})}?clientId=${clientServiceForm.data.clientId}&serviceId=${activeService.id}`}
+			href={editServiceRoute(activeService.id)}
 			class="group variant-ghost btn-icon btn-icon-sm h-8 w-8 place-self-end
       justify-self-end transition-colors rounded-token hover:variant-filled"
 		>
@@ -145,26 +152,32 @@
 		<hr class="col-span-2 my-2" />
 		<span class="mt-4 font-bold">Upcoming Appointments</span>
 		<a
-			onclick={(e) => {
+			onclick={async (e) => {
 				e.preventDefault();
 				openModal({
 					routes: {
 						from: page.url.toString(),
-						to: `${route('/[orgLabel]/clients/[clientId=uuid]/services/events/[action=crud]', {
-							action: 'create',
-							clientId: clientServiceForm.data.clientId,
-							orgLabel: user.properties.orgLabel
-						})}?serviceId=${activeService.id}`
+						to: addServiceEventRoute(activeService.id)
 					},
 					ref: ClientServiceEventsFormPage,
 					modalStore
+				}).then(async (response) => {
+					if (response?.type === 'save') {
+						let res = await fetch(
+							`${route('GET /api/v1/services/events')}?serviceId=${activeService.id}`
+						).then(async (r) => (await r.json()) as (typeof serviceEvents.$inferSelect)[]);
+						clientServiceEvents[activeService.id] = [
+							...res.map((serviceEvent) => ({
+								...serviceEvent,
+								startTS: new Date(serviceEvent.startTS),
+								endTS: new Date(serviceEvent.endTS)
+							})),
+							...(clientServiceEvents[activeService.id] ?? [])
+						];
+					}
 				});
 			}}
-			href={route('/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
-				action: 'create',
-				clientId: clientServiceForm.data.clientId,
-				orgLabel: user.properties.orgLabel
-			})}
+			href={addServiceEventRoute(activeService.id)}
 			class="variant-outline-success btn-icon btn-icon-sm h-7 w-7 place-self-end
       justify-self-end transition-colors rounded-token hover:variant-filled-success"
 		>

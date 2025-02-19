@@ -26,7 +26,6 @@
 			}
 		}
 	}
-	$inspect(path, store.lookups);
 </script>
 
 {#if !$disabled && $focused}
@@ -38,7 +37,7 @@
 		class="relative z-20"
 	>
 		<div
-			class="card border-surface-400-500-token absolute flex h-fit max-h-28 min-w-full flex-col space-y-1 overflow-y-auto border py-4 pl-4 pr-2"
+			class="card border-surface-400-500-token absolute flex h-fit max-h-36 min-w-full flex-col space-y-0.5 overflow-y-auto border py-4 pl-4 pr-2"
 		>
 			{#if store.searching}
 				{@render searchPlaceholder()}
@@ -51,11 +50,13 @@
 						type="button"
 						class="{$value === lookup.id || $value.includes(lookup.id)
 							? 'variant-ghost'
-							: ''} flex flex-col px-2 py-1 text-left rounded-token hover:variant-ghost"
+							: ''} flex flex-col px-2 py-2 text-left rounded-token hover:variant-ghost"
 					>
-						<span>{lookup.label}</span>
+						<span class="truncate">{lookup.label}</span>
 						<span class={lookup.description ? 'block' : 'hidden'}>{lookup.description}</span>
-						<span class={lookup.description ? 'block' : 'hidden'}>{lookup.descriptionExtra}</span>
+						<span class={lookup.descriptionExtra ? 'block' : 'hidden'}
+							>{lookup.descriptionExtra}</span
+						>
 					</button>
 				{/each}
 			{:else}

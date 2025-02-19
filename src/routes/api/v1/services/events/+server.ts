@@ -21,7 +21,6 @@ export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams 
     filters.push(eq(services.id, params.serviceId))
   }
   if (params["startTS.gte"]) {
-    console.log(params["startTS.gte"])
     filters.push(gte(serviceEvents.startTS, new Date(params["startTS.gte"])))
   }
   let serviceEventRows = await db

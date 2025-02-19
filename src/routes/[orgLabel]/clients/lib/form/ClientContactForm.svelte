@@ -23,8 +23,8 @@
 
 	let {
 		clientContactForm,
-		mode
-	}: { clientContactForm: FormValidated<typeof clientContactFormSchema>; mode: FormMode } =
+		action
+	}: { clientContactForm: FormValidated<typeof clientContactFormSchema>; action: FormMode } =
 		$props();
 	let user = getUser();
 	let form = initForm({
@@ -32,7 +32,7 @@
 		schema: clientContactFormSchema,
 		opts: {
 			onUpdate({ form }) {
-				if (form.valid && mode === 'create') {
+				if (form.valid && action === 'create') {
 					modalStore.add({
 						id: 'clients-create',
 						type: 'component',
@@ -61,10 +61,13 @@
 		}
 	}
 
-	let action =
-		mode === 'create'
-			? route('create /[orgLabel]/clients/create', { orgLabel: user.properties.orgLabel })
-			: mode === 'update'
+	let formAction =
+		action === 'create'
+			? route('default /[orgLabel]/clients/[action=crud]', {
+					action,
+					orgLabel: user.properties.orgLabel
+				})
+			: action === 'update'
 				? route('update /[orgLabel]/clients/[clientId=uuid]', {
 						orgLabel: user.properties.orgLabel,
 						clientId: clientContactForm.data.id
@@ -72,7 +75,7 @@
 				: '';
 </script>
 
-<FormContainer class="min-w-96 max-w-lg" {form} {action}>
+<FormContainer class="min-w-96 max-w-lg" {form} action={formAction}>
 	{#snippet title()}
 		<span class="w-fit"> Client Profile </span>
 	{/snippet}

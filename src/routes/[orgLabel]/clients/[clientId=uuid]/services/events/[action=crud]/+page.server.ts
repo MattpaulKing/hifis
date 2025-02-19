@@ -1,9 +1,9 @@
 import { superValidate } from "sveltekit-superforms"
 import { valibot } from "sveltekit-superforms/adapters"
 import { clientServiceEvents, clientServiceEventsFormSchema } from "../schema"
-import { eq } from "drizzle-orm"
+import { and, eq, gte } from "drizzle-orm"
 import { error } from "@sveltejs/kit"
-import { clients, services } from "$src/schemas"
+import { clients, serviceEvents, services } from "$src/schemas"
 import { single } from "$src/lib/server/db"
 import { createClientServiceEvents } from "$routes/[orgLabel]/clients/[clientId=uuid]/services/events"
 import type { DB } from "$src/lib/server/db/client"
@@ -33,10 +33,7 @@ export const load: PageServerLoad = async ({ url, params: { action, clientId }, 
       .limit(1)
       .then(single),
     service: searchParams.serviceId ? await db
-      .select({
-        id: services.id,
-        label: services.label
-      })
+      .select({ id: services.id, label: services.label })
       .from(services)
       .where(eq(services.id, searchParams.serviceId))
       .limit(1)
@@ -44,7 +41,11 @@ export const load: PageServerLoad = async ({ url, params: { action, clientId }, 
     excludedServiceEventIds: await db
       .select({ id: clientServiceEvents.id })
       .from(clientServiceEvents)
-      .where(eq(clientServiceEvents.clientId, clientId))
+      .leftJoin(serviceEvents, eq(serviceEvents.id, clientServiceEvents.serviceEventId))
+      .where(and(
+        eq(clientServiceEvents.clientId, clientId),
+        gte(serviceEvents.startTS, new Date())
+      ))
       .then(rows => rows.map(({ id }) => id)),
     serviceEventForm: await getValidatedForm({ db, action: action as CRUD, params: searchParams }),
   }

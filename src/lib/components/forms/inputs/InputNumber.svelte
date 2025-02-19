@@ -6,7 +6,7 @@
 </script>
 
 <input
-	type="text"
+	type="number"
 	autocomplete="off"
 	class="input {classes}"
 	readonly={$disabled}

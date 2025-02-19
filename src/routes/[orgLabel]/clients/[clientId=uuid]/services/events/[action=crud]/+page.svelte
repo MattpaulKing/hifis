@@ -26,8 +26,6 @@
 			excludedIds: data.excludedServiceEventIds
 		})
 	});
-
-	//BUG: Service Event isn't filtered out
 </script>
 
 <FormCard>
@@ -63,7 +61,7 @@
 		<Field class="col-span-2" {form} path="serviceEventId" lookups={lookups.serviceEvent}>
 			<Label label="Service Event"></Label>
 			<InputLookup
-				apiRoute={`${route('GET /api/v1/services/events')}?serviceId=${$formData.serviceId}&lookups=true&startTS.gte=${new Date().toISOString()}`}
+				apiRoute={`${route('GET /api/v1/services/events')}?serviceId=${$formData.serviceId}&lookups=true`}
 			/>
 			<LookupDropdown />
 			<Errors />

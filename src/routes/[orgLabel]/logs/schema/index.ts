@@ -4,9 +4,17 @@ import { timestamps, uuidPK } from "$src/schemas/helpers";
 import { services, clients } from "$src/schemas";
 import { relations } from "drizzle-orm";
 
+
+export const logCategories = pgTable("log_categories", {
+  ...uuidPK,
+  ...timestamps,
+  label: text("label").notNull()
+})
+
 export const logs = pgTable("logs", {
   ...uuidPK,
   ...timestamps,
+  categoryId: uuid("category_id").notNull().references(() => logCategories.id, { onUpdate: "cascade", onDelete: "cascade" }),
   note: text("note").notNull(),
 })
 
@@ -39,6 +47,7 @@ export const logsServicesRelations = relations(logsServices, ({ one }) => ({
 
 export const logsFormSchema = v.object({
   id: v.pipe(v.string(), v.uuid()),
+  categoryId: v.pipe(v.string(), v.minLength(2, "Category is required")),
   note: v.pipe(v.string(), v.minLength(2, "Note is required")),
   serviceIds: v.fallback(v.array(v.pipe(v.string(), v.uuid())), []),
   clientIds: v.fallback(v.array(v.pipe(v.string(), v.uuid())), [])

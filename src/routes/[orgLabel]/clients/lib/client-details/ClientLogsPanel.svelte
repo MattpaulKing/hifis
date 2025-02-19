@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { GridItemTabs, GridItemTabsState } from '$src/lib/components/user-grid';
-	import { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
 	import { lookupCtxDefault, lookupCtxFromSingle } from '$src/lib/interfaces/lookups';
+	import { fade } from 'svelte/transition';
+	import { GridItemTabs, GridItemTabsState } from '$src/lib/components/user-grid';
+	import { LookupStore } from '$src/lib/components/forms';
 	import { LogForm, type aggLogsWitsClientsAndServices } from '$routes/[orgLabel]/logs/lib';
 	import type { clients } from '$src/schemas';
 	import type { FormValidated } from '$src/lib/interfaces';
 	import type { logsFormSchema } from '$routes/[orgLabel]/logs/schema';
-	import { fade } from 'svelte/transition';
 
 	type Props = {
 		logForm: FormValidated<typeof logsFormSchema>;
@@ -27,7 +27,8 @@
 	});
 	let clientLogsFormLookups = $state({
 		clients: new LookupStore({ ...lookupCtxFromSingle(clientContact), inputValue: '' }),
-		services: new LookupStore(lookupCtxDefault())
+		services: new LookupStore(lookupCtxDefault()),
+		categoryId: new LookupStore(lookupCtxDefault())
 	});
 </script>
 
@@ -76,5 +77,5 @@
 		<span class="row-start-3 mt-2">{activeLog.note}</span>
 	</div>
 {:else}
-	<LogForm {logForm} mode="create" lookups={clientLogsFormLookups}></LogForm>
+	<LogForm action="create" {logForm} lookups={clientLogsFormLookups}></LogForm>
 {/if}
