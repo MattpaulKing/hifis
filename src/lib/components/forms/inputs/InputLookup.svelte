@@ -9,12 +9,13 @@
 		valueDisplay?: Snippet;
 		restProps?: Record<keyof HTMLInputElement, string>;
 	};
-	let { apiRoute, onkeydown: _onkeydown, valueDisplay, ...restProps }: Props = $props();
+	let { apiRoute: _apiRoute, onkeydown: _onkeydown, valueDisplay, ...restProps }: Props = $props();
 	let { value, focused, disabled, errors, isArray, path } = getField<
 		string | string[] | undefined
 	>();
 	let store = getLookups();
 	let timeout: ReturnType<typeof setTimeout>;
+	let apiRoute = $state(_apiRoute);
 
 	function handleSearch(e: Event) {
 		e.stopImmediatePropagation();
@@ -24,9 +25,12 @@
 		timeout = setTimeout(fetchLookups, 400);
 	}
 	async function fetchLookups() {
-		let fetchedLookups = await fetch(`${apiRoute}?search=${store.inputValue}&lookups=true`).then(
-			async (r) => (await r.json()) as Lookup[]
-		);
+		if (_apiRoute.includes('?')) {
+			apiRoute = _apiRoute.concat(`&search=${store.inputValue}&looukps=true`);
+		} else {
+			apiRoute = _apiRoute.concat(`?search=${store.inputValue}&looukps=true`);
+		}
+		let fetchedLookups = await fetch(apiRoute).then(async (r) => (await r.json()) as Lookup[]);
 		store.filterFetchedLookups({ fetchedLookups, $value });
 		store.searching = false;
 	}

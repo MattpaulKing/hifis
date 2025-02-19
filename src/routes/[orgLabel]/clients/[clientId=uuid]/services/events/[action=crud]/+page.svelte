@@ -16,7 +16,6 @@
 	import { route } from '$src/lib/ROUTES.js';
 	import { clientServiceEventsFormSchema } from '../schema/index.js';
 	let { data } = $props();
-
 	let form = initForm({ form: data.serviceEventForm, schema: clientServiceEventsFormSchema });
 	let { form: formData } = form;
 	let lookups = $state({
@@ -64,7 +63,7 @@
 		<Field class="col-span-2" {form} path="serviceEventId" lookups={lookups.serviceEvent}>
 			<Label label="Service Event"></Label>
 			<InputLookup
-				apiRoute={`${route('GET /api/v1/services/events')}?serviceId=${$formData.serviceId}&lookups=true`}
+				apiRoute={`${route('GET /api/v1/services/events')}?serviceId=${$formData.serviceId}&lookups=true&startTS.gte=${new Date().toISOString()}`}
 			/>
 			<LookupDropdown />
 			<Errors />

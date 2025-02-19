@@ -1,4 +1,4 @@
-import { and, eq, getTableColumns, type SQL } from "drizzle-orm";
+import { and, eq, getTableColumns, gte, type SQL } from "drizzle-orm";
 import { serviceEvents, services } from "$src/schemas";
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types"
@@ -7,6 +7,8 @@ type ApiParams = Partial<{
   serviceId: string;
   serviceEventId: string;
   lookups: string;
+  'startTS.gte': string;
+  endTS: string;
 }>
 
 export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams } }) => {
@@ -17,6 +19,10 @@ export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams 
   }
   if (params.serviceId) {
     filters.push(eq(services.id, params.serviceId))
+  }
+  if (params["startTS.gte"]) {
+    console.log(params["startTS.gte"])
+    filters.push(gte(serviceEvents.startTS, new Date(params["startTS.gte"])))
   }
   let serviceEventRows = await db
     .select(params.lookups ? {
