@@ -52,7 +52,7 @@
 							? 'variant-ghost'
 							: ''} flex flex-col px-2 py-2 text-left rounded-token hover:variant-ghost"
 					>
-						<span class="truncate">{lookup.label}</span>
+						<span class="truncate {lookup.description ? 'font-bold' : ''}">{lookup.label}</span>
 						<span class={lookup.description ? 'block' : 'hidden'}>{lookup.description}</span>
 						<span class={lookup.descriptionExtra ? 'block' : 'hidden'}
 							>{lookup.descriptionExtra}</span

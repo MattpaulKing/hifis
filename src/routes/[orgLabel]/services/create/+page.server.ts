@@ -1,7 +1,7 @@
 import { superValidate } from "sveltekit-superforms";
 import { valibot } from "sveltekit-superforms/adapters";
 import { servicesFormSchema } from "../schema";
-import { servicesCreate } from "../actions.server";
+import { serviceCreate } from "../actions.server";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals: { subject, db } }) => {
@@ -14,5 +14,5 @@ export const load: PageServerLoad = async ({ locals: { subject, db } }) => {
 }
 
 export const actions = {
-  create: async (e) => await servicesCreate(e)
+  create: async (e) => await serviceCreate(e)
 } satisfies Actions

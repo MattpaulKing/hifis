@@ -60,22 +60,16 @@
 			msgStore.setMsg({ msg: 'There may be duplicates', status: 'error' });
 		}
 	}
-
-	let formAction =
-		action === 'create'
-			? route('default /[orgLabel]/clients/[action=crud]', {
-					action,
-					orgLabel: user.properties.orgLabel
-				})
-			: action === 'update'
-				? route('update /[orgLabel]/clients/[clientId=uuid]', {
-						orgLabel: user.properties.orgLabel,
-						clientId: clientContactForm.data.id
-					})
-				: '';
 </script>
 
-<FormContainer class="min-w-96 max-w-lg" {form} action={formAction}>
+<FormContainer
+	class="min-w-96 max-w-lg"
+	{form}
+	action={route('default /[orgLabel]/clients/[action=crud]', {
+		action,
+		orgLabel: user.properties.orgLabel
+	})}
+>
 	{#snippet title()}
 		<span class="w-fit"> Client Profile </span>
 	{/snippet}

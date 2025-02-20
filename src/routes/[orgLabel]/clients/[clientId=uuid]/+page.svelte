@@ -31,7 +31,7 @@
 		</Stepper>
 	{/snippet}
 	{#if stepperStore.activePage.label === 'contact'}
-		<ClientContactForm clientContactForm={data.client.contactForm} mode="update"
+		<ClientContactForm action="create" clientContactForm={data.client.contactForm}
 		></ClientContactForm>
 	{:else if stepperStore.activePage.label === 'services'}
 		<ClientServicesPanel

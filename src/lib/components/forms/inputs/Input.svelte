@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { getField } from './context.svelte';
-	import type { HTMLInputAttributes } from 'svelte/elements';
-	let { class: classes, ...restProps }: { class?: string } & HTMLInputAttributes = $props();
+	import type { HTMLInputAttributes, HTMLInputTypeAttribute } from 'svelte/elements';
+	let {
+		type = 'text',
+		class: classes,
+		...restProps
+	}: { type?: HTMLInputTypeAttribute; class?: string } & HTMLInputAttributes = $props();
 	let { value, path, disabled, errors } = getField<string>();
 </script>
 

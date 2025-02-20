@@ -3,6 +3,7 @@ import { superForm, type FormOptions, type Infer, type SuperValidated } from "sv
 import { getFormMsgStore } from "."
 import { getModalStore } from "../modal"
 import type { ErrorMessage, ObjectEntries, ObjectIssue, ObjectSchema } from "valibot"
+import { getDrawerStore } from "../drawer"
 
 export type ISchema = ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
 
@@ -26,6 +27,7 @@ export default function <T extends ISchema>({ form, schema, opts = {} }:
 ) {
   let msgStore = getFormMsgStore()
   let modalStore = getModalStore()
+  let drawerStore = getDrawerStore()
   return superForm(form, {
     //@ts-ignore
     ...defaultFormOptions(schema),
@@ -34,6 +36,7 @@ export default function <T extends ISchema>({ form, schema, opts = {} }:
       if (e.result.type === "success") {
         msgStore.setMsg({ id: form.id, msg: "Success", status: "success" })
         modalStore.queue[0]?.response({ type: "save" })
+        drawerStore.queue[0]?.response({ type: 'save' })
       } else if (e.result.type === "error" || e.result.type === "failure") {
         msgStore.setMsg({ id: form.id, msg: "Error", status: "error" })
       }

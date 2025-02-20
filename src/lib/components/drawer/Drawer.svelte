@@ -33,7 +33,7 @@
 		<!-- Drawer -->
 		<!-- separate In/Out so anim values update -->
 		<div
-			class="bg-surface-100-800-token h-full {drawerStore.width} w-full overflow-y-auto shadow-xl transition-transform rounded-tl-container-token rounded-bl-container-token"
+			class="bg-surface-100-800-token h-full p-2 {drawerStore.width} w-full overflow-y-auto shadow-xl transition-transform rounded-tl-container-token rounded-bl-container-token"
 			data-testid="drawer"
 			role="dialog"
 			aria-modal="true"

@@ -73,7 +73,3 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
     },
   }
 }
-
-export const actions = {
-  update: async (e) => await clientUpdate(e)
-} satisfies Actions

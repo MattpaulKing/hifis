@@ -8,7 +8,14 @@ import { relations } from "drizzle-orm";
 export const logCategories = pgTable("log_categories", {
   ...uuidPK,
   ...timestamps,
-  label: text("label").notNull()
+  label: text("label").notNull(),
+  description: text("description").notNull()
+})
+
+export const logCategoriesFormSchema = v.object({
+  id: v.pipe(v.string(), v.uuid()),
+  label: v.pipe(v.string(), v.minLength(2, "Category label is required")),
+  description: v.pipe(v.string(), v.minLength(2, "Description is required")),
 })
 
 export const logs = pgTable("logs", {

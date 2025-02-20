@@ -77,5 +77,12 @@
 		<span class="row-start-3 mt-2">{activeLog.note}</span>
 	</div>
 {:else}
-	<LogForm action="create" {logForm} lookups={clientLogsFormLookups}></LogForm>
+	<LogForm
+		action="create"
+		{logForm}
+		lookups={clientLogsFormLookups}
+		formOpts={{
+			onUpdate({ form }) {}
+		}}
+	></LogForm>
 {/if}

@@ -2,8 +2,8 @@ import { superValidate } from "sveltekit-superforms";
 import { valibot } from "sveltekit-superforms/adapters";
 import { clientCreate, clientUpdate } from "../actions.server";
 import { clientContactFormSchema } from "../schema";
-import type { Actions, PageServerLoad } from "./types";
 import { error } from "@sveltejs/kit";
+import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ }) => {
   const today = new Date()
