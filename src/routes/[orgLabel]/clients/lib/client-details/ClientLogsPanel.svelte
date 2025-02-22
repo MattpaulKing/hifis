@@ -7,6 +7,7 @@
 	import type { clients } from '$src/schemas';
 	import type { FormValidated } from '$src/lib/interfaces';
 	import type { logsFormSchema } from '$routes/[orgLabel]/logs/schema';
+	import { PanelList, PanelListBtn } from '$src/lib/components/panels';
 
 	type Props = {
 		logForm: FormValidated<typeof logsFormSchema>;
@@ -34,35 +35,24 @@
 
 <GridItemTabs tabState={logsTabState} />
 {#if logsTabState.activeEntity?.id === 'all'}
-	<div
-		in:fade={{ duration: 700 }}
-		class="flex w-fit min-w-80 max-w-xl flex-col gap-x-4 overflow-y-auto bg-inherit p-4"
-	>
-		<span class="col-span-2 mx-5 text-xl font-bold">All Logs</span>
-		<ul class="list mt-2">
-			{#each Object.values(clientLogs) as log}
-				<li class="">
-					<button
-						disabled={logsTabState.findIdx(log.id) >= 0}
-						onclick={() => logsTabState.openTab(log)}
-						class="btn btn-sm grid w-full grid-cols-2 gap-2 hover:variant-ghost disabled:cursor-not-allowed"
-					>
-						<span class="-ml-3 font-bold">{log.label}</span>
-						<span class="text-surface-800-100-token justify-self-end text-sm">
-							{#if log.services.length > 0}
-								{log.services.map(({ label }) => label).join(' | ')}
-							{:else}
-								No services
-							{/if}
-						</span>
-						<span class="col-span-2 max-h-24 max-w-full justify-self-start truncate"
-							>{log.note}</span
-						>
-					</button>
-				</li>
-			{/each}
-		</ul>
-	</div>
+	<PanelList listItems={Object.values(clientLogs)}>
+		{#snippet listItem({ item: log })}
+			<PanelListBtn
+				disabled={logsTabState.findIdx(log.id) >= 0}
+				onclick={() => logsTabState.openTab(log)}
+			>
+				<span class="font-bold">{log.label}</span>
+				<span class="text-surface-800-100-token justify-self-end text-sm">
+					{#if log.services.length > 0}
+						{log.services.map(({ label }) => label).join(' | ')}
+					{:else}
+						No services
+					{/if}
+				</span>
+				<span class="col-span-2 max-h-24 justify-self-start truncate">{log.note}</span>
+			</PanelListBtn>
+		{/snippet}
+	</PanelList>
 {:else if activeLog}
 	<div in:fade={{ duration: 700 }} class="grid grid-cols-3 bg-inherit p-4">
 		<span class="col-span-2 text-lg font-bold">

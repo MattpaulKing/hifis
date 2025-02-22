@@ -1,7 +1,7 @@
 import { getContext, setContext } from "svelte"
 import { users } from "../../../schemas"
 
-type UserData = typeof users.$inferSelect & { orgLabel: string }
+export type UserData = typeof users.$inferSelect & { orgLabel: string }
 
 class User {
   properties = $state({} as UserData)

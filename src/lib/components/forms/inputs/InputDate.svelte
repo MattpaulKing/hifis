@@ -21,7 +21,7 @@
 	autocomplete="off"
 	class="input [&::-webkit-calendar-picker-indicator]:scale-150 [&::-webkit-calendar-picker-indicator]:bg-[url('/Calendar.png')] [&::-webkit-calendar-picker-indicator]:dark:invert"
 	name={path}
-	disabled={$disabled}
+	readonly={$disabled}
 	bind:value={$strValue}
 	aria-invalid={$errors ? 'true' : 'false'}
 	{...attrs}

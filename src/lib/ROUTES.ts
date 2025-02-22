@@ -43,14 +43,14 @@ const PAGES = {
   "/[orgLabel]/services": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/services`
   },
+  "/[orgLabel]/services/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
+    return `/${params.orgLabel}/services/${params.action}`
+  },
   "/[orgLabel]/services/[serviceId=uuid]": (params: { orgLabel: (string | number), serviceId: (Parameters<typeof import('../params/uuid.ts').match>[0]) }) => {
     return `/${params.orgLabel}/services/${params.serviceId}`
   },
   "/[orgLabel]/services/categories/create": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/services/categories/create`
-  },
-  "/[orgLabel]/services/create": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/services/create`
   },
   "/[orgLabel]/services/events": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/services/events`
@@ -107,11 +107,11 @@ const ACTIONS = {
   "default /[orgLabel]/logs/categories/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
     return `/${params.orgLabel}/logs/categories/${params.action}`
   },
+  "default /[orgLabel]/services/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
+    return `/${params.orgLabel}/services/${params.action}`
+  },
   "create /[orgLabel]/services/categories/create": (params: { orgLabel: (string | number) }) => {
     return `/${params.orgLabel}/services/categories/create?/create`
-  },
-  "create /[orgLabel]/services/create": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/services/create?/create`
   },
   "default /[orgLabel]/services/events/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
     return `/${params.orgLabel}/services/events/${params.action}`
@@ -225,9 +225,9 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 * ```
 */
 export type KIT_ROUTES = {
-  PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients': 'orgLabel', '/[orgLabel]/clients/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/clients/[clientId=uuid]': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]': 'orgLabel' | 'clientId' | 'action', '/[orgLabel]/clients/[clientId=uuid]/services/edit': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/events': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/events/[action=crud]': 'orgLabel' | 'clientId' | 'action', '/[orgLabel]/logs': 'orgLabel', '/[orgLabel]/logs/categories/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services': 'orgLabel', '/[orgLabel]/services/[serviceId=uuid]': 'orgLabel' | 'serviceId', '/[orgLabel]/services/categories/create': 'orgLabel', '/[orgLabel]/services/create': 'orgLabel', '/[orgLabel]/services/events': 'orgLabel', '/[orgLabel]/services/events/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/users/create': 'orgLabel', '/test': never }
+  PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients': 'orgLabel', '/[orgLabel]/clients/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/clients/[clientId=uuid]': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]': 'orgLabel' | 'clientId' | 'action', '/[orgLabel]/clients/[clientId=uuid]/services/edit': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/events': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/events/[action=crud]': 'orgLabel' | 'clientId' | 'action', '/[orgLabel]/logs': 'orgLabel', '/[orgLabel]/logs/categories/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services': 'orgLabel', '/[orgLabel]/services/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services/[serviceId=uuid]': 'orgLabel' | 'serviceId', '/[orgLabel]/services/categories/create': 'orgLabel', '/[orgLabel]/services/events': 'orgLabel', '/[orgLabel]/services/events/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/users/create': 'orgLabel', '/test': never }
   SERVERS: { 'GET /api/v1/clients': never, 'GET /api/v1/clients/services': never, 'GET /api/v1/logs/categories': never, 'GET /api/v1/organizations': never, 'GET /api/v1/search': never, 'GET /api/v1/services': never, 'GET /api/v1/services/categories': never, 'GET /api/v1/services/events': never, 'GET /api/v1/user/grid': never, 'GET /auth/callback': never }
-  ACTIONS: { 'default /[orgLabel]/clients/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/clients/[clientId=uuid]/services/[action=crud]': 'orgLabel' | 'clientId' | 'action', 'edit /[orgLabel]/clients/[clientId=uuid]/services/edit': 'orgLabel' | 'clientId', 'default /[orgLabel]/clients/[clientId=uuid]/services/events/[action=crud]': 'orgLabel' | 'clientId' | 'action', 'create /[orgLabel]/logs': 'orgLabel', 'update /[orgLabel]/logs': 'orgLabel', 'default /[orgLabel]/logs/categories/[action=crud]': 'orgLabel' | 'action', 'create /[orgLabel]/services/categories/create': 'orgLabel', 'create /[orgLabel]/services/create': 'orgLabel', 'default /[orgLabel]/services/events/[action=crud]': 'orgLabel' | 'action', 'create /[orgLabel]/users/create': 'orgLabel' }
+  ACTIONS: { 'default /[orgLabel]/clients/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/clients/[clientId=uuid]/services/[action=crud]': 'orgLabel' | 'clientId' | 'action', 'edit /[orgLabel]/clients/[clientId=uuid]/services/edit': 'orgLabel' | 'clientId', 'default /[orgLabel]/clients/[clientId=uuid]/services/events/[action=crud]': 'orgLabel' | 'clientId' | 'action', 'create /[orgLabel]/logs': 'orgLabel', 'update /[orgLabel]/logs': 'orgLabel', 'default /[orgLabel]/logs/categories/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/[action=crud]': 'orgLabel' | 'action', 'create /[orgLabel]/services/categories/create': 'orgLabel', 'default /[orgLabel]/services/events/[action=crud]': 'orgLabel' | 'action', 'create /[orgLabel]/users/create': 'orgLabel' }
   LINKS: Record<string, never>
   Params: { orgLabel: never, action: never, clientId: never, serviceId: never, value: never }
 }

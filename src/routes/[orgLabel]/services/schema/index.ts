@@ -21,10 +21,10 @@ export const servicesFormSchema = v.object({
   id: v.pipe(v.string(), v.uuid()),
   label: v.pipe(v.string("Service's name is required"), v.minLength(1, "Service's name is required")),
   address: v.pipe(v.string("Address is required")),
-  phone: v.string(),
+  phone: v.nullable(v.string()),
   email: v.nullable(v.pipe(v.string(), v.email("Invalid email format"))),
   categoryId: v.pipe(v.string("Category is required"), v.uuid()),
-  description: v.string(),
+  description: v.nullable(v.string()),
   orgId: v.pipe(v.string(), v.uuid())
 })
 

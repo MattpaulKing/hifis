@@ -24,29 +24,39 @@
 
 <Drawer />
 <Modal />
-<div class="h-screen w-screen overflow-hidden">
-	<div class="col-span-2 flex h-14 w-full place-items-center justify-between bg-surface-500 px-5">
-		<a href={route('/[orgLabel]', { orgLabel: data.org.label })} class="h3 font-bold">HIFIS</a>
-		<div>
-			<NavBarSearch></NavBarSearch>
-		</div>
-		<div class="relative">
-			<UserAvatar onclick={onUserAvatarClick}></UserAvatar>
-			{#if userMenuOpen}
-				<UserMenu></UserMenu>
-			{/if}
+<div
+	class="grid h-full max-h-screen w-full max-w-full grid-cols-[auto_1fr] grid-rows-[auto_1fr] items-start overflow-hidden"
+>
+	<div class="relative z-10 col-span-2 h-14">
+		<div class="fixed flex h-14 w-full place-items-center justify-between bg-surface-500 px-5">
+			<a href={route('/[orgLabel]', { orgLabel: data.org.label })} class="h3 font-bold">HIFIS</a>
+			<div>
+				<NavBarSearch></NavBarSearch>
+			</div>
+			<div class="relative">
+				<UserAvatar onclick={onUserAvatarClick}></UserAvatar>
+				{#if userMenuOpen}
+					<UserMenu></UserMenu>
+				{/if}
+			</div>
 		</div>
 	</div>
-	<div class="grid h-full w-full grid-cols-[auto_1fr]">
+	<div class="relative z-10 flex min-h-fit w-24">
 		<nav
 			in:fade
-			class="sticky grid h-full w-fit grid-cols-1 items-start bg-surface-700 [&>.btn]:rounded-none"
+			class="fixed grid h-full w-fit auto-rows-min grid-cols-1 items-start gap-y-1 bg-surface-700 [&>.btn]:rounded-none"
 		>
 			<SidebarAnchor href={route('/[orgLabel]/clients', { orgLabel: data.org.label })}>
-				<img src="/FolderUser.png" alt="client-folder" />
+				<img src="/FolderUser.png" alt="icon" />
 				<span>Clients</span>
 			</SidebarAnchor>
+			<SidebarAnchor href={route('/[orgLabel]/services', { orgLabel: data.org.label })}>
+				<img src="/Buildings.png" alt="icon" />
+				<span>Services</span>
+			</SidebarAnchor>
 		</nav>
+	</div>
+	<div class="relative flex h-full w-full overflow-y-auto">
 		{@render children()}
 	</div>
 </div>

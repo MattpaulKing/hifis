@@ -4,6 +4,7 @@
 	import { default as ClientServiceEventsFormPage } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/events/[action=crud]/+page.svelte';
 	import { GridItemTabs, GridItemTabsState } from '$src/lib/components/user-grid';
 	import { ClientServiceForm } from '../../[clientId=uuid]/services/lib';
+	import { PanelList, PanelListBtn } from '$src/lib/components/panels';
 	import { retryExp } from '$src/lib/api';
 	import { route } from '$src/lib/ROUTES';
 	import { page } from '$app/state';
@@ -90,31 +91,18 @@
 
 <GridItemTabs tabState={serviceTabState} />
 {#if serviceTabState.activeEntity?.id === 'all'}
-	<div in:fade={{ duration: 700 }} class="flex w-fit min-w-80 flex-col gap-x-4 bg-inherit p-4">
-		<span class="col-span-2 mx-4 text-xl font-bold">All Services</span>
-		<ul class="list mt-2">
-			{#each Object.values(clientServices) as service}
-				<li class="">
-					<button
-						disabled={serviceTabState.findIdx(service.id) >= 0}
-						onclick={() => serviceTabState.openTab(service)}
-						class="btn btn-sm grid w-full grid-cols-2 gap-2 hover:variant-ghost disabled:cursor-not-allowed"
-					>
-						<span class="font-bold"> {service.label}</span>
-						<span class="text-surface-800-100-token justify-self-end text-sm"
-							>{service.orgLabel}</span
-						>
-						<span class="col-span-2 justify-self-start">{service.clientServiceDescription}</span>
-					</button>
-				</li>
-			{/each}
-			{#if Object.values(clientServices).length === 0}
-				<li>
-					<span class="mx-4">No services attached...</span>
-				</li>
-			{/if}
-		</ul>
-	</div>
+	<PanelList listItems={Object.values(clientServices)}>
+		{#snippet listItem({ item: service })}
+			<PanelListBtn
+				disabled={serviceTabState.findIdx(service.id) >= 0}
+				onclick={() => serviceTabState.openTab(service)}
+			>
+				<span class="font-bold"> {service.label}</span>
+				<span class="text-surface-800-100-token justify-self-end text-sm">{service.orgLabel}</span>
+				<span class="col-span-2 justify-self-start">{service.clientServiceDescription}</span>
+			</PanelListBtn>
+		{/snippet}
+	</PanelList>
 {:else if activeService}
 	<div
 		in:fade={{ duration: 700 }}

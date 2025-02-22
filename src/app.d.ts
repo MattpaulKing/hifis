@@ -2,17 +2,19 @@
 
 import type { parse } from "valibot";
 import type { users } from "./schemas";
-import type { UserSubject } from "$lib/user/userContext";
 import type { DB } from "./lib/server/db/client";
+import type { UserData } from "./lib/components/user/userContext.svelte";
+
+type Subject = {
+  type: "user",
+  properties: UserData
+}
 
 // for information about these interfaces
 declare global {
   namespace App {
     interface Locals {
-      subject: {
-        type: "user";
-        properties: UserData
-      },
+      subject: Subject,
       db: DB
     }
     // interface Error {}

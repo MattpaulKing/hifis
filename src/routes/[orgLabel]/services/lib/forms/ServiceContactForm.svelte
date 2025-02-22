@@ -11,19 +11,23 @@
 		Label,
 		LookupDropdown,
 		FormBtns,
-		LookupStore
+		LookupStore,
+		type FormMode,
+		FormTitle
 	} from '$lib/components/forms';
 	import ServiceCategoriesCreatePage from '$routes/[orgLabel]/services/categories/create/+page.svelte';
 	import { route } from '$lib/ROUTES';
-	import { lookupCtxDefault, type FormValidated } from '$src/lib/interfaces';
 	import { servicesFormSchema } from '../../schema';
 	import { getUser } from '$src/lib/components/user';
+	import type { FormValidated } from '$src/lib/interfaces';
 	import type { Component } from 'svelte';
 
 	type Props = {
 		serviceForm: FormValidated<typeof servicesFormSchema>;
+		action: FormMode;
+		lookups: { serviceCategory: LookupStore };
 	};
-	let { serviceForm }: Props = $props();
+	let { serviceForm, action, lookups }: Props = $props();
 	let user = getUser();
 	const orgLabel = user.properties.orgLabel;
 	let form = initForm({
@@ -41,19 +45,26 @@
 			width: 'xl:w-1/4'
 		});
 	}
-	let lookups = new LookupStore(lookupCtxDefault());
+	let { form: formData } = form;
 </script>
 
-<FormContainer {form} action={route('create /[orgLabel]/services/create', { orgLabel })}>
-	{#snippet title()}
-		<span>Add a Service</span>
-	{/snippet}
+<FormContainer
+	{form}
+	action={route('default /[orgLabel]/clients/[action=crud]', { action, orgLabel })}
+>
+	<FormTitle>
+		{#if action === 'create'}
+			<span>Add a Service</span>
+		{:else}
+			<span>Edit {$formData.label}</span>
+		{/if}
+	</FormTitle>
 	<Field {form} path="label">
 		<Label label="Service Title"></Label>
 		<Input type="text" />
 		<Errors />
 	</Field>
-	<Field {form} path="categoryId" {lookups}>
+	<Field {form} path="categoryId" lookups={lookups.serviceCategory}>
 		<Label label="Service Category">
 			<button
 				type="button"

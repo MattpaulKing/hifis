@@ -4,7 +4,6 @@ import { single } from "$lib/server/db"
 import { services } from "$routes/[orgLabel]/services/schema"
 import { superValidate } from "sveltekit-superforms"
 import { valibot } from "sveltekit-superforms/adapters"
-import { clientUpdate } from "../actions.server"
 import { serviceCategories } from "$routes/[orgLabel]/services/categories/schema"
 import { organizations } from "$routes/[orgLabel]/schema"
 import { clientServiceEvents, clientsServices, serviceEvents } from "$src/schemas"
@@ -12,7 +11,7 @@ import { clientServiceFormSchema } from "./services/schema"
 import { rowsToMap } from "$src/lib/helpers"
 import { logsFormSchema } from "$routes/[orgLabel]/logs/schema"
 import { logsWithClientsAndServices, aggLogsWitsClientsAndServices } from "$routes/[orgLabel]/logs/lib"
-import type { Actions, PageServerLoad } from "./$types"
+import type { PageServerLoad } from "./$types"
 
 export const load: PageServerLoad = async ({ url: { searchParams }, params: { clientId }, locals: { db } }) => {
   let params = Object.fromEntries(searchParams)

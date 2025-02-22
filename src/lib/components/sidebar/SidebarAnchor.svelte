@@ -9,15 +9,13 @@
 	let active = $derived(page.url.pathname === href);
 </script>
 
-{#key page.url.pathname}
-	<a
-		{href}
-		class="btn btn-sm ml-0 flex flex-col items-center
+<a
+	{href}
+	class="btn btn-sm ml-0 flex flex-col items-center
     font-bold transition-colors
     [&>span]:relative [&>span]:-left-1 [&>span]:text-sm {active
-			? 'variant-filled'
-			: 'hover:variant-ghost [&>img]:dark:invert'}"
-	>
-		{@render children()}
-	</a>
-{/key}
+		? 'variant-filled'
+		: 'hover:variant-ghost [&>img]:dark:invert'}"
+>
+	{@render children()}
+</a>

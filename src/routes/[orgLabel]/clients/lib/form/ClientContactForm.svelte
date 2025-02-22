@@ -69,6 +69,7 @@
 		action,
 		orgLabel: user.properties.orgLabel
 	})}
+	disabled={action === 'read'}
 >
 	{#snippet title()}
 		<span class="w-fit"> Client Profile </span>
