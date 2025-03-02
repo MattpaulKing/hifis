@@ -1,9 +1,9 @@
 import { getRouteData } from '$lib/urls';
 import type { modalStore as ModalStore } from '.';
-import type { Modal } from './store.svelte';
+import type { Modal, ModalResponse } from './store.svelte';
 
 
-export default async function <T extends { type: "close" | "save" } | undefined>({ id, routes, ref, modalStore }: {
+export default async function <T extends ModalResponse | undefined>({ id, routes, ref, modalStore }: {
   id?: string,
   modalStore: ModalStore,
   routes: { from: string, to: string },
@@ -21,7 +21,7 @@ export default async function <T extends { type: "close" | "save" } | undefined>
         return { data }
       },
       response: (r) => {
-        resolve(r)
+        resolve(r as T)
       }
     })
   })

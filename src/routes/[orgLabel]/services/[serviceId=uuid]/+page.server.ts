@@ -6,21 +6,28 @@ import { single } from "$src/lib/server/db"
 import { clients, clientServiceEvents, clientsServices, serviceCategories, serviceEvents } from "$src/schemas"
 import { rowsToMap } from "$src/lib/helpers"
 import { clientContactFormSchema } from "$routes/[orgLabel]/clients/schema"
+import { serviceEventsFormSchema } from "../events/schema"
+import { clientServiceFormSchema } from "$routes/[orgLabel]/clients/[clientId=uuid]/services/schema"
 import type { PageServerLoad, Actions } from "./$types"
 
 export const load: PageServerLoad = async ({ params: { serviceId }, locals: { db } }) => {
   return {
-    serviceForm: await superValidate(
-      await db
-        .select()
-        .from(services)
-        .where(eq(services.id, serviceId))
-        .then(single),
-      valibot(servicesFormSchema), { errors: false }),
+    ...await db
+      .select()
+      .from(services)
+      .where(eq(services.id, serviceId))
+      .then(single)
+      .then(async service => {
+        return {
+          service,
+          serviceForm: await superValidate(service, valibot(servicesFormSchema), { errors: false }),
+        }
+      }),
     clients: await db
       .select({
         ...getTableColumns(clients),
-        clientServiceDescription: clientsServices.description
+        clientServiceDescription: clientsServices.description,
+        clientServiceId: clientsServices.id
       })
       .from(clients)
       .innerJoin(clientsServices, eq(clientsServices.clientId, clients.id))
@@ -29,28 +36,33 @@ export const load: PageServerLoad = async ({ params: { serviceId }, locals: { db
     ...await db
       .select({
         ...getTableColumns(serviceEvents),
-        clientId: clientServiceEvents.clientId
+        client: { ...getTableColumns(clients) }
       })
-      .from(clientServiceEvents)
-      .innerJoin(serviceEvents, eq(clientServiceEvents.serviceEventId, serviceEvents.id))
+      .from(serviceEvents)
+      .leftJoin(clientServiceEvents, eq(clientServiceEvents.serviceEventId, serviceEvents.id))
+      .leftJoin(clients, eq(clients.id, clientServiceEvents.clientId))
       .where(eq(serviceEvents.serviceId, serviceId))
       .then(rows => rows.reduce((agg, row) => {
-        if (row.clientId in agg) {
-          agg.clientsEvents[row.clientId].push(row)
-        } else {
-          agg.clientsEvents[row.clientId] = [row]
+        let { client, ...serviceEvent } = row
+        if (client?.id && client.id in agg.clientsEvents) {
+          agg.clientsEvents[client.id].push(serviceEvent)
+        } else if (client?.id) {
+          agg.clientsEvents[client.id] = [serviceEvent]
         }
-        if (row.id in agg.servicesEvents) {
-          agg.servicesEvents[row.id].push(row)
-        } else {
-          agg.servicesEvents[row.id] = [row]
+        if (!(row.id in agg.serviceEvents)) {
+          agg.serviceEvents[serviceEvent.id] = { ...serviceEvent, attending: {} }
+        }
+        if (client && !(client.id in agg.serviceEvents[serviceEvent.id].attending)) {
+          agg.serviceEvents[serviceEvent.id].attending[client.id] = client
         }
         return agg
-      }, { clientsEvents: {}, servicesEvents: {} } as {
+      }, { clientsEvents: {}, serviceEvents: {} } as {
         clientsEvents: Record<string, typeof serviceEvents.$inferSelect[]>,
-        servicesEvents: Record<string, typeof serviceEvents.$inferSelect[]>
+        serviceEvents: Record<string, typeof serviceEvents.$inferSelect & { attending: Record<string, typeof clients.$inferSelect> }>
       })),
-    clientContactForm: await superValidate(valibot(clientContactFormSchema)),
+    clientContactForm: await superValidate({ id: crypto.randomUUID() }, valibot(clientContactFormSchema), { errors: false }),
+    clientServiceForm: await superValidate({ id: crypto.randomUUID() }, valibot(clientServiceFormSchema), { errors: false }),
+    serviceEventForm: await superValidate({ id: crypto.randomUUID(), serviceId }, valibot(serviceEventsFormSchema), { errors: false }),
     lookups: {
       serviceCategory: await db
         .select({ id: serviceCategories.id, label: serviceCategories.label })

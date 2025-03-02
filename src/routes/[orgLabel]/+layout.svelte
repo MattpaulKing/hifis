@@ -8,13 +8,18 @@
 	import { route } from '$src/lib/ROUTES';
 	import { fade } from 'svelte/transition';
 	import SidebarAnchor from '$src/lib/components/sidebar/SidebarAnchor.svelte';
+	import { page } from '$app/state';
 
 	let { data, children } = $props();
 
 	setFormMsgStore();
 	setDrawerStore({ isOpen: false });
 	setModalStore();
-	setUser({ ...data.user, orgLabel: data.org.label });
+	setUser({
+		user: { ...data.user, orgLabel: data.org.label },
+		clients: data.usersClients,
+		services: []
+	});
 	let userMenuOpen = $state(false);
 
 	function onUserAvatarClick() {
@@ -25,9 +30,9 @@
 <Drawer />
 <Modal />
 <div
-	class="grid h-full max-h-screen w-full max-w-full grid-cols-[auto_1fr] grid-rows-[auto_1fr] items-start overflow-hidden"
+	class="grid h-full min-h-screen w-full max-w-full grid-cols-[auto_1fr] grid-rows-[auto_1fr] items-start overflow-hidden"
 >
-	<div class="relative z-10 col-span-2 h-14">
+	<div class="relative z-20 col-span-2 h-14">
 		<div class="fixed flex h-14 w-full place-items-center justify-between bg-surface-500 px-5">
 			<a href={route('/[orgLabel]', { orgLabel: data.org.label })} class="h3 font-bold">HIFIS</a>
 			<div>
@@ -41,7 +46,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="relative z-10 flex min-h-fit w-24">
+	<div class="relative z-20 flex min-h-fit w-24">
 		<nav
 			in:fade
 			class="fixed grid h-full w-fit auto-rows-min grid-cols-1 items-start gap-y-1 bg-surface-700 [&>.btn]:rounded-none"

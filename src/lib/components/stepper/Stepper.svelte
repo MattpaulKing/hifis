@@ -4,12 +4,13 @@
 	import { slide } from 'svelte/transition';
 	type EventProps = MouseEvent & { currentTarget: EventTarget & HTMLButtonElement };
 	type Props = {
-		title: string;
+		label: string;
+		subLabel?: string;
 		stepperStore: StepperStore;
 		onToggle?: (e: EventProps) => void;
 		children: Snippet;
 	};
-	let { title, stepperStore, onToggle, children }: Props = $props();
+	let { label, subLabel, stepperStore, onToggle, children }: Props = $props();
 	function onclick(e: EventProps) {
 		stepperStore.expanded = !stepperStore.expanded;
 		onToggle?.(e);
@@ -26,7 +27,7 @@
 		>
 			<div class="flex w-full place-items-center justify-between gap-x-4 text-lg font-bold">
 				{#if stepperStore.expanded}
-					<span>{title}</span>
+					<span>{label}</span>
 				{/if}
 				<button
 					{onclick}
@@ -41,6 +42,7 @@
 					/></button
 				>
 			</div>
+			<span class="{subLabel ? 'block' : 'hidden'} text-sm">{subLabel}</span>
 			<div class="relative z-50 col-span-2 mt-4 flex h-fit w-full">
 				<div
 					class="bg-surface-400-500-token absolute left-1/2 -z-10 hidden h-full w-0.5 md:block"

@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import { default as ClientServicesFormPage } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]/+page.svelte';
-	import { default as ClientServiceEventsFormPage } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/events/[action=crud]/+page.svelte';
+	import { default as ClientServiceEventsFormPage } from '$routes/[orgLabel]/services/events/clients/[action=crud]/+page.svelte';
 	import { GridItemTabs, GridItemTabsState } from '$src/lib/components/user-grid';
 	import { ClientServiceForm } from '../../[clientId=uuid]/services/lib';
-	import { PanelList, PanelListBtn } from '$src/lib/components/panels';
+	import { PanelList, PanelListModalBtn, PanelListBtn } from '$src/lib/components/panels';
 	import { retryExp } from '$src/lib/api';
 	import { route } from '$src/lib/ROUTES';
-	import { page } from '$app/state';
 	import { getUser } from '$src/lib/components/user';
-	import { getModalStore, openModal } from '$src/lib/components/modal';
+	import { getModalStore } from '$src/lib/components/modal';
 	import { serviceEvents } from '$src/schemas';
 	import type { FormValidated } from '$src/lib/interfaces';
 	import type { clientServiceFormSchema } from '../../[clientId=uuid]/services/schema';
@@ -81,11 +80,10 @@
 		})}?clientId=${clientServiceForm.data.clientId}&serviceId=${serviceId}`;
 	}
 	function addServiceEventRoute(serviceId: string) {
-		return `${route('/[orgLabel]/clients/[clientId=uuid]/services/events/[action=crud]', {
-			action: 'create',
-			clientId: clientServiceForm.data.clientId,
-			orgLabel: user.properties.orgLabel
-		})}?serviceId=${serviceId}`;
+		return `${route('/[orgLabel]/services/events/clients/[action=crud]', {
+			orgLabel: user.properties.orgLabel,
+			action: 'create'
+		})}?clientId=${clientServiceForm.data.clientId}&serviceId=${serviceId}`;
 	}
 </script>
 
@@ -111,66 +109,45 @@
 		<span class="text-xl font-bold">
 			{activeService.label}
 		</span>
-
-		<a
-			onclick={async (e) => {
-				e.preventDefault();
-				await openModal({
-					routes: {
-						from: page.url.toString(),
-						to: editServiceRoute(activeService.id)
-					},
-					ref: ClientServicesFormPage,
-					modalStore
-				}).then(async (response) => {
-					if (response?.type === 'save') {
-						pushClientsService({ serviceId: activeService.id });
-					}
-				});
-			}}
+		<PanelListModalBtn
+			class="variant-outline-surface hover:variant-filled"
 			href={editServiceRoute(activeService.id)}
-			class="group variant-ghost btn-icon btn-icon-sm h-8 w-8 place-self-end
-      justify-self-end transition-colors rounded-token hover:variant-filled"
+			ref={ClientServicesFormPage}
+			onCreate={async (response) => {
+				if (response?.type === 'save') {
+					pushClientsService({ serviceId: activeService.id });
+				}
+			}}
 		>
-			<img src="/NotePencil.png" class="p-1 group-hover:filter-none dark:invert" alt="update" />
-		</a> <span class="">{activeService.categoryLabel}</span>
-
+			<img src="/NotePencil.png" class="hover:filter-none dark:invert" alt="edit" />
+		</PanelListModalBtn>
+		<span class="">{activeService.categoryLabel}</span>
 		<span class="col-span-2 mt-4">{activeService.clientServiceDescription ?? 'No description'}</span
 		>
 		<hr class="col-span-2 my-2" />
 		<span class="mt-4 font-bold">Upcoming Appointments</span>
-		<a
-			onclick={async (e) => {
-				e.preventDefault();
-				openModal({
-					routes: {
-						from: page.url.toString(),
-						to: addServiceEventRoute(activeService.id)
-					},
-					ref: ClientServiceEventsFormPage,
-					modalStore
-				}).then(async (response) => {
-					if (response?.type === 'save') {
-						let res = await fetch(
-							`${route('GET /api/v1/services/events')}?serviceId=${activeService.id}`
-						).then(async (r) => (await r.json()) as (typeof serviceEvents.$inferSelect)[]);
-						clientServiceEvents[activeService.id] = [
-							...res.map((serviceEvent) => ({
-								...serviceEvent,
-								startTS: new Date(serviceEvent.startTS),
-								endTS: new Date(serviceEvent.endTS)
-							})),
-							...(clientServiceEvents[activeService.id] ?? [])
-						];
-					}
-				});
-			}}
+		<PanelListModalBtn
+			class="variant-outline-success hover:variant-filled-success"
 			href={addServiceEventRoute(activeService.id)}
-			class="variant-outline-success btn-icon btn-icon-sm h-7 w-7 place-self-end
-      justify-self-end transition-colors rounded-token hover:variant-filled-success"
+			ref={ClientServiceEventsFormPage}
+			onCreate={async (response) => {
+				if (response?.type === 'save') {
+					let res = await fetch(
+						`${route('GET /api/v1/services/events')}?serviceId=${activeService.id}&clientId=${clientServiceForm.data.clientId}`
+					).then(async (r) => (await r.json()) as (typeof serviceEvents.$inferSelect)[]);
+					clientServiceEvents[activeService.id] = [
+						...res.map((serviceEvent) => ({
+							...serviceEvent,
+							startTS: new Date(serviceEvent.startTS),
+							endTS: new Date(serviceEvent.endTS)
+						}))
+					];
+				}
+				modalStore.close();
+			}}
 		>
 			<img src="/Plus.png" class="h-5 w-5 p-1 group-hover:filter-none dark:invert" alt="add" />
-		</a>
+		</PanelListModalBtn>
 		<div class="col-span-2 mt-4 grid h-fit w-full grid-cols-2">
 			{#each activeService.serviceEvents as serviceEvent}
 				<span class="">{serviceEvent.label}</span>

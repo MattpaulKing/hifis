@@ -28,7 +28,6 @@
 		} else {
 			apiRoute = _apiRoute.concat(`?search=${store.inputValue}&looukps=true`);
 		}
-		console.log(apiRoute);
 		let fetchedLookups = await fetch(apiRoute).then(async (r) => (await r.json()) as Lookup[]);
 		store.filterFetchedLookups({ fetchedLookups, $value });
 		store.searching = false;
@@ -49,7 +48,7 @@
 	tabindex="0"
 	aria-expanded={$focused}
 	class="input-group overflow-hidden [&>div]:px-2
-  {$disabled ? 'border-none' : ''}
+  {$disabled ? 'focus-within:border-transparent' : ''}
   {isArray ? 'grid-cols-[auto_1fr_auto]' : 'grid-cols-[1fr_auto]'}"
 	onfocus={handleSearch}
 	onclick={handleSearch}

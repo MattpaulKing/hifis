@@ -12,44 +12,33 @@
 		initForm,
 		type FormMode
 	} from '$lib/components/forms';
-	import ClientsKeepAdding from '$routes/[orgLabel]/clients/lib/ClientsAddMoreDialog.svelte';
-	import { getModalStore } from '$lib/components/modal/context.js';
 	import { route } from '$lib/ROUTES';
-	import { page } from '$app/state';
 	import { getUser } from '$lib/components/user';
 	import { clientContactFormSchema } from '../../schema';
 	import type { FormValidated } from '$lib/interfaces';
 	import type { Lookup } from '$lib/interfaces/Lookup';
+	import type { FormOptions, Infer } from 'sveltekit-superforms';
 
 	let {
 		clientContactForm,
-		action
-	}: { clientContactForm: FormValidated<typeof clientContactFormSchema>; action: FormMode } =
-		$props();
+		action,
+		opts
+	}: {
+		clientContactForm: FormValidated<typeof clientContactFormSchema>;
+		action: FormMode;
+		opts?: FormOptions<Infer<typeof clientContactFormSchema>>;
+	} = $props();
 	let user = getUser();
 	let form = initForm({
 		form: clientContactForm,
 		schema: clientContactFormSchema,
-		opts: {
-			onUpdate({ form }) {
-				if (form.valid && action === 'create') {
-					modalStore.add({
-						id: 'clients-create',
-						type: 'component',
-						ref: ClientsKeepAdding,
-						props: () => ({ orgLabel: user.properties.orgLabel, clientId: form.data.id }),
-						routes: { from: page.url.toString(), to: page.url.toString() }
-					});
-				}
-			}
-		}
+		opts
 	});
 
 	let { form: formData } = form;
 	let possibleDuplicates = $state<Lookup[]>([]);
 	let debouncer = new Debouncer({ callback: fetchDuplicates });
 	let msgStore = getFormMsgStore();
-	let modalStore = getModalStore();
 
 	async function fetchDuplicates() {
 		if (!$formData.firstName || !$formData.lastName) return;
@@ -63,13 +52,12 @@
 </script>
 
 <FormContainer
-	class="min-w-96 max-w-lg"
+	class="min-w-96 max-w-lg p-6"
 	{form}
 	action={route('default /[orgLabel]/clients/[action=crud]', {
 		action,
 		orgLabel: user.properties.orgLabel
 	})}
-	disabled={action === 'read'}
 >
 	{#snippet title()}
 		<span class="w-fit"> Client Profile </span>

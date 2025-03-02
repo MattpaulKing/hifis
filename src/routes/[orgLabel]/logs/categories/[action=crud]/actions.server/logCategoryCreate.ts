@@ -2,11 +2,10 @@ import { insertFormData, validateForm } from "$lib/server/forms"
 import { logCategories, logCategoriesFormSchema } from "$routes/[orgLabel]/logs/schema"
 import type { RequestEvent } from "../$types"
 
-export default async function(e: RequestEvent) {
-  const { request, locals: { db } } = e
-  const form = await validateForm({ request, schema: logCategoriesFormSchema })
+export default async function(requestEvent: RequestEvent) {
+  const form = await validateForm({ requestEvent, schema: logCategoriesFormSchema })
   return await insertFormData({
-    db,
+    db: requestEvent.locals.db,
     form,
     table: logCategories
   })

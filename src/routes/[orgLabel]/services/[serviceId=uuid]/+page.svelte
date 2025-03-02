@@ -2,7 +2,7 @@
 	import { FormCard, LookupStore } from '$src/lib/components/forms';
 	import { Step, Stepper, StepperStore } from '$src/lib/components/stepper';
 	import { lookupCtxFromSingle } from '$src/lib/interfaces/lookups';
-	import { ServiceClientsPanel, ServiceContactForm } from '../lib';
+	import { ServiceClientsPanel, ServiceContactForm, ServiceEventsPanel } from '../lib';
 
 	let { data } = $props();
 	let stepperStore = new StepperStore({
@@ -13,13 +13,14 @@
 	let lookups = {
 		serviceCategory: new LookupStore(lookupCtxFromSingle(data.lookups.serviceCategory))
 	};
-	let servicesClients = $state(data.clients);
+	let clients = $state(data.clients);
 	let clientServiceEvents = $state(data.clientsEvents);
+	let serviceEvents = $state(data.serviceEvents);
 </script>
 
 <FormCard>
 	{#snippet stepper()}
-		<Stepper title="Service" {stepperStore}>
+		<Stepper label="Service" {stepperStore}>
 			{#each stepperStore.pages as page, idx}
 				<Step {stepperStore} {idx} {page}>
 					{stepperStore.expanded ? page.label : idx + 1}
@@ -32,11 +33,14 @@
 		></ServiceContactForm>
 	{:else if stepperStore.activePage.label === 'clients'}
 		<ServiceClientsPanel
-			{servicesClients}
+			{clients}
+			service={data.service}
 			{clientServiceEvents}
 			clientContactForm={data.clientContactForm}
+			clientServiceForm={data.clientServiceForm}
 		></ServiceClientsPanel>
 	{:else if stepperStore.activePage.label === 'events'}
-		<div></div>
+		<ServiceEventsPanel {serviceEvents} serviceEventForm={data.serviceEventForm}
+		></ServiceEventsPanel>
 	{/if}
 </FormCard>

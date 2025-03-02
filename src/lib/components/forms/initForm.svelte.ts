@@ -7,9 +7,16 @@ import type { ErrorMessage, ObjectEntries, ObjectIssue, ObjectSchema } from "val
 
 export type ISchema = ObjectSchema<ObjectEntries, ErrorMessage<ObjectIssue> | undefined>
 
-function defaultFormOptions<T extends ISchema>(validator: T) {
-  return {
-    validators: valibot(validator),
+export default function <T extends ISchema>({ form, schema, opts }:
+  { form: SuperValidated<Infer<T>, any, Infer<T>>, schema: T, opts?: FormOptions<Infer<T>, any, Infer<T>> }
+) {
+  let msgStore = getFormMsgStore()
+  let modalStore = getModalStore()
+  let drawerStore = getDrawerStore()
+  //@ts-ignore
+  return superForm(form, {
+    id: form.data.id ?? crypto.randomUUID(),
+    validators: valibot(schema),
     dataType: "json",
     applyAction: true,
     errorSelector: '[aria-invalid="true"],[data-invalid]',
@@ -17,21 +24,9 @@ function defaultFormOptions<T extends ISchema>(validator: T) {
     stickyNavbar: ".app-bar" as const,
     delayMs: 700,
     timeoutMs: 8000,
-    resetForm: true,
-    invalidateAll: true
-  } as FormOptions<Infer<T>, any, Infer<T>>
-}
-
-export default function <T extends ISchema>({ form, schema, opts = {} }:
-  { form: SuperValidated<Infer<T>, any, Infer<T>>, schema: T, opts?: FormOptions<Infer<T>, any, Infer<T>> }
-) {
-  let msgStore = getFormMsgStore()
-  let modalStore = getModalStore()
-  let drawerStore = getDrawerStore()
-  return superForm(form, {
-    //@ts-ignore
-    ...defaultFormOptions(schema),
-    ...opts,
+    resetForm: false,
+    invalidateAll: true,
+    // ...opts,
     onResult(e) {
       if (e.result.type === "success") {
         msgStore.setMsg({ id: form.id, msg: "Success", status: "success" })
@@ -40,8 +35,8 @@ export default function <T extends ISchema>({ form, schema, opts = {} }:
       } else if (e.result.type === "error" || e.result.type === "failure") {
         msgStore.setMsg({ id: form.id, msg: "Error", status: "error" })
       }
-      if (opts.onResult) {
-        opts.onResult(e)
+      if (opts?.onResult) {
+        opts?.onResult(e)
       }
     },
   })

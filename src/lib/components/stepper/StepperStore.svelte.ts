@@ -25,7 +25,7 @@ export default class {
   private setHref(searchKey: string, i: number) {
     let searchParams = page.url.searchParams
     searchParams.set(searchKey, i.toString())
-    return new URL(`${page.url.origin}${page.url.pathname}?${searchParams}`).toString()
+    return new URL(`${page.url.origin}${page.url.pathname}?${searchParams.toString()}`).toString()
   }
   private initActiveIndex(searchKey: string) {
     if (!searchKey) return 0

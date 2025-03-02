@@ -7,6 +7,7 @@
 		tabState: GridItemTabsState;
 		tabRef?: HTMLDivElement;
 		onclick?: (t: TabEntity) => void;
+		onClose?: (t: TabEntity) => void;
 		onAdd?: () => void;
 		onpointerdown?: ((e: PointerEvent) => void) | null;
 		onpointerup?: (e: PointerEvent) => void;
@@ -18,6 +19,7 @@
 		onpointerup,
 		onpointerdown,
 		onclick,
+		onClose,
 		onAdd,
 		children
 	}: Props = $props();
@@ -76,8 +78,9 @@
 						e.stopPropagation();
 						if (tabState.entities.length === 1 && entity.tabType === 'new-entity') return;
 						tabState.remove({ entity });
+						onClose?.(entity);
 					}}
-					class="btn-icon btn-icon-sm absolute right-0.5 top-0 my-0 h-5 w-5 font-bold hover:variant-filled {entity.active
+					class="btn-icon btn-icon-sm absolute right-0 top-0 my-0 h-5 w-5 font-bold hover:variant-filled {entity.active
 						? 'hover:invert'
 						: ''}"
 				>

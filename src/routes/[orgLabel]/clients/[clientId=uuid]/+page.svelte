@@ -22,7 +22,7 @@
 
 <FormCard>
 	{#snippet stepper()}
-		<Stepper title="Client" {stepperStore}>
+		<Stepper label="Client" subLabel={data.client.contact.label} {stepperStore}>
 			{#each stepperStore.pages as page, idx}
 				<Step {stepperStore} {idx} {page}>
 					{stepperStore.expanded ? page.label : idx + 1}
@@ -31,7 +31,7 @@
 		</Stepper>
 	{/snippet}
 	{#if stepperStore.activePage.label === 'contact'}
-		<ClientContactForm action="create" clientContactForm={data.client.contactForm}
+		<ClientContactForm action="update" clientContactForm={data.client.contactForm}
 		></ClientContactForm>
 	{:else if stepperStore.activePage.label === 'services'}
 		<ClientServicesPanel

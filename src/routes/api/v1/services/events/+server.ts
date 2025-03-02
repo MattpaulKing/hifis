@@ -1,6 +1,7 @@
 import { and, eq, getTableColumns, gte, type SQL } from "drizzle-orm";
-import { serviceEvents, services } from "$src/schemas";
+import { clientServiceEvents, serviceEvents, services } from "$src/schemas";
 import { json } from "@sveltejs/kit";
+import { fmtTime } from "$src/lib/helpers";
 import type { RequestHandler } from "./$types"
 
 type ApiParams = Partial<{
@@ -9,6 +10,7 @@ type ApiParams = Partial<{
   lookups: string;
   'startTS.gte': string;
   endTS: string;
+  clientId: string;
 }>
 
 export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams } }) => {
@@ -23,6 +25,9 @@ export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams 
   if (params["startTS.gte"]) {
     filters.push(gte(serviceEvents.startTS, new Date(params["startTS.gte"])))
   }
+  if (params.clientId) {
+    filters.push(eq(clientServiceEvents.clientId, params.clientId))
+  }
   let serviceEventRows = await db
     .select(params.lookups ? {
       id: serviceEvents.id,
@@ -32,6 +37,7 @@ export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams 
     } : getTableColumns(serviceEvents))
     .from(serviceEvents)
     .innerJoin(services, eq(services.id, serviceEvents.serviceId))
+    .leftJoin(clientServiceEvents, eq(clientServiceEvents.serviceEventId, serviceEvents.id))
     .where(and(...filters))
 
   if (params.lookups) {
@@ -39,15 +45,9 @@ export const GET: RequestHandler = async ({ locals: { db }, url: { searchParams 
       id: row.id,
       label: row.label,
       description: row.startTS.toDateString(),
-      descriptionExtra: `${fmtDuration(row.startTS)} - ${fmtDuration(row.endTS)}`
+      descriptionExtra: `${fmtTime(row.startTS)} - ${fmtTime(row.endTS)}`
     })))
   }
 
   return json(serviceEventRows)
-}
-
-function fmtDuration(d: Date) {
-  let utcHours = d.getUTCHours()
-  let isAM = utcHours < 12
-  return `${isAM ? utcHours : utcHours - 12}:${d.getUTCMinutes()} ${isAM ? 'AM' : 'PM'}`
 }

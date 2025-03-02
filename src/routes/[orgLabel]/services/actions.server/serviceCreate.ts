@@ -1,12 +1,11 @@
 import { insertFormData, validateForm } from "$lib/server/forms"
 import { services, servicesFormSchema } from "../schema";
-import type { RequestEvent } from "../create/$types";
+import type { RequestEvent } from "../$types";
 
-export default async function(e: RequestEvent) {
-  const { request, locals: { db } } = e
-  const form = await validateForm({ request, schema: servicesFormSchema })
+export default async function(requestEvent: RequestEvent) {
+  const form = await validateForm({ requestEvent, schema: servicesFormSchema })
   return await insertFormData({
-    db,
+    db: requestEvent.locals.db,
     form,
     table: services
   })

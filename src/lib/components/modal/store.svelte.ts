@@ -11,7 +11,7 @@ export interface Modal<P extends Record<string, unknown> = {}> {
   ref: Component<any>,
   props: Modal["type"] extends "component" ? () => { data: P } : (() => P)
   meta?: Record<string, unknown>
-  response: (r: any) => void
+  response: (r: ModalResponse) => void
 }
 
 export default class {
@@ -21,9 +21,8 @@ export default class {
   showing = $derived(this.queue.length > 0)
   showingIdx = $derived(this.queue.length - 1)
 
-  add<P extends Record<string, unknown>>(modal: Omit<Modal<P>, "response" | "id"> & { id?: string, response?: (r: any) => void }) {
+  add<P extends Record<string, unknown>>(modal: Omit<Modal<P>, "response" | "id"> & { id?: string, response?: (r: ModalResponse) => void }) {
     let id = modal.id ?? crypto.randomUUID()
-    //@ts-ignore
     this.queue.push({
       id,
       response: () => null,

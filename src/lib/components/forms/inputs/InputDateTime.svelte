@@ -12,7 +12,7 @@
 		attrs?: HTMLInputAttributes;
 	} = $props();
 
-	let { disabled, path, errors } = getField<Date>();
+	let { value, disabled, path, errors } = getField<Date>();
 	let strValue = dateProxy(form, path as FormPath<T, Date>, { format: 'datetime' });
 </script>
 

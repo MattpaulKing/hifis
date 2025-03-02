@@ -5,9 +5,9 @@ export default class {
   activeIdx = $derived(this.entities.findIndex(entity => entity.active) ?? 0)
   activeEntity = $derived(this.activeIdx >= 0 ? this.entities[this.activeIdx] : null)
   entityLabel: string;
-  constructor({ entities, entityLabel }: { entities: Omit<TabEntity, "tabType">[], entityLabel: string }) {
+  constructor({ entities, entityLabel }: { entities: TabEntity[], entityLabel: string }) {
     this.entityLabel = entityLabel
-    this.entities = entities.length > 0 ? entities.map(entity => ({ ...entity, tabType: 'entity' }) as TabEntity) : [this.newEntityTabData()]
+    this.entities = entities.length > 0 ? entities : [this.newEntityTabData()]
   }
   private newEntityTabData() {
     return { id: '', label: `New ${this.entityLabel}`, active: true, tabType: "new-entity" } as TabEntity

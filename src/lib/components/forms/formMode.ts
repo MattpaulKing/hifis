@@ -1,1 +1,1 @@
-export type FormMode = "create" | "update" | "read"
+export type FormMode = "create" | "update" 

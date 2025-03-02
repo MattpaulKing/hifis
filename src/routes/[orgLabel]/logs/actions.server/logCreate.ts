@@ -2,8 +2,9 @@ import { ar, validateForm } from "$lib/server/forms"
 import { logs, logsClients, logsFormSchema, logsServices } from "../schema";
 import type { RequestEvent } from "../$types";
 
-export default async function({ request, locals: { db } }: RequestEvent) {
-  const form = await validateForm({ request, schema: logsFormSchema })
+export default async function(requestEvent: RequestEvent) {
+  let db = requestEvent.locals.db
+  const form = await validateForm({ requestEvent, schema: logsFormSchema })
   if (!form.valid) return ar.invalid({ form })
   let { serviceIds = [], clientIds, ...logData } = form.data
   try {

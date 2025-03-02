@@ -21,7 +21,6 @@
 		setLookups(lookups);
 	}
 	$_disabled = disabled || $_disabled || $formDisabled;
-	$inspect($_disabled);
 
 	function handleLostFocus(e: FocusEvent) {
 		if (!fieldContainer?.contains(e.relatedTarget as Node | null)) {

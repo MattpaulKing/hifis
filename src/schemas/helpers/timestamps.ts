@@ -6,3 +6,11 @@ const timestamps = {
   deletedAt: timestamp("deleted_at"),
 }
 export default timestamps
+
+export function timestampsDefault() {
+  return {
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: new Date(),
+  }
+}

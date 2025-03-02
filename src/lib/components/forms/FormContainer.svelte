@@ -2,8 +2,8 @@
 	import { setFormCtx } from './inputs/context.svelte';
 	import { getFormMsgStore, LoadingSpinner } from '.';
 	import { fade } from 'svelte/transition';
-	import type { SuperForm } from 'sveltekit-superforms';
 	import { onDestroy, type Snippet } from 'svelte';
+	import type { SuperForm } from 'sveltekit-superforms';
 
 	let {
 		form,
@@ -34,7 +34,7 @@
 	});
 </script>
 
-<div in:fade class="relative flex flex-col p-6 {classes ?? ''}">
+<div in:fade class="relative flex flex-col {classes ?? 'p-6'}">
 	<div class="absolute right-0 top-0 z-50 flex w-full flex-col items-end">
 		{#if msgStore.current && msgStore.current.id === $formId}
 			<div

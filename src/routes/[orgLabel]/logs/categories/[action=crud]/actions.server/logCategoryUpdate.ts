@@ -3,8 +3,12 @@ import { eq } from "drizzle-orm";
 import { logCategories, logCategoriesFormSchema } from "$routes/[orgLabel]/logs/schema";
 import type { RequestEvent } from "../$types";
 
-export default async function(e: RequestEvent) {
-  const { request, locals: { db } } = e
-  const form = await validateForm({ request, schema: logCategoriesFormSchema })
-  return await updateFormData({ db, table: logCategories, form, eqStmts: [eq(logCategories.id, form.data.id)] })
+export default async function(requestEvent: RequestEvent) {
+  const form = await validateForm({ requestEvent, schema: logCategoriesFormSchema })
+  return await updateFormData({
+    db: requestEvent.locals.db,
+    table: logCategories,
+    form,
+    eqStmts: [eq(logCategories.id, form.data.id)]
+  })
 }

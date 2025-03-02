@@ -6,7 +6,7 @@
 		active: _active,
 		children
 	}: { href: string; active?: boolean; children: Snippet } = $props();
-	let active = $derived(page.url.pathname === href);
+	let active = $derived(_active ?? page.url.pathname.startsWith(href));
 </script>
 
 <a
