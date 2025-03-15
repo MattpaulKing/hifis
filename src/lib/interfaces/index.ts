@@ -1,2 +1,2 @@
 export { lookupCtxDefault } from "./lookups"
-export type { FormValidated } from "./forms"
+export type { FormValidated, FormOpts } from "./forms"

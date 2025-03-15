@@ -13,35 +13,37 @@
 		LookupDropdown
 	} from '$lib/components/forms';
 	import { route } from '$lib/ROUTES';
-	import { clientServiceFormSchema } from '../../schema';
 	import { getUser } from '$lib/components/user';
-	import type { FormOptions, Infer, SuperValidated } from 'sveltekit-superforms';
+	import { servicesReferralsFormSchema } from '../../schema';
 	import type { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
 	import type { CRUD } from '$src/params/crud';
+	import type { FormValidated, FormOpts } from '$src/lib/interfaces';
 
 	let {
-		clientServiceForm,
+		serviceReferralForm,
 		action,
+		clientServiceRelation,
 		formOpts,
 		lookups = $bindable(),
 		disabledFields
 	}: {
-		clientServiceForm: SuperValidated<Infer<typeof clientServiceFormSchema>>;
+		serviceReferralForm: FormValidated<typeof servicesReferralsFormSchema>;
 		action: CRUD;
-		formOpts?: FormOptions<Infer<typeof clientServiceFormSchema>>;
+		clientServiceRelation: 'attach' | 'referral';
+		formOpts?: FormOpts<typeof servicesReferralsFormSchema>;
 		lookups: {
 			clients: LookupStore;
 			services: LookupStore;
+			statuses: LookupStore;
 		};
 		disabledFields?: {
-			clientId?: boolean;
-			serviceId?: boolean;
+			[K in keyof typeof serviceReferralForm.data]: boolean;
 		};
 	} = $props();
 
 	let form = initForm({
-		form: clientServiceForm,
-		schema: clientServiceFormSchema,
+		form: serviceReferralForm,
+		schema: servicesReferralsFormSchema,
 		opts: formOpts
 	});
 
@@ -60,19 +62,23 @@
 			msgStore.setMsg({ msg: 'Duplicate detected', status: 'error' });
 		}
 	}
+	let formAction =
+		clientServiceRelation === 'referral'
+			? route('default /[orgLabel]/services/[serviceId=uuid]/referrals/[action=crud]', {
+					action,
+					orgLabel: user.properties.orgLabel,
+					serviceId: $formData.serviceId
+				})
+			: route('default /[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
+					orgLabel: user.properties.orgLabel,
+					clientId: $formData.clientId,
+					action: 'create'
+				});
 </script>
 
-<FormContainer
-	class="w-full max-w-lg"
-	{form}
-	action={route('default /[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
-		action,
-		orgLabel: user.properties.orgLabel,
-		clientId: $formData.clientId
-	})}
->
+<FormContainer {form} action={formAction}>
 	{#snippet title()}
-		<span>Attach a Client to a Service</span>
+		<span>Refer a Client to a Service</span>
 	{/snippet}
 	<Field {form} path="clientId" disabled={disabledFields?.clientId} lookups={lookups.clients}>
 		<Label label="Client"></Label>
@@ -87,7 +93,13 @@
 		<Errors />
 	</Field>
 	<Field {form} path="description" class="col-span-2">
-		<Label label="Description"></Label>
+		<Label label="Description">
+			{#snippet fieldDescription()}
+				<span class="-mt-1 text-surface-400"
+					>Explain why the service is a good fit for the referral</span
+				>
+			{/snippet}
+		</Label>
 		<InputTextArea />
 		<Errors />
 	</Field>

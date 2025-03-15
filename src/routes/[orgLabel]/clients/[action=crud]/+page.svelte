@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { FormCard } from '$lib/components/forms';
+	import { FormCard, initForm } from '$lib/components/forms';
 	import { Step, Stepper, StepperStore } from '$lib/components/stepper';
 	import { getModalStore } from '$src/lib/components/modal';
 	import { ClientContactForm } from '../lib';
 	import { default as ClientsKeepAdding } from '$routes/[orgLabel]/clients/lib/ClientsAddMoreDialog.svelte';
 	import { getUser } from '$src/lib/components/user';
+	import { clientContactFormSchema } from '../schema';
 
 	let { data } = $props();
 
@@ -17,6 +18,10 @@
 	});
 	let modalStore = getModalStore();
 	let user = getUser();
+	let clientContactForm = initForm({
+		form: data.clientContactForm,
+		schema: clientContactFormSchema
+	});
 </script>
 
 <FormCard>
@@ -36,7 +41,7 @@
 
 	{#if stepperStore.activePage.label === 'contact'}
 		<ClientContactForm
-			clientContactForm={data.clientContactForm}
+			{clientContactForm}
 			action={data.searchParams.action}
 			opts={{
 				onUpdate({ form }) {

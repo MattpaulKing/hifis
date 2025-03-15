@@ -4,18 +4,27 @@
 	let {
 		label,
 		class: classes = '',
-		children
-	}: { label: string | undefined; class?: string; children?: Snippet } = $props();
-	let { path, constraints } = getField();
+		children,
+		fieldDescription
+	}: {
+		label: string | undefined;
+		class?: string;
+		children?: Snippet;
+		fieldDescription?: Snippet;
+	} = $props();
+	let { path } = getField();
 </script>
 
-<label for={path}>
-	<div class="mb-1 ml-1 flex h-8 w-full place-items-center justify-between gap-x-2">
-		<span class="{classes} {$constraints?.required ? 'field-required-label relative' : ''}">
+<label for={path} class="mb-1 ml-1 flex flex-col">
+	<div class="flex h-8 w-full place-items-center justify-between gap-x-2">
+		<span class={classes}>
 			{label}
 		</span>
 		{#if children}
 			{@render children()}
 		{/if}
 	</div>
+	{#if fieldDescription}
+		{@render fieldDescription()}
+	{/if}
 </label>

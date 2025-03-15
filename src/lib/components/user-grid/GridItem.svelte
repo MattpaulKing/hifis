@@ -63,8 +63,6 @@
 	{/if}
 {/snippet}
 
-<!-- <svelte:window  /> -->
-
 <div
 	class="absolute transition-transform {classes} {controller.active
 		? 'opacity-80'
@@ -79,7 +77,7 @@
 
 {#if controller.active}
 	<div
-		class="{classes} border opacity-50 transition-transform"
+		class="{classes} border border-red-500 opacity-50 transition-transform"
 		style={`position: absolute; left:${controller.preview.left}px; top:${controller.preview.top}px;  
 		width: ${controller.preview.width}px; height: ${controller.preview.height}px; z-index: -10;`}
 	>

@@ -9,31 +9,23 @@
 		getFormMsgStore,
 		FormBtns,
 		FormContainer,
-		initForm,
 		type FormMode
 	} from '$lib/components/forms';
 	import { route } from '$lib/ROUTES';
 	import { getUser } from '$lib/components/user';
 	import { clientContactFormSchema } from '../../schema';
-	import type { FormValidated } from '$lib/interfaces';
 	import type { Lookup } from '$lib/interfaces/Lookup';
-	import type { FormOptions, Infer } from 'sveltekit-superforms';
+	import type { FormOptions, Infer, SuperForm } from 'sveltekit-superforms';
 
 	let {
-		clientContactForm,
-		action,
-		opts
+		clientContactForm: form,
+		action
 	}: {
-		clientContactForm: FormValidated<typeof clientContactFormSchema>;
+		clientContactForm: SuperForm<Infer<typeof clientContactFormSchema>>;
 		action: FormMode;
 		opts?: FormOptions<Infer<typeof clientContactFormSchema>>;
 	} = $props();
 	let user = getUser();
-	let form = initForm({
-		form: clientContactForm,
-		schema: clientContactFormSchema,
-		opts
-	});
 
 	let { form: formData } = form;
 	let possibleDuplicates = $state<Lookup[]>([]);

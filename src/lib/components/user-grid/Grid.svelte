@@ -2,8 +2,8 @@
 	import { setGridContext } from '.';
 	import type { Snippet } from 'svelte';
 	type Props = {
-		cols: number;
-		rows: number;
+		cols?: number;
+		rows?: number;
 		itemSize: { width: number; height: number };
 		gap?: number;
 		bounds?: boolean;

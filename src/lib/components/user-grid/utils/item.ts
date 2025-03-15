@@ -18,7 +18,7 @@ export function size2coordinate(size: number, cellSize: number, gap: number): nu
   return position2coordinate(size + gap * 2, cellSize, gap);
 }
 
-export function snapOnMove(left: number, top: number, item: LayoutItem, { itemSize, gap, maxDimensions }: SnapGridParams): Position {
+export function snapOnMove(left: number, top: number, item: LayoutItem, { itemSize, gap, maxDimensions }: GridSettings): Position {
   const { widthGridUnits, heightGridUnits } = item;
   let x = position2coordinate(left, itemSize.width, gap);
   let y = position2coordinate(top, itemSize.height, gap);

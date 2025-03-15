@@ -6,7 +6,7 @@
 
 	let { data } = $props();
 	let stepperStore = new StepperStore({
-		labels: ['contact', 'clients', 'events'],
+		labels: ['contact', 'clients', 'events', 'referrals'],
 		searchKey: 'i',
 		expanded: true
 	});
@@ -40,7 +40,9 @@
 			clientServiceForm={data.clientServiceForm}
 		></ServiceClientsPanel>
 	{:else if stepperStore.activePage.label === 'events'}
-		<ServiceEventsPanel {serviceEvents} serviceEventForm={data.serviceEventForm}
+		<ServiceEventsPanel bind:serviceEvents serviceEventForm={data.serviceEventForm}
 		></ServiceEventsPanel>
+	{:else if stepperStore.activePage.label === 'referrals'}
+		<div></div>
 	{/if}
 </FormCard>

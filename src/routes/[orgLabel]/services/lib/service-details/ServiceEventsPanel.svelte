@@ -10,6 +10,7 @@
 	import { ServiceEventForm } from '$routes/[orgLabel]/services/events/lib';
 	import { timestampsDefault } from '$src/schemas/helpers';
 	import { ServiceEventClientChip } from '..';
+	import { flip } from 'svelte/animate';
 	import type { clients, serviceEvents as ServiceEvents } from '$src/schemas';
 	import type { FormValidated } from '$src/lib/interfaces';
 	import type { serviceEventsFormSchema } from '../../events/schema';
@@ -21,7 +22,7 @@
 		>;
 		serviceEventForm: FormValidated<typeof serviceEventsFormSchema>;
 	};
-	let { serviceEvents, serviceEventForm }: Props = $props();
+	let { serviceEvents = $bindable(), serviceEventForm }: Props = $props();
 	let user = getUser();
 
 	let eventTabState = new GridItemTabsState({
@@ -65,6 +66,15 @@
 			);
 		serviceEvents[eventTabState.entities[eventTabState.activeIdx].id].attending = attending;
 	}
+	function fadeOnDelete(node: Element) {
+		if (deleted) {
+			deleted = false;
+			return fade(node);
+		} else {
+			return fade(node, { duration: 0 });
+		}
+	}
+	let deleted = $state(false);
 </script>
 
 <GridItemTabs tabState={eventTabState}></GridItemTabs>
@@ -110,7 +120,7 @@
 	></ServiceEventForm>
 {:else if activeEvent}
 	<div
-		in:fade={{ delay: 150, duration: 700 }}
+		in:fade={{ delay: 0, duration: 700 }}
 		class="grid w-full grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 bg-inherit p-4"
 	>
 		<span class="text-xl font-bold">
@@ -149,19 +159,25 @@
 					}}>+</PanelListModalBtn
 				>
 			</div>
-			<ul class="grid w-fit grid-cols-[auto_auto] justify-items-stretch gap-x-4 overflow-y-auto">
-				{#each Object.values(activeEvent.attending) as clientAttending, i (i)}
-					<ServiceEventClientChip
-						clientId={clientAttending.id}
-						clientLabel={clientAttending.label}
-						serviceEventId={activeEvent.id}
-						onDelete={() => delete serviceEvents[activeEvent.id].attending[clientAttending.id]}
-					></ServiceEventClientChip>
-				{/each}
+			<ul class="grid w-fit grid-cols-[auto_auto] justify-items-stretch gap-2 overflow-y-auto">
 				{#if Object.values(activeEvent.attending).length === 0}
 					<li>
 						<span class="mx-4">None found...</span>
 					</li>
+				{:else}
+					{#each Object.values(activeEvent.attending) as clientAttending, i (i)}
+						<li animate:flip out:fadeOnDelete>
+							<ServiceEventClientChip
+								clientId={clientAttending.id}
+								clientLabel={clientAttending.label}
+								serviceEventId={activeEvent.id}
+								onDelete={() => {
+									deleted = true;
+									delete serviceEvents[activeEvent.id].attending[clientAttending.id];
+								}}
+							></ServiceEventClientChip>
+						</li>
+					{/each}
 				{/if}
 			</ul>
 		</div>

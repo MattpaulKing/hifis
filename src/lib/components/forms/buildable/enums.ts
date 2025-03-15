@@ -1,0 +1,6 @@
+const ELEMENT_TYPES = {
+  FORM_FIELDS: "FORM_FIELDS",
+  UI: 'UI',
+  CONTAINERS: 'CONTAINERS',
+}
+export default ELEMENT_TYPES

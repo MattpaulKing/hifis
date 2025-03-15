@@ -21,7 +21,7 @@ export async function insertFormData<T extends PgTable, P extends FormValidated<
   table,
   form,
   opts = { returning: true }
-}: { db: DB, table: T, form: P, opts: { returning: boolean } }) {
+}: { db: DB, table: T, form: P, opts?: { returning: boolean } }) {
   if (!form.valid) {
     return ar.invalid({ form })
   }
@@ -32,7 +32,6 @@ export async function insertFormData<T extends PgTable, P extends FormValidated<
         .insert(table)
         .values(form.data)
         .returning()
-      console.log(inserted)
       if (typeof form.data === "object" && "id" in form.data) {
         form.data.id = inserted.id
       }

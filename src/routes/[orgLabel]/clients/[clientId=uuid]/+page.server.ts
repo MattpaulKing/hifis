@@ -7,10 +7,10 @@ import { valibot } from "sveltekit-superforms/adapters"
 import { serviceCategories } from "$routes/[orgLabel]/services/categories/schema"
 import { organizations } from "$routes/[orgLabel]/schema"
 import { clientServiceEvents, clientsServices, serviceEvents } from "$src/schemas"
-import { clientServiceFormSchema } from "./services/schema"
 import { rowsToMap } from "$src/lib/helpers"
 import { logsFormSchema } from "$routes/[orgLabel]/logs/schema"
 import { logsWithClientsAndServices, aggLogsWitsClientsAndServices } from "$routes/[orgLabel]/logs/lib"
+import { servicesReferralsFormSchema } from "$routes/[orgLabel]/services/[serviceId=uuid]/referrals/schema"
 import type { PageServerLoad } from "./$types"
 
 export const load: PageServerLoad = async ({ url: { searchParams }, params: { clientId }, locals: { db } }) => {
@@ -43,10 +43,10 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
         .innerJoin(clientsServices, eq(clientsServices.serviceId, services.id))
         .where(eq(clientsServices.clientId, clientId))
         .then(rowsToMap),
-      serviceForm: await superValidate({
+      serviceReferralForm: await superValidate({
         id: crypto.randomUUID(),
         clientId: clientId,
-      }, valibot(clientServiceFormSchema), { errors: false }),
+      }, valibot(servicesReferralsFormSchema), { errors: false }),
       serviceEvents: await db
         .query.clientServiceEvents.findMany({
           columns: {},

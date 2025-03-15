@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { FormCard } from '$lib/components/forms';
+	import { FormCard, initForm } from '$lib/components/forms';
 	import { Step, Stepper, StepperStore } from '$lib/components/stepper';
 	import { lookupCtxDefault, lookupCtxFromSingle } from '$lib/interfaces/lookups';
 	import { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
 	import { ClientContactForm, ClientLogsPanel, ClientServicesPanel } from '../lib';
+	import { clientContactFormSchema } from '../schema';
 
 	let { data } = $props();
 	let stepperStore = new StepperStore({
@@ -18,6 +19,10 @@
 			excludedIds: Object.keys(data.client.services)
 		})
 	});
+	let clientContactForm = initForm({
+		form: data.client.contactForm,
+		schema: clientContactFormSchema
+	});
 </script>
 
 <FormCard>
@@ -31,13 +36,12 @@
 		</Stepper>
 	{/snippet}
 	{#if stepperStore.activePage.label === 'contact'}
-		<ClientContactForm action="update" clientContactForm={data.client.contactForm}
-		></ClientContactForm>
+		<ClientContactForm action="update" {clientContactForm}></ClientContactForm>
 	{:else if stepperStore.activePage.label === 'services'}
 		<ClientServicesPanel
 			clientServicesData={data.client.services}
 			clientServiceEventsData={data.client.serviceEvents}
-			clientServiceForm={data.client.serviceForm}
+			serviceReferralForm={data.client.serviceReferralForm}
 			{clientServicesFormLookups}
 		></ClientServicesPanel>
 	{:else if stepperStore.activePage.label === 'logs'}

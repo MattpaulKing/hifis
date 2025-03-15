@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm"
 import { users } from "./users/schema"
 import type { PageServerLoad } from "./$types"
+import type { TabEntity } from "$src/lib/components/user-grid"
 
 export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
   return {
@@ -8,10 +9,10 @@ export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
       {
         id: '1',
         label: 'A',
-        x: 1,
-        y: 1,
+        x: 0,
+        y: 0,
         heightGridUnits: 4,
-        widthGridUnits: 10,
+        widthGridUnits: 11,
         min: { heightGridUnits: 1, widthGridUnits: 2 },
         moveable: true,
         resizeable: true
@@ -20,19 +21,19 @@ export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
         id: '2',
         label: 'B',
         x: 11,
-        y: 1,
+        y: 0,
         heightGridUnits: 4,
-        widthGridUnits: 10,
+        widthGridUnits: 11,
         min: { heightGridUnits: 1, widthGridUnits: 2 },
         moveable: true,
         resizeable: true
       }
     ],
     entities: [
-      { id: '1', label: 'something', active: false },
-      { id: '2', label: 'something else', active: true },
-      { id: '3', label: 'sth else', active: false }
-    ],
+      { id: '1', label: 'something', active: false, tabType: "entity" },
+      { id: '2', label: 'something else', active: true, tabType: "entity" },
+      { id: '3', label: 'sth else', active: false, tabType: "entity" }
+    ] as TabEntity[],
 
     orgsUsers: await db
       .select()

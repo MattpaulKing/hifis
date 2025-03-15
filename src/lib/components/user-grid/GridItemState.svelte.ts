@@ -1,9 +1,10 @@
 import { calcPosition, coordinate2position, coordinate2size, snapOnMove, snapOnResize } from "./utils/item";
 import { on } from "svelte/events";
 import { getGridContext } from "./utils/GridContext.svelte";
-import { getAvailablePosition, hasCollisions } from "./utils/grid";
+import { getAvailablePosition, getGridDimensions, hasCollisions } from "./utils/grid";
 import type { ItemSize, LayoutItem } from "./types";
 import type { TabEntity } from "./GridItemTabsState.svelte";
+import Grid from "svelte-grid-extended"
 
 export default class {
   active = $state(false);
@@ -71,6 +72,7 @@ export default class {
         itemSize: this.settings.itemSize,
         gap: this.settings.gap
       })
+
       this.left = position.left;
       this.top = position.top;
       this.width = position.width;
@@ -99,10 +101,11 @@ export default class {
     x: number;
     y: number;
   } | null {
-    let rect = this.settings.boundsTo?.getBoundingClientRect()
-    if (!rect) return null
-    let maxCols = Math.round(rect.width / (this.settings.itemSize.width + this.settings.gap)) - 1
-    let maxRows = Math.round(rect.height / (this.settings.itemSize.height + this.settings.gap)) - 1
+    // let rect = this.settings.boundsTo?.getBoundingClientRect()
+    // if (!rect) return null
+    // let maxCols = Math.round(rect.width / (this.settings.itemSize.width + this.settings.gap)) - 1
+    // let maxRows = Math.round(rect.height / (this.settings.itemSize.height + this.settings.gap)) - 1
+    let dimensions = this.settings.getGridDimensions()
     return getAvailablePosition({
       id: '',
       x: 0,
@@ -112,7 +115,7 @@ export default class {
       min: { widthGridUnits: 32, heightGridUnits: 32 },
       moveable: true,
       resizeable: true,
-    }, Object.values(this.settings.items), maxCols, maxRows);
+    }, Object.values(this.settings.items), dimensions.cols, dimensions.rows);
   }
 
   private applyPreview() {
@@ -169,23 +172,20 @@ export default class {
     let _top = event.pageY - this.initialPointerPosition.top + this.initialPosition.top;
     if (this.settings.bounds && this.settings.boundsTo) {
       const parentRect = this.settings.boundsTo.getBoundingClientRect();
-      if (_left < parentRect.left) {
-        _left = parentRect.left;
+      _left = Math.max(_left, 0)
+      _left = Math.min(_left, parentRect.width - this.width)
+      if (_left + this.width > parentRect.width) {
+        _left = parentRect.width - this.width - this.settings.gap
       }
-      if (_top < parentRect.top) {
-        _top = parentRect.top;
-      }
-      if (_left + this.width > parentRect.right) {
-        _left = parentRect.right - this.width;
-      }
-      if (_top + this.height > parentRect.bottom) {
-        _top = parentRect.bottom - this.height;
+      if (_top + this.height > parentRect.height) {
+        _top = parentRect.height - this.height
       }
     }
     this.left = _left;
     this.top = _top;
     //TODO: implement scroll
     // scroll();
+    console.log(_top)
     const { x, y } = snapOnMove(this.left, this.top, this.previewItem, this.settings);
     if (!hasCollisions({ ...this.previewItem, x, y }, Object.values(this.settings.items))) {
       this.previewItem = { ...this.previewItem, x, y };
@@ -247,7 +247,6 @@ export default class {
     }
   }
   private resizeMouseEnd(event: PointerEvent) {
-    console.log(event.button)
     if (event.button !== 0 || !this.active) return;
     this.endInteraction(event);
   }

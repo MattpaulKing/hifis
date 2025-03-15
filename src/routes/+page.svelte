@@ -1,10 +1,12 @@
 <script lang="ts">
 	/* 
  TODO:
-  0. ServicesEventsPanel has a bug where the slide out on activeEvent shows on activeEvent switch
-  1. GridItemTabs need a callback on switch / click
+ 0. Pretty sure that the grid's bounding rect doesen't get shown to the items until after the item figures out its left is 0
+  1. change schema so that clientServiceRelation can be attached/referral/etc. and fix ServiceReferralForm
   2. Finish resize logic
   3. Figure out if modals & drawers being open at the same time messes with each other closing
+  4. clientId needs Referrals panel
+  5. Services/serviceId needs Referrals panel
  */
 </script>
 

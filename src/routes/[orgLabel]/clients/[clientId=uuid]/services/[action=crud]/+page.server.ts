@@ -1,12 +1,13 @@
 import { superValidate } from "sveltekit-superforms";
 import { valibot } from "sveltekit-superforms/adapters";
-import { clientServiceFormSchema, clientsServices } from "../schema";
+import { clientsServices } from "../schema";
 import { lookupCtxDefault } from "$lib/interfaces";
 import { and, eq } from "drizzle-orm";
 import { services } from "$routes/[orgLabel]/services/schema";
 import { clientServiceCreate, clientServiceUpdate } from "./actions.server";
 import { clients } from "$routes/[orgLabel]/clients/schema";
 import { error } from "@sveltejs/kit";
+import { servicesReferralsFormSchema } from "$routes/[orgLabel]/services/[serviceId=uuid]/referrals/schema";
 import type { Actions, PageServerLoad } from "../[action=crud]/$types";
 import type { DB } from "$src/lib/server/db/client";
 import type { CRUD } from "$src/params/crud";
@@ -19,7 +20,7 @@ type SearchParamsObj = {
 export const load: PageServerLoad = async ({ url, params: { action }, locals: { db } }) => {
   let params: SearchParamsObj = Object.fromEntries(url.searchParams)
   return {
-    clientServiceForm: await getFormData({ action: action as CRUD, params, db }),
+    serviceReferralForm: await getFormData({ action: action as CRUD, params, db }),
     action: action as CRUD,
     lookups: await getLookups({ db, params }),
   }
@@ -71,7 +72,7 @@ async function getFormData({ db, action, params }: { db: DB, action: CRUD, param
       id: crypto.randomUUID(),
       clientId: params.clientId,
       serviceId: params.serviceId,
-    }, valibot(clientServiceFormSchema), { errors: false })
+    }, valibot(servicesReferralsFormSchema), { errors: false })
   } else if (params.clientId && params.serviceId) {
     const [clientService] = await db
       .select()
@@ -83,7 +84,7 @@ async function getFormData({ db, action, params }: { db: DB, action: CRUD, param
       .limit(1)
     return await superValidate({
       ...clientService
-    }, valibot(clientServiceFormSchema))
+    }, valibot(servicesReferralsFormSchema))
   } else {
     return error(404)
   }

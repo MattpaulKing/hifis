@@ -1,27 +1,14 @@
 <script lang="ts">
 	import { GridItemTabs, GridItemTabsState } from '$src/lib/components/user-grid';
 	import { ClientContactForm } from '$routes/[orgLabel]/clients/lib';
-	import { default as ClientContactFormPage } from '$routes/[orgLabel]/clients/[action=crud]/+page.svelte';
-	import { PanelList, PanelListModalBtn, PanelListBtn } from '$src/lib/components/panels';
+	import { PanelList, PanelListBtn } from '$src/lib/components/panels';
 	import { timestampsDefault } from '$src/schemas/helpers';
-	import { route } from '$src/lib/ROUTES';
-	import { getUser } from '$src/lib/components/user';
 	import { fade } from 'svelte/transition';
-	import { invalidateAll } from '$app/navigation';
-	import { getModalStore } from '$src/lib/components/modal';
 	import { clientServiceFormSchema } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/schema';
-	import {
-		Errors,
-		Field,
-		FormBtns,
-		FormContainer,
-		initForm,
-		InputTextArea,
-		Label
-	} from '$src/lib/components/forms';
+	import { initForm } from '$src/lib/components/forms';
+	import { clientContactFormSchema } from '$routes/[orgLabel]/clients/schema';
 	import type { clients as Clients, serviceEvents, services } from '$src/schemas';
 	import type { FormValidated } from '$src/lib/interfaces';
-	import type { clientContactFormSchema } from '$routes/[orgLabel]/clients/schema';
 
 	type Props = {
 		service: typeof services.$inferSelect;
@@ -37,7 +24,7 @@
 		service,
 		clients,
 		clientServiceEvents,
-		clientContactForm,
+		clientContactForm: _clientContactForm,
 		clientServiceForm: _clientServiceForm
 	}: Props = $props();
 	let clientTabState = new GridItemTabsState({
@@ -51,19 +38,30 @@
 			...clients[clientTabState.activeEntity.id]
 		};
 	});
-	let modalStore = getModalStore();
-	let user = getUser();
-	let clientServiceForm = initForm({ form: _clientServiceForm, schema: clientServiceFormSchema });
-	let { form: clientServiceFormData } = clientServiceForm;
+	let clientContactForm = initForm({ form: _clientContactForm, schema: clientContactFormSchema });
+	let { form: clientContactFormData } = clientContactForm;
 	function setFormDataToActiveClient() {
-		if (!activeClient) return;
-		let id = activeClient.id;
-		$clientServiceFormData = {
-			id: clients[id].clientServiceId,
-			clientId: id,
-			serviceId: service.id,
-			description: clients[id].clientServiceDescription
-		};
+		if (!activeClient) {
+			clientContactForm.reset();
+		} else {
+			$clientContactFormData = activeClient;
+		}
+	}
+	function updateClients({ form }: { form: typeof _clientContactForm }) {
+		if (form.valid) {
+			clients[form.data.id] = {
+				...form.data,
+				...timestampsDefault(),
+				label: `${form.data.firstName} ${form.data.lastName}`,
+				clientServiceDescription: '',
+				clientServiceId: service.id
+			};
+			clientTabState.entities[clientTabState.activeIdx] = {
+				...clientTabState.entities[clientTabState.activeIdx],
+				id: form.data.id,
+				label: clients[form.data.id].label
+			};
+		}
 	}
 </script>
 
@@ -79,13 +77,7 @@
 				disabled={clientTabState.findIdx(client.id) >= 0}
 				onclick={() => {
 					clientTabState.openTab(client);
-					clientContactForm.data = { ...client };
-					$clientServiceFormData = {
-						id: client.clientServiceId,
-						clientId: client.id,
-						serviceId: service.id,
-						description: client.clientServiceDescription
-					};
+					setFormDataToActiveClient();
 				}}
 			>
 				<span class="justify-self-start font-bold">{client.label}</span>
@@ -97,64 +89,26 @@
 		{/snippet}
 	</PanelList>
 {:else if activeClient}
-	<div in:fade={{ duration: 700 }} class="grid w-full grid-cols-[1fr_auto] gap-x-4 bg-inherit p-4">
-		<span class="text-xl font-bold">
-			{activeClient.label}
-		</span>
-		<PanelListModalBtn
-			class="variant-outline-surface hover:variant-filled"
-			href={`${route('/[orgLabel]/clients/[action=crud]', {
-				orgLabel: user.properties.orgLabel,
-				action: 'update'
-			})}?clientId=${activeClient.id}`}
-			ref={ClientContactFormPage}
-			onCreate={async (response) => {
-				if (response?.type === 'save') {
-					modalStore.close();
-					await invalidateAll();
+	<div in:fade={{ duration: 700 }} class="grid w-full gap-x-4 bg-inherit p-4">
+		<ClientContactForm
+			action="update"
+			{clientContactForm}
+			opts={{
+				onUpdate({ form }) {
+					updateClients({ form });
 				}
 			}}
-		>
-			<img src="/NotePencil.png" class="hover:filter-none dark:invert" alt="edit" />
-		</PanelListModalBtn>
-		<FormContainer
-			class="col-span-2"
-			form={clientServiceForm}
-			action={route('default /[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
-				orgLabel: user.properties.orgLabel,
-				clientId: activeClient.id,
-				action: activeClient.clientServiceDescription.length > 0 ? 'update' : 'create'
-			})}
-		>
-			<Field form={clientServiceForm} path="description" class="col-span-2 min-w-96">
-				<Label label="Client's Service Description"></Label>
-				<InputTextArea></InputTextArea>
-				<Errors></Errors>
-			</Field>
-			<FormBtns></FormBtns>
-		</FormContainer>
+		></ClientContactForm>
 	</div>
 {:else}
-	<ClientContactForm
-		action="create"
-		{clientContactForm}
-		opts={{
-			onUpdate({ form }) {
-				if (form.valid) {
-					clients[form.data.id] = {
-						...form.data,
-						...timestampsDefault(),
-						label: `${form.data.firstName} ${form.data.lastName}`,
-						clientServiceDescription: '',
-						clientServiceId: service.id
-					};
-					clientTabState.entities[clientTabState.activeIdx] = {
-						...clientTabState.entities[clientTabState.activeIdx],
-						id: form.data.id,
-						label: clients[form.data.id].label
-					};
-				}
-			}
-		}}
-	></ClientContactForm>
+	<!-- <ServiceCli -->
+	<!-- <ClientContactForm -->
+	<!-- 	action="create" -->
+	<!-- 	{clientContactForm} -->
+	<!-- 	opts={{ -->
+	<!-- 		onUpdate({ form }) { -->
+	<!-- 			updateClients({ form }); -->
+	<!-- 		} -->
+	<!-- 	}} -->
+	<!-- ></ClientContactForm> -->
 {/if}

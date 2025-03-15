@@ -27,8 +27,8 @@ export class GridSettings {
     let rect = this.boundsTo?.getBoundingClientRect()
     if (!rect) return { cols: this.cols, rows: this.rows }
     return {
-      cols: Math.round(rect.width / this.itemSize.width),
-      rows: Math.round(rect.height / this.itemSize.height),
+      cols: Math.round(rect.width / (this.itemSize.width + this.gap)) + 1,
+      rows: Math.round(rect.height / (this.itemSize.height + this.gap)) + 1,
     }
   })
   constructor(params: GridSettingsParams) {

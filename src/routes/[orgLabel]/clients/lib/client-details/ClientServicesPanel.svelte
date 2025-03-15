@@ -3,17 +3,17 @@
 	import { default as ClientServicesFormPage } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]/+page.svelte';
 	import { default as ClientServiceEventsFormPage } from '$routes/[orgLabel]/services/events/clients/[action=crud]/+page.svelte';
 	import { GridItemTabs, GridItemTabsState } from '$src/lib/components/user-grid';
-	import { ClientServiceForm } from '../../[clientId=uuid]/services/lib';
 	import { PanelList, PanelListModalBtn, PanelListBtn } from '$src/lib/components/panels';
 	import { retryExp } from '$src/lib/api';
 	import { route } from '$src/lib/ROUTES';
 	import { getUser } from '$src/lib/components/user';
 	import { getModalStore } from '$src/lib/components/modal';
 	import { serviceEvents } from '$src/schemas';
+	import { ServiceReferralForm } from '$routes/[orgLabel]/services/[serviceId=uuid]/referrals/lib';
 	import type { FormValidated } from '$src/lib/interfaces';
-	import type { clientServiceFormSchema } from '../../[clientId=uuid]/services/schema';
 	import type { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
 	import type { ClientServicesApiResponse } from '$routes/api/v1/clients/services/+server';
+	import type { servicesReferralsFormSchema } from '$routes/[orgLabel]/services/[serviceId=uuid]/referrals/schema';
 
 	type Props = {
 		clientServicesData: Record<
@@ -26,7 +26,7 @@
 				clientServiceDescription: string;
 			}
 		>;
-		clientServiceForm: FormValidated<typeof clientServiceFormSchema>;
+		serviceReferralForm: FormValidated<typeof servicesReferralsFormSchema>;
 		clientServicesFormLookups: {
 			clients: LookupStore;
 			services: LookupStore;
@@ -35,14 +35,14 @@
 	};
 	let {
 		clientServicesData,
-		clientServiceForm,
+		serviceReferralForm,
 		clientServicesFormLookups,
 		clientServiceEventsData
 	}: Props = $props();
 	let user = getUser();
 	let modalStore = getModalStore();
 	let serviceTabState = new GridItemTabsState({
-		entities: [{ id: 'all', label: 'All Services', active: true }],
+		entities: [{ id: 'all', label: 'All Services', active: true, tabType: 'entity-list' }],
 		entityLabel: 'service'
 	});
 	let clientServices = $state(clientServicesData);
@@ -57,7 +57,7 @@
 	});
 	async function pushClientsService({ serviceId }: { serviceId: string }) {
 		let [clientAndService] = await retryExp<ClientServicesApiResponse[0]>({
-			route: `${route('GET /api/v1/clients/services')}?clientId=${clientServiceForm.data.clientId}&serviceId=${serviceId}`
+			route: `${route('GET /api/v1/clients/services')}?clientId=${serviceReferralForm.data.clientId}&serviceId=${serviceId}`
 		});
 		if (modalStore.showing) modalStore.close();
 		if (!clientAndService) return null;
@@ -75,15 +75,15 @@
 	function editServiceRoute(serviceId: string) {
 		return `${route('/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]', {
 			action: 'update',
-			clientId: clientServiceForm.data.clientId,
+			clientId: serviceReferralForm.data.clientId,
 			orgLabel: user.properties.orgLabel
-		})}?clientId=${clientServiceForm.data.clientId}&serviceId=${serviceId}`;
+		})}?clientId=${serviceReferralForm.data.clientId}&serviceId=${serviceId}`;
 	}
 	function addServiceEventRoute(serviceId: string) {
 		return `${route('/[orgLabel]/services/events/clients/[action=crud]', {
 			orgLabel: user.properties.orgLabel,
 			action: 'create'
-		})}?clientId=${clientServiceForm.data.clientId}&serviceId=${serviceId}`;
+		})}?clientId=${serviceReferralForm.data.clientId}&serviceId=${serviceId}`;
 	}
 </script>
 
@@ -133,7 +133,7 @@
 			onCreate={async (response) => {
 				if (response?.type === 'save') {
 					let res = await fetch(
-						`${route('GET /api/v1/services/events')}?serviceId=${activeService.id}&clientId=${clientServiceForm.data.clientId}`
+						`${route('GET /api/v1/services/events')}?serviceId=${activeService.id}&clientId=${serviceReferralForm.data.clientId}`
 					).then(async (r) => (await r.json()) as (typeof serviceEvents.$inferSelect)[]);
 					clientServiceEvents[activeService.id] = [
 						...res.map((serviceEvent) => ({
@@ -163,9 +163,10 @@
 		</div>
 	</div>
 {:else}
-	<ClientServiceForm
-		{clientServiceForm}
+	<ServiceReferralForm
+		{serviceReferralForm}
 		action="create"
+		clientServiceRelation="attach"
 		formOpts={{
 			async onUpdate({ form }) {
 				if (!form.valid) return;
@@ -174,5 +175,5 @@
 		}}
 		lookups={clientServicesFormLookups}
 		disabledFields={{ clientId: true }}
-	></ClientServiceForm>
+	></ServiceReferralForm>
 {/if}
