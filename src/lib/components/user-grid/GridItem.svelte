@@ -1,8 +1,3 @@
-<!--@component?
-  min: minimum size of item in Grid Units
-  max: maximum size of item in Grid Units
--->
-
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
 	import { GridItemState, GridItemTabs, GridItemTabsState, type TabEntity } from '.';
@@ -12,7 +7,6 @@
 	type Props = {
 		item: LayoutItem;
 		entities: TabEntity[];
-		onChange?: (item: LayoutItem) => void;
 		gridItem: Snippet<[TabEntity]>;
 		class?: string;
 	};
@@ -35,7 +29,11 @@
 </script>
 
 {#snippet gridItemContent()}
-	<div class="flex w-full place-items-center justify-between">
+	<div
+		class="flex w-full place-items-center justify-between {controller.active
+			? '[&_span]:select-none'
+			: ''}"
+	>
 		<GridItemTabs {tabState}>
 			<div class="flex place-items-center">
 				<button
@@ -65,7 +63,7 @@
 
 <div
 	class="absolute transition-transform {classes} {controller.active
-		? 'opacity-80'
+		? 'opacity-80 '
 		: ''} {item.moveable ? 'border' : ''}"
 	style={`left:${controller.left}px; top:${controller.top}px; width: ${controller.width}px; height: ${controller.height}px;`}
 	bind:this={controller.moveableEl}
@@ -84,28 +82,3 @@
 		{@render gridItemContent()}
 	</div>
 {/if}
-
-<style>
-	.resizer-default {
-		touch-action: none;
-		position: absolute;
-		-webkit-user-select: none;
-		-moz-user-select: none;
-		user-select: none;
-		width: 20px;
-		height: 20px;
-		right: 0;
-		bottom: 0;
-		cursor: se-resize;
-	}
-	.resizer-default::after {
-		content: '';
-		position: absolute;
-		right: 3px;
-		bottom: 3px;
-		width: 5px;
-		height: 5px;
-		border-right: 2px solid rgba(0, 0, 0, 0.4);
-		border-bottom: 2px solid rgba(0, 0, 0, 0.4);
-	}
-</style>

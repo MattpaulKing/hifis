@@ -11,6 +11,9 @@ dependencies:
   '@hono/node-server':
     specifier: ^1.13.7
     version: 1.13.7(hono@4.6.15)
+  '@lucide/svelte':
+    specifier: ^0.482.0
+    version: 0.482.0(svelte@5.16.0)
   '@openauthjs/openauth':
     specifier: ^0.2.6
     version: 0.2.6(arctic@2.3.3)(hono@4.6.15)
@@ -1490,6 +1493,14 @@ packages:
       recast: 0.23.9
       svelte: 5.16.0
     dev: true
+
+  /@lucide/svelte@0.482.0(svelte@5.16.0):
+    resolution: {integrity: sha512-n2ycHU9cNcleRDwwpEHBJ6pYzVhHIaL3a+9dQa8kns9hB2g05bY+v2p2KP8v0pZwtNhYTHk/F2o2uZ1bVtQGhw==}
+    peerDependencies:
+      svelte: ^5
+    dependencies:
+      svelte: 5.16.0
+    dev: false
 
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}

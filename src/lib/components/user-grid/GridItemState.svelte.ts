@@ -1,10 +1,9 @@
 import { calcPosition, coordinate2position, coordinate2size, snapOnMove, snapOnResize } from "./utils/item";
 import { on } from "svelte/events";
 import { getGridContext } from "./utils/GridContext.svelte";
-import { getAvailablePosition, getGridDimensions, hasCollisions } from "./utils/grid";
+import { getAvailablePosition, hasCollisions } from "./utils/grid";
 import type { ItemSize, LayoutItem } from "./types";
 import type { TabEntity } from "./GridItemTabsState.svelte";
-import Grid from "svelte-grid-extended"
 
 export default class {
   active = $state(false);
@@ -130,14 +129,15 @@ export default class {
   }
 
 
-  private initInteraction(e: PointerEvent | TouchEvent["touches"][0]) {
+  private initInteraction(e: PointerEvent | DragEvent | TouchEvent["touches"][0]) {
     this.active = true;
     this.initialPointerPosition = { left: e.pageX, top: e.pageY }
+    this.initialPosition = { left: this.left, top: this.top }
     if ("pointerId" in e && this.moveableEl) {
       this.moveableEl?.setPointerCapture(e.pointerId)
     }
   }
-  private endInteraction(event: PointerEvent | Touch) {
+  private endInteraction(event: PointerEvent | Touch | DragEvent) {
     this.active = false;
     this.applyPreview();
     if ("pointerId" in event) {
@@ -153,18 +153,23 @@ export default class {
   moveStartTouch(e: TouchEvent) {
     if (this.active) return
     this.initInteraction(e.touches[0])
-    this.initialPosition = { left: this.left, top: this.top }
     this.cleanupMoveTouch = on(window, 'touchmove', (e) => this.move(e.touches[0]))
     this.cleanupMoveEndTouch = on(window, 'touchend', (e) => this.moveEndTouch(e.touches[0]))
   }
-  moveStartMouse(event: PointerEvent) {
+  moveStartMouse(event: PointerEvent | DragEvent) {
     if (event.button !== 0 || this.active) return;
     this.initInteraction(event);
-    this.initialPosition = { left: this.left, top: this.top }
-    this.cleanupMoveMouse = on(window, 'pointermove', (e) => this.move(e));
-    this.cleanupMoveEndMouse = on(window, 'pointerup', (e) => this.moveEndMouse(e))
+    if ("dataTransfer" in event) {
+      this.cleanupMoveMouse = on(window, 'drag', (e) => this.move(e))
+      this.cleanupMoveEndMouse = on(window, 'dragend', (e) => this.moveEndMouse(e))
+
+    } else {
+      this.cleanupMoveMouse = on(window, 'pointermove', (e) => this.move(e));
+      this.cleanupMoveEndMouse = on(window, 'pointerup', (e) => this.moveEndMouse(e))
+
+    }
   }
-  private move(event: PointerEvent | Touch) {
+  private move(event: PointerEvent | DragEvent | Touch) {
     if (!this.settings.itemSize) {
       throw new Error('Grid is not mounted yet');
     }
@@ -185,13 +190,12 @@ export default class {
     this.top = _top;
     //TODO: implement scroll
     // scroll();
-    console.log(_top)
     const { x, y } = snapOnMove(this.left, this.top, this.previewItem, this.settings);
     if (!hasCollisions({ ...this.previewItem, x, y }, Object.values(this.settings.items))) {
       this.previewItem = { ...this.previewItem, x, y };
     }
   }
-  private moveEndMouse(event: PointerEvent) {
+  private moveEndMouse(event: PointerEvent | DragEvent) {
     if (event.button !== 0 || !this.active) return;
     this.endInteraction(event);
   }

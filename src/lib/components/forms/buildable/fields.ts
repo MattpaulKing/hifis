@@ -1,13 +1,14 @@
 import { ELEMENT_TYPES, Input } from "$lib/components/forms";
+import { Type, TextSearch } from "@lucide/svelte"
 
 const fields = {
   input: {
-    id: '0',
+    id: crypto.randomUUID(),
     category: ELEMENT_TYPES.FORM_FIELDS,
     type: 'input',
     component: {
       render: Input,
-      icon: 'solar:text-square-line-duotone',
+      icon: Type,
       title: 'Input'
     },
     settings: {
@@ -18,6 +19,33 @@ const fields = {
       attributes: {
         placeholder: 'Enter input text'
       }
+    },
+    layout: {
+      widthGridUnits: 4,
+      heightGridUnits: 2
+    }
+  },
+  select: {
+    id: '1',
+    category: ELEMENT_TYPES.FORM_FIELDS,
+    type: 'select',
+    component: {
+      render: Input,
+      icon: TextSearch,
+      title: 'Select'
+    },
+    settings: {
+      properties: {
+        name: 'select-0',
+        label: 'Select',
+      },
+      attributes: {
+        placeholder: 'Enter input text'
+      }
+    },
+    layout: {
+      widthGridUnits: 4,
+      heightGridUnits: 2
     }
   }
 }
