@@ -2,13 +2,13 @@ import { eq } from "drizzle-orm"
 import { users } from "./users/schema"
 import type { PageServerLoad } from "./$types"
 import type { TabEntity } from "$src/lib/components/user-grid"
+import type { LayoutItem } from "$src/lib/components/user-grid/types"
 
 export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
   return {
     usersComponents: [
       {
         id: '1',
-        label: 'A',
         x: 0,
         y: 0,
         heightGridUnits: 4,
@@ -19,7 +19,6 @@ export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
       },
       {
         id: '2',
-        label: 'B',
         x: 11,
         y: 0,
         heightGridUnits: 4,
@@ -28,7 +27,7 @@ export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
         moveable: true,
         resizeable: true
       }
-    ],
+    ] as LayoutItem[],
     entities: [
       { id: '1', label: 'something', active: false, tabType: "entity" },
       { id: '2', label: 'something else', active: true, tabType: "entity" },

@@ -1,53 +1,28 @@
 <script lang="ts">
-	import { GridSettings, setGridContext } from '.';
-	import { BuildableFieldPreview, type buildableFormFields } from '../forms';
-	import { position2coordinate } from './utils/item';
+	import { GridSettings } from '.';
 	import type { Snippet } from 'svelte';
-	import type { LayoutItem } from './types';
 
 	type Props = {
 		gridSettings: GridSettings;
 		class?: string;
 		autoCompress?: boolean;
-		draggedField?: (typeof buildableFormFields)[keyof typeof buildableFormFields];
-		previewDraggedFieldItem?: LayoutItem;
+		ondragover?: (e: DragEvent) => void;
 		children: Snippet;
+		fieldPreview?: Snippet<[{ dragEvent: DragEvent | undefined }]>;
 	};
 	let {
 		gridSettings,
 		class: classes,
-		draggedField = $bindable(),
-		previewDraggedFieldItem = $bindable(),
-		children
+		ondragover: _ondragover,
+		children,
+		fieldPreview
 	}: Props = $props();
 
 	function ondragover(e: DragEvent) {
-		if (!draggedField) return;
-		let {
-			id,
-			layout: { widthGridUnits, heightGridUnits }
-		} = draggedField;
-		previewDraggedFieldItem = {
-			id,
-			x:
-				position2coordinate(e.pageX, gridSettings.itemSize.width, gridSettings.gap) -
-				widthGridUnits,
-			y:
-				position2coordinate(e.pageY, gridSettings.itemSize.height, gridSettings.gap) -
-				heightGridUnits,
-
-			widthGridUnits,
-			heightGridUnits,
-			min: {
-				widthGridUnits,
-				heightGridUnits
-			},
-			moveable: true,
-			resizeable: true
-		};
-		dragE = e;
+		dragEvent = e;
+		_ondragover?.(e);
 	}
-	let dragE = $state<DragEvent>();
+	let dragEvent = $state<DragEvent>();
 </script>
 
 <div
@@ -59,10 +34,6 @@
 >
 	{#if gridSettings.itemSize && gridSettings.boundsTo}
 		{@render children()}
-	{/if}
-	{#if draggedField && previewDraggedFieldItem && dragE}
-		<BuildableFieldPreview item={previewDraggedFieldItem} dragEvent={dragE}>
-			<span class="border border-red-500">hi</span>
-		</BuildableFieldPreview>
+		{@render fieldPreview?.({ dragEvent })}
 	{/if}
 </div>

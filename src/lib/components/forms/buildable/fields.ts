@@ -1,6 +1,7 @@
 import { ELEMENT_TYPES, Input } from "$lib/components/forms";
 import { Type, TextSearch } from "@lucide/svelte"
 
+
 const fields = {
   input: {
     id: crypto.randomUUID(),
@@ -50,3 +51,4 @@ const fields = {
   }
 }
 export default fields
+export type FieldSettings = typeof fields[keyof typeof fields]
