@@ -29,7 +29,7 @@
 	let previewDraggedFieldItem: LayoutItem | undefined = $state();
 	function ondragend() {
 		if (!previewDraggedFieldItem) return;
-		items.push(previewDraggedFieldItem);
+		previewDraggedFieldItem.items.push(previewDraggedFieldItem);
 		draggedField = undefined;
 	}
 	function ondragover(e: DragEvent) {
