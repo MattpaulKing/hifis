@@ -6,7 +6,7 @@
 	import { ClientContactForm } from '../lib';
 	import { default as ClientsKeepAdding } from '$routes/[orgLabel]/clients/lib/ClientsAddMoreDialog.svelte';
 	import { getUser } from '$src/lib/components/user';
-	import { clientContactFormSchema } from '../schema';
+	import { clientContactSchema } from '../schema';
 
 	let { data } = $props();
 
@@ -20,7 +20,7 @@
 	let user = getUser();
 	let clientContactForm = initForm({
 		form: data.clientContactForm,
-		schema: clientContactFormSchema
+		schema: clientContactSchema
 	});
 </script>
 

@@ -1,11 +1,16 @@
 import { eq } from "drizzle-orm"
 import { users } from "./users/schema"
+import { superValidate } from "sveltekit-superforms"
+import { entityFieldSchema, entitySchema } from "$src/schemas"
+import { valibot } from "sveltekit-superforms/adapters"
 import type { PageServerLoad } from "./$types"
 import type { TabEntity } from "$src/lib/components/user-grid"
 import type { LayoutItem } from "$src/lib/components/user-grid/types"
 
 export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
+  console.dir(entityFieldSchema, { depth: null })
   return {
+    entityFieldsForm: await superValidate(valibot(entityFieldSchema), { errors: false }),
     usersComponents: [
       {
         id: '1',

@@ -4,9 +4,9 @@
 	import { PanelList, PanelListBtn } from '$src/lib/components/panels';
 	import { timestampsDefault } from '$src/schemas/helpers';
 	import { fade } from 'svelte/transition';
-	import { clientServiceFormSchema } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/schema';
+	import { clientServiceSchema } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/schema';
 	import { initForm } from '$src/lib/components/forms';
-	import { clientContactFormSchema } from '$routes/[orgLabel]/clients/schema';
+	import { clientContactSchema} from '$routes/[orgLabel]/clients/schema';
 	import type { clients as Clients, serviceEvents, services } from '$src/schemas';
 	import type { FormValidated } from '$src/lib/interfaces';
 
@@ -17,8 +17,8 @@
 			typeof Clients.$inferSelect & { clientServiceId: string; clientServiceDescription: string }
 		>;
 		clientServiceEvents: Record<string, (typeof serviceEvents.$inferSelect)[] | undefined>; // NOTE: clientIds -> serviceEvent map
-		clientServiceForm: FormValidated<typeof clientServiceFormSchema>;
-		clientContactForm: FormValidated<typeof clientContactFormSchema>;
+		clientServiceForm: FormValidated<typeof clientServiceSchema>;
+		clientContactForm: FormValidated<typeof clientContactSchema>;
 	};
 	let {
 		service,
@@ -38,7 +38,7 @@
 			...clients[clientTabState.activeEntity.id]
 		};
 	});
-	let clientContactForm = initForm({ form: _clientContactForm, schema: clientContactFormSchema });
+	let clientContactForm = initForm({ form: _clientContactForm, schema: clientContactSchema});
 	let { form: clientContactFormData } = clientContactForm;
 	function setFormDataToActiveClient() {
 		if (!activeClient) {

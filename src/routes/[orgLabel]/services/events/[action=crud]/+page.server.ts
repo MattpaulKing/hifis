@@ -1,6 +1,6 @@
 import { superValidate } from "sveltekit-superforms"
 import { valibot } from "sveltekit-superforms/adapters"
-import { serviceEvents, serviceEventsFormSchema } from "../schema";
+import { serviceEvents, serviceEventsSchema } from "../schema";
 import { error } from "@sveltejs/kit";
 import { single } from "$src/lib/server/db";
 import { eq } from "drizzle-orm";
@@ -48,7 +48,7 @@ async function getFormData({ db, searchParams }: { db: DB, searchParams: SearchP
     return await superValidate({
       id: crypto.randomUUID(),
       serviceId: searchParams.serviceId
-    }, valibot(serviceEventsFormSchema), { errors: false })
+    }, valibot(serviceEventsSchema), { errors: false })
   } else if (searchParams.serviceEventId) {
     return await superValidate(
       await db
@@ -56,7 +56,7 @@ async function getFormData({ db, searchParams }: { db: DB, searchParams: SearchP
         .from(serviceEvents)
         .where(eq(serviceEvents.id, searchParams.serviceEventId))
         .limit(1)
-        .then(single), valibot(serviceEventsFormSchema), { errors: false })
+        .then(single), valibot(serviceEventsSchema), { errors: false })
   } else {
     return error(404)
   }

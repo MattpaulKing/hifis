@@ -12,9 +12,9 @@
 		Label,
 		InputDateTime
 	} from '$src/lib/components/forms';
-	import { serviceEventsFormSchema } from './schema/index.js';
+	import { serviceEventsSchema } from './schema/index.js';
 	let { data } = $props();
-	let form = initForm({ form: data.serviceEventForm, schema: serviceEventsFormSchema });
+	let form = initForm({ form: data.serviceEventForm, schema: serviceEventsSchema });
 </script>
 
 <FormCard>

@@ -3,11 +3,16 @@
 	import {
 		BuildableFieldPreview,
 		buildableFormFields,
+		Field,
+		initForm,
+		Label,
 		previewFieldItemFromFieldSettings
 	} from '$src/lib/components/forms';
+	import { entityFieldSchema } from '$src/schemas/index.js';
 	import type { LayoutItem } from '$src/lib/components/user-grid/types.js';
 
 	let { data } = $props();
+	let form = initForm({ form: data.entityFieldsForm, schema: entityFieldSchema });
 
 	let items = $state(data.usersComponents);
 	let cellSize = 32;
@@ -19,17 +24,17 @@
 		gap: cellSize,
 		readOnly: false
 	});
-	/*
-  TODO: 
-    0. Figure out how I'm going to create the schema on the fly...
-  */
 	let draggedField = $state<
 		(typeof buildableFormFields)[keyof typeof buildableFormFields] | undefined
 	>();
+
 	let previewDraggedFieldItem: LayoutItem | undefined = $state();
+	function ondragstart(field: (typeof buildableFormFields)[keyof typeof buildableFormFields]) {
+		draggedField = field;
+	}
 	function ondragend() {
 		if (!previewDraggedFieldItem) return;
-		previewDraggedFieldItem.items.push(previewDraggedFieldItem);
+		items.push(previewDraggedFieldItem);
 		draggedField = undefined;
 	}
 	function ondragover(e: DragEvent) {
@@ -37,15 +42,14 @@
 		previewDraggedFieldItem = previewFieldItemFromFieldSettings({
 			e,
 			fieldSettings: draggedField,
-			itemSize: gridSettings.itemSize,
-			gap: gridSettings.gap
+			gridSettings
 		});
 	}
 </script>
 
 <div class="flex h-full w-full">
 	<div class="flex h-full w-full p-4">
-		<Grid {ondragover} {gridSettings} class="border ">
+		<Grid {ondragover} {gridSettings} class="col-span-2 border">
 			{#each items as _, i}
 				<GridItem class="card rounded-token" item={items[i]} entities={data.entities}>
 					{#snippet gridItem(entity)}
@@ -56,9 +60,12 @@
 			{/each}
 			{#snippet fieldPreview({ dragEvent })}
 				{#if draggedField && previewDraggedFieldItem && dragEvent}
-					{@const Field = draggedField.component.render}
+					{@const FieldInput = draggedField.component.render}
 					<BuildableFieldPreview item={previewDraggedFieldItem} {dragEvent}>
-						<Field />
+						<Field {form} path="previewField.name">
+							<Label label={draggedField.settings.properties.label}></Label>
+							<FieldInput />
+						</Field>
 					</BuildableFieldPreview>
 				{/if}
 			{/snippet}
@@ -77,13 +84,11 @@
 			{@const Icon = field.component.icon}
 			<button
 				draggable={true}
-				ondragstart={() => {
-					draggedField = field;
-				}}
+				ondragstart={() => ondragstart(field)}
 				{ondragend}
 				class="variant-ghost btn btn-sm w-fit"
 			>
-				<span class="border border-surface-900 p-1 rounded-token">
+				<span class="p-1 rounded-token">
 					<Icon size={20} />
 				</span>
 				<span class="">{field.component.title}</span>

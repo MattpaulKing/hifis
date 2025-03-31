@@ -4,7 +4,7 @@
 	import { lookupCtxDefault, lookupCtxFromSingle } from '$lib/interfaces/lookups';
 	import { LookupStore } from '$src/lib/components/forms/inputs/LookupStore.svelte';
 	import { ClientContactForm, ClientLogsPanel, ClientServicesPanel } from '../lib';
-	import { clientContactFormSchema } from '../schema';
+	import { clientContactSchema} from '../schema';
 
 	let { data } = $props();
 	let stepperStore = new StepperStore({
@@ -21,7 +21,7 @@
 	});
 	let clientContactForm = initForm({
 		form: data.client.contactForm,
-		schema: clientContactFormSchema
+		schema: clientContactSchema
 	});
 </script>
 

@@ -1,7 +1,9 @@
 <script lang="ts">
 	/* 
  TODO:
- 0. Pretty sure that the grid's bounding rect doesen't get shown to the items until after the item figures out its left is 0
+  -1. Create a way to make valibot schemas from fields
+  0. LogsSchema - figure out how to have array in schema & Referrals Schema
+  1. Entities - Split to multiple files for relations
   1. change schema so that clientServiceRelation can be attached/referral/etc. and fix ServiceReferralForm
   2. Finish resize logic
   3. Figure out if modals & drawers being open at the same time messes with each other closing

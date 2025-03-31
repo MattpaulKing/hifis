@@ -1,7 +1,7 @@
 import { superValidate } from "sveltekit-superforms";
 import { valibot } from "sveltekit-superforms/adapters";
 import { clientCreate, clientUpdate } from "./actions.server";
-import { clientContactFormSchema, clients } from "../schema";
+import { clientContactSchema, clients } from "../schema";
 import { error } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
 import { single } from "$src/lib/server/db";
@@ -47,13 +47,13 @@ async function getFormData({ searchParams, db }: { searchParams: SearchParams, d
   if (searchParams.action === "create") {
     return await superValidate({
       dob: new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()),
-    }, valibot(clientContactFormSchema), { errors: false })
+    }, valibot(clientContactSchema), { errors: false })
   } else if (searchParams.clientId) {
     return await superValidate(await db
       .select()
       .from(clients)
       .where(eq(clients.id, searchParams.clientId))
-      .then(single), valibot(clientContactFormSchema), { errors: false }
+      .then(single), valibot(clientContactSchema), { errors: false }
     )
   } else {
     error(404)

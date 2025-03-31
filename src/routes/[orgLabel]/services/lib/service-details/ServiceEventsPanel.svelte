@@ -13,14 +13,14 @@
 	import { flip } from 'svelte/animate';
 	import type { clients, serviceEvents as ServiceEvents } from '$src/schemas';
 	import type { FormValidated } from '$src/lib/interfaces';
-	import type { serviceEventsFormSchema } from '../../events/schema';
+	import type { serviceEventsSchema } from '../../events/schema';
 
 	type Props = {
 		serviceEvents: Record<
 			string,
 			typeof ServiceEvents.$inferSelect & { attending: Record<string, typeof clients.$inferSelect> }
 		>;
-		serviceEventForm: FormValidated<typeof serviceEventsFormSchema>;
+		serviceEventForm: FormValidated<typeof serviceEventsSchema>;
 	};
 	let { serviceEvents = $bindable(), serviceEventForm }: Props = $props();
 	let user = getUser();

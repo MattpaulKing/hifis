@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { initForm } from '$lib/components/forms/index.js';
 	import { UserForm } from '../lib';
-	import { usersFormSchema } from '../schema';
+	import { usersSchema } from '../schema';
 
 	let { data } = $props();
 	let form = initForm({
 		form: data.userForm,
-		schema: usersFormSchema,
+		schema: usersSchema,
 		opts: {
 			resetForm: true
 		}

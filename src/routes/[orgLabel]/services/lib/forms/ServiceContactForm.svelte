@@ -17,7 +17,7 @@
 	} from '$lib/components/forms';
 	import ServiceCategoriesCreatePage from '$routes/[orgLabel]/services/categories/create/+page.svelte';
 	import { route } from '$lib/ROUTES';
-	import { servicesFormSchema } from '../../schema';
+	import { servicesSchema} from '../../schema';
 	import { getUser } from '$src/lib/components/user';
 	import type { FormValidated } from '$src/lib/interfaces';
 	import type { Component } from 'svelte';

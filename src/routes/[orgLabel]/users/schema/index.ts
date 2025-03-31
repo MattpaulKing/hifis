@@ -18,7 +18,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   organizations: many(organizations)
 }))
 
-export const usersFormSchema = v.object({
+export const usersSchema = v.object({
   id: v.pipe(v.string(), v.uuid()),
   firstName: v.pipe(v.string(), v.trim(), v.minLength(1, "First Name is required")),
   lastName: v.pipe(v.string(), v.trim(), v.minLength(1, "Last Name is required")),

@@ -1,8 +1,8 @@
-import * as v from "valibot"
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { timestamps, uuidPK } from "$src/schemas/helpers";
 import { relations, sql, type SQL } from "drizzle-orm";
 import { logs, services } from "$src/schemas";
+import { createInsertSchema } from "drizzle-valibot";
 
 export const clients = pgTable('clients', {
   ...uuidPK,
@@ -14,25 +14,8 @@ export const clients = pgTable('clients', {
   phone: text('phone'),
   email: text("email"),
 })
-
-export const clientContactFormSchema = v.object({
-  id: v.fallback(v.pipe(v.string(), v.uuid()), crypto.randomUUID()),
-  firstName: v.pipe(v.string(), v.trim(), v.minLength(1, "First Name is required")),
-  lastName: v.pipe(v.string(), v.trim(), v.minLength(1, "Last Name is required")),
-  dob: v.pipe(
-    v.date("Date is required"),
-    v.maxValue(
-      new Date(
-        new Date().getFullYear() - 18,
-        new Date().getMonth(),
-        new Date().getDate()
-      ), 'Client must be at least 18 years old')),
-  phone: v.nullable(v.pipe(v.string(), v.trim())),
-  email: v.nullable(v.pipe(v.string(), v.email())),
-})
-
 export const clientsRelations = relations(clients, ({ many }) => ({
   services: many(services),
   logs: many(logs)
 }))
-
+export const clientContactSchema = createInsertSchema(clients)

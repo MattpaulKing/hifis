@@ -1,6 +1,6 @@
 import { superValidate } from "sveltekit-superforms";
 import { valibot } from "sveltekit-superforms/adapters";
-import { services, servicesFormSchema } from "../schema";
+import { services, servicesSchema} from "../schema";
 import { serviceCreate } from "../actions.server";
 import { error } from "@sveltejs/kit";
 import { single } from "$src/lib/server/db";

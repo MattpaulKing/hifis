@@ -22,7 +22,7 @@ const fields = {
       }
     },
     layout: {
-      widthGridUnits: 4,
+      widthGridUnits: 5,
       heightGridUnits: 2
     }
   },

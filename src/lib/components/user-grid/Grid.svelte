@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { GridSettings } from '.';
 	import type { Snippet } from 'svelte';
+	import { setFormCtx } from '../forms/inputs/context.svelte';
 
 	type Props = {
 		gridSettings: GridSettings;
 		class?: string;
 		autoCompress?: boolean;
+		disabled?: boolean;
 		ondragover?: (e: DragEvent) => void;
 		children: Snippet;
 		fieldPreview?: Snippet<[{ dragEvent: DragEvent | undefined }]>;
@@ -14,6 +16,7 @@
 		gridSettings,
 		class: classes,
 		ondragover: _ondragover,
+		disabled = false,
 		children,
 		fieldPreview
 	}: Props = $props();
@@ -23,6 +26,7 @@
 		_ondragover?.(e);
 	}
 	let dragEvent = $state<DragEvent>();
+	setFormCtx({ disabled });
 </script>
 
 <div

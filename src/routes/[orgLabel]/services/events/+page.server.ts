@@ -1,6 +1,6 @@
 import { superValidate } from "sveltekit-superforms"
 import { valibot } from "sveltekit-superforms/adapters"
-import { serviceEventsFormSchema } from "./schema"
+import { serviceEventsSchema } from "./schema"
 import type { PageServerLoad, Actions } from "./$types"
 
 type SearchParams = Partial<{
@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ url: { searchParams }, locals: { db
     serviceEventForm: await superValidate({
       id: crypto.randomUUID(),
       serviceId: searchParamsObj.serviceId
-    }, valibot(serviceEventsFormSchema), { errors: false })
+    }, valibot(serviceEventsSchema), { errors: false })
   }
 }
 

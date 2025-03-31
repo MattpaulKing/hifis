@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm"
-import { clients, clientContactFormSchema } from "../schema"
+import { clients, clientContactSchema} from "../schema"
 import { single } from "$lib/server/db"
 import { services } from "$routes/[orgLabel]/services/schema"
 import { superValidate } from "sveltekit-superforms"
@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ url: { searchParams }, params: { cl
           contact,
           contactForm: await superValidate({
             ...contact
-          }, valibot(clientContactFormSchema))
+          }, valibot(clientContactSchema))
         })),
       services: await db
         .select({

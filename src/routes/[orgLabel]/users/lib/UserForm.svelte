@@ -13,12 +13,12 @@
 	} from '$lib/components/forms';
 	import { route, type KIT_ROUTES } from '$lib/ROUTES';
 	import type { Infer, SuperForm } from 'sveltekit-superforms';
-	import type { usersFormSchema } from '../schema';
+	import type { usersSchema } from '../schema';
 	import type { CRUD } from '../../../../params/crud';
 	import type { Lookup } from '$lib/interfaces/Lookup';
 
 	type Props = {
-		form: SuperForm<Infer<typeof usersFormSchema>>;
+		form: SuperForm<Infer<typeof usersSchema>>;
 		lookups: { org: Lookup[] };
 		action: {
 			path: keyof KIT_ROUTES['ACTIONS'];

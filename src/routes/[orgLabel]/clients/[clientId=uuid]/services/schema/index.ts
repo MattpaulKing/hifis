@@ -1,8 +1,8 @@
-import * as v from "valibot"
 import { clients, services } from "$src/schemas";
 import { timestamps, uuidPK } from "$src/schemas/helpers";
 import { pgTable, text, unique, uuid } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { createInsertSchema } from "drizzle-valibot";
 
 export const clientsServices = pgTable("clients_services", {
   ...uuidPK,
@@ -19,9 +19,4 @@ export const clientsServicesRelations = relations(clientsServices, ({ one }) => 
   services: one(services, { fields: [clientsServices.serviceId], references: [services.id] }),
 }))
 
-export const clientServiceFormSchema = v.object({
-  id: v.pipe(v.string(), v.uuid()),
-  clientId: v.pipe(v.string(), v.uuid("Unable to find client")),
-  serviceId: v.pipe(v.string(), v.uuid("Unable to find service")),
-  description: v.pipe(v.string(), v.trim(), v.minLength(1, "Description is required")),
-})
+export const clientServiceSchema = createInsertSchema(clientsServices)

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { clientServiceEventsFormSchema } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/events/schema/index.js';
+	import { clientServiceEventSchema } from '$routes/[orgLabel]/clients/[clientId=uuid]/services/events/schema/index.js';
 	import {
 		initForm,
 		Errors,
@@ -19,7 +19,7 @@
 	import type { CRUD } from '$src/params/crud';
 
 	type Props = {
-		clientServiceEventForm: FormValidated<typeof clientServiceEventsFormSchema>;
+		clientServiceEventForm: FormValidated<typeof clientserviceEventsSchema>;
 		lookups: {
 			client: LookupStore;
 			service: LookupStore;
@@ -27,14 +27,14 @@
 		};
 		action: CRUD;
 		disabledFields: Partial<
-			Record<keyof FormValidated<typeof clientServiceEventsFormSchema>['data'], boolean>
+			Record<keyof FormValidated<typeof clientserviceEventsSchema>['data'], boolean>
 		>;
 	};
 	let { clientServiceEventForm, lookups, action, disabledFields }: Props = $props();
 	let user = getUser();
 	let form = initForm({
 		form: clientServiceEventForm,
-		schema: clientServiceEventsFormSchema
+		schema: clientserviceEventsSchema
 	});
 	let { form: formData } = form;
 	$inspect(lookups.serviceEvent.inputValue);

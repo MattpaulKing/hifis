@@ -1,6 +1,6 @@
 import { superValidate } from "sveltekit-superforms"
 import { valibot } from "sveltekit-superforms/adapters"
-import { usersFormSchema } from "../schema"
+import { usersSchema } from "../schema"
 import { userCreate } from "./actions.server"
 import type { Actions, PageServerLoad } from "./$types"
 
@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ params: { orgLabel }, locals: { sub
     userForm: await superValidate({
       id: crypto.randomUUID(),
       orgId: userOrgId
-    }, valibot(usersFormSchema), { errors: false }),
+    }, valibot(usersSchema), { errors: false }),
     lookups: {
       org: [{
         id: userOrgId,

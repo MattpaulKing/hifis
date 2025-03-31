@@ -13,7 +13,7 @@
 		Label
 	} from '$lib/components/forms';
 	import { route } from '$lib/ROUTES';
-	import { serviceCategoriesFormSchema } from '../schema';
+	import { serviceCategoriesSchema} from '../schema';
 
 	let { data } = $props();
 	let form = initForm({

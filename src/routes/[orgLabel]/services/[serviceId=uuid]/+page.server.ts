@@ -1,13 +1,12 @@
 import { superValidate } from "sveltekit-superforms"
 import { valibot } from "sveltekit-superforms/adapters"
-import { services, servicesFormSchema } from "../schema"
+import { services, servicesSchema } from "../schema"
 import { eq, getTableColumns } from "drizzle-orm"
 import { single } from "$src/lib/server/db"
-import { clients, clientServiceEvents, clientsServices, serviceCategories, serviceEvents } from "$src/schemas"
+import { clientContactSchema, clients, clientServiceEvents, clientsServices, serviceCategories, serviceEvents } from "$src/schemas"
 import { rowsToMap } from "$src/lib/helpers"
-import { clientContactFormSchema } from "$routes/[orgLabel]/clients/schema"
-import { serviceEventsFormSchema } from "../events/schema"
-import { clientServiceFormSchema } from "$routes/[orgLabel]/clients/[clientId=uuid]/services/schema"
+import { serviceEventsSchema } from "../events/schema"
+import { clientServiceSchema } from "$routes/[orgLabel]/clients/[clientId=uuid]/services/schema"
 import type { PageServerLoad, Actions } from "./$types"
 
 export const load: PageServerLoad = async ({ params: { serviceId }, locals: { db } }) => {
@@ -20,7 +19,7 @@ export const load: PageServerLoad = async ({ params: { serviceId }, locals: { db
       .then(async service => {
         return {
           service,
-          serviceForm: await superValidate(service, valibot(servicesFormSchema), { errors: false }),
+          serviceForm: await superValidate(service, valibot(servicesSchema), { errors: false }),
         }
       }),
     clients: await db
@@ -60,9 +59,9 @@ export const load: PageServerLoad = async ({ params: { serviceId }, locals: { db
         clientsEvents: Record<string, typeof serviceEvents.$inferSelect[]>,
         serviceEvents: Record<string, typeof serviceEvents.$inferSelect & { attending: Record<string, typeof clients.$inferSelect> }>
       })),
-    clientContactForm: await superValidate({ id: crypto.randomUUID() }, valibot(clientContactFormSchema), { errors: false }),
-    clientServiceForm: await superValidate({ id: crypto.randomUUID() }, valibot(clientServiceFormSchema), { errors: false }),
-    serviceEventForm: await superValidate({ id: crypto.randomUUID(), serviceId }, valibot(serviceEventsFormSchema), { errors: false }),
+    clientContactForm: await superValidate({ id: crypto.randomUUID() }, valibot(clientContactSchema), { errors: false }),
+    clientServiceForm: await superValidate({ id: crypto.randomUUID() }, valibot(clientServiceSchema), { errors: false }),
+    serviceEventForm: await superValidate({ id: crypto.randomUUID(), serviceId }, valibot(serviceEventsSchema), { errors: false }),
     lookups: {
       serviceCategory: await db
         .select({ id: serviceCategories.id, label: serviceCategories.label })

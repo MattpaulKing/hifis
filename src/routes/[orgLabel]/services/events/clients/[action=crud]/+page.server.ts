@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm"
 import { error } from "@sveltejs/kit"
 import { clients, serviceEvents, services } from "$src/schemas"
 import { single } from "$src/lib/server/db"
-import { clientServiceEvents, clientServiceEventsFormSchema } from "$routes/[orgLabel]/clients/[clientId=uuid]/services/events/schema"
+import { clientServiceEvents, clientServiceEventSchema} from "$routes/[orgLabel]/clients/[clientId=uuid]/services/events/schema"
 import { serviceEventClientCreate, serviceEventClientDelete } from "./actions.server"
 import type { CRUD } from "$src/params/crud"
 import type { PageServerLoad, Actions } from "./$types"
@@ -73,5 +73,5 @@ async function getValidatedForm({ params }: { params: SearchParams }) {
     clientId: params.clientId,
     serviceId: params.serviceId,
     serviceEventId: params.serviceEventId
-  }, valibot(clientServiceEventsFormSchema), { errors: false })
+  }, valibot(clientserviceEventsSchema), { errors: false })
 }

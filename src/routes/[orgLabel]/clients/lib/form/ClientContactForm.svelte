@@ -13,7 +13,7 @@
 	} from '$lib/components/forms';
 	import { route } from '$lib/ROUTES';
 	import { getUser } from '$lib/components/user';
-	import { clientContactFormSchema } from '../../schema';
+	import { clientContactSchema } from '../../schema';
 	import type { Lookup } from '$lib/interfaces/Lookup';
 	import type { FormOptions, Infer, SuperForm } from 'sveltekit-superforms';
 
@@ -21,9 +21,9 @@
 		clientContactForm: form,
 		action
 	}: {
-		clientContactForm: SuperForm<Infer<typeof clientContactFormSchema>>;
+		clientContactForm: SuperForm<Infer<typeof clientContactSchema>>;
 		action: FormMode;
-		opts?: FormOptions<Infer<typeof clientContactFormSchema>>;
+		opts?: FormOptions<Infer<typeof clientContactSchema>>;
 	} = $props();
 	let user = getUser();
 

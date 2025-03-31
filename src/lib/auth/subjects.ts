@@ -1,11 +1,11 @@
 import { createSubjects } from "@openauthjs/openauth";
-import { usersFormSchema } from "../../routes/[orgLabel]/users/schema";
-import { organizationInsertSchema } from "$routes/[orgLabel]/schema";
+import { usersSchema } from "../../routes/[orgLabel]/users/schema";
+import { organizationsSchema } from "$src/schemas";
 
 export const subjects = createSubjects({
   user: {
-    ...usersFormSchema,
-    orgLabel: organizationInsertSchema.entries.label
+    ...usersSchema,
+    orgLabel: organizationsSchema.entries.label
   }
 })
 export type UserSubject = typeof subjects["user"]

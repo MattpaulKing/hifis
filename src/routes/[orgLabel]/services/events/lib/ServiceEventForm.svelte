@@ -14,7 +14,7 @@
 	} from '$src/lib/components/forms';
 	import { getUser } from '$src/lib/components/user/userContext.svelte.js';
 	import { route } from '$src/lib/ROUTES.js';
-	import { serviceEventsFormSchema } from '../schema/index.js';
+	import { serviceEventsSchema } from '../schema/index.js';
 	import type { FormValidated } from '$src/lib/interfaces/forms.js';
 	import type { CRUD } from '$src/params/crud.js';
 	import type { FormOptions, Infer } from 'sveltekit-superforms';
@@ -24,13 +24,13 @@
 		action,
 		opts
 	}: {
-		serviceEventForm: FormValidated<typeof serviceEventsFormSchema>;
+		serviceEventForm: FormValidated<typeof serviceEventsSchema>;
 		action: CRUD;
-		opts?: FormOptions<Infer<typeof serviceEventsFormSchema>>;
+		opts?: FormOptions<Infer<typeof serviceEventsSchema>>;
 	} = $props();
 	let form = initForm({
 		form: { ...serviceEventForm },
-		schema: serviceEventsFormSchema,
+		schema: serviceEventsSchema,
 		opts
 	});
 	let user = getUser();
