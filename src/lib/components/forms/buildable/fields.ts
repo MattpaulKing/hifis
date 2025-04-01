@@ -1,32 +1,42 @@
 import { ELEMENT_TYPES, Input } from "$lib/components/forms";
 import { Type, TextSearch } from "@lucide/svelte"
 
-
 const fields = {
   input: {
     id: crypto.randomUUID(),
     category: ELEMENT_TYPES.FORM_FIELDS,
-    type: 'input',
     component: {
       render: Input,
       icon: Type,
       title: 'Input'
     },
-    settings: {
-      properties: {
-        name: 'input-0',
-        label: 'Input',
-      },
-      attributes: {
-        placeholder: 'Enter input text'
-      }
+    properties: {
+      name: 'input',
+      label: 'Default Label',
+      entityId: "",
+      fieldType: "input",
+      inputType: "text",
+      multiple: false,
+      placeholder: "Default Placeholder",
+      required: true,
+      min: null,
+      max: null
     },
     layout: {
+      id: "",
+      x: null,
+      y: null,
       widthGridUnits: 5,
-      heightGridUnits: 2
+      heightGridUnits: 2,
+      min: {
+        widthGridUnits: 5,
+        heightGridUnits: 2,
+      },
+      moveable: true,
+      resizeable: true,
     }
   },
-  select: {
+  lookup: {
     id: '1',
     category: ELEMENT_TYPES.FORM_FIELDS,
     type: 'select',
@@ -35,20 +45,32 @@ const fields = {
       icon: TextSearch,
       title: 'Select'
     },
-    settings: {
-      properties: {
-        name: 'select-0',
-        label: 'Select',
-      },
-      attributes: {
-        placeholder: 'Enter input text'
-      }
+    properties: {
+      name: 'lookup',
+      label: 'Default Label',
+      entityId: "",
+      fieldType: "lookup",
+      inputType: null,
+      multiple: false,
+      placeholder: "Default Placeholder",
+      required: true,
+      min: null,
+      max: null
     },
     layout: {
-      widthGridUnits: 4,
-      heightGridUnits: 2
+      id: "",
+      x: null,
+      y: null,
+      widthGridUnits: 5,
+      heightGridUnits: 2,
+      min: {
+        widthGridUnits: 5,
+        heightGridUnits: 2,
+      },
+      moveable: true,
+      resizeable: true,
     }
   }
 }
 export default fields
-export type FieldSettings = typeof fields[keyof typeof fields]
+export type BuildableField = typeof fields[keyof typeof fields]

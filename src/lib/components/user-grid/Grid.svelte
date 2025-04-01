@@ -7,16 +7,16 @@
 		gridSettings: GridSettings;
 		class?: string;
 		autoCompress?: boolean;
-		disabled?: boolean;
+		userBuilding?: boolean;
 		ondragover?: (e: DragEvent) => void;
 		children: Snippet;
-		fieldPreview?: Snippet<[{ dragEvent: DragEvent | undefined }]>;
+		fieldPreview?: Snippet<[{ dragEvent: DragEvent }]>;
 	};
 	let {
 		gridSettings,
 		class: classes,
 		ondragover: _ondragover,
-		disabled = false,
+		userBuilding = false,
 		children,
 		fieldPreview
 	}: Props = $props();
@@ -25,12 +25,13 @@
 		dragEvent = e;
 		_ondragover?.(e);
 	}
-	let dragEvent = $state<DragEvent>();
-	setFormCtx({ disabled });
+	let dragEvent = $state<DragEvent | null>(null);
+	setFormCtx({ disabled: userBuilding });
 </script>
 
 <div
 	{ondragover}
+	onpointerleave={() => (dragEvent = null)}
 	role="grid"
 	tabindex="0"
 	class="relative h-full w-full {classes}"
@@ -38,6 +39,8 @@
 >
 	{#if gridSettings.itemSize && gridSettings.boundsTo}
 		{@render children()}
-		{@render fieldPreview?.({ dragEvent })}
+		{#if dragEvent !== null}
+			{@render fieldPreview?.({ dragEvent })}
+		{/if}
 	{/if}
 </div>

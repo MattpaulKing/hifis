@@ -2,11 +2,10 @@ import { getContext, setContext } from "svelte";
 import type { GridDimensions, ItemSize, LayoutItem } from "../types";
 
 type GridSettingsParams = {
-  cols: number,
-  rows: number,
-  gap?: number,
+  cellSize: number,
+  cols?: number,
+  rows?: number,
   items?: Record<string, LayoutItem>,
-  itemSize: ItemSize,
   bounds?: boolean,
   boundsTo?: HTMLDivElement,
   readOnly?: boolean,
@@ -32,11 +31,11 @@ export class GridSettings {
     }
   })
   constructor(params: GridSettingsParams) {
-    this.cols = params.cols
-    this.rows = params.rows
-    this.gap = params.gap ?? this.gap
+    this.cols = params.cols ?? this.cols
+    this.rows = params.rows ?? this.rows
+    this.gap = params.cellSize ?? this.gap
     this.items = params.items ?? this.items
-    this.itemSize = params.itemSize
+    this.itemSize = { height: params.cellSize, width: params.cellSize }
     this.bounds = params.bounds ?? false
     this.boundsTo = params.boundsTo ?? undefined
     this.readOnly = params.readOnly ?? false

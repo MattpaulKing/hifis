@@ -1,4 +1,4 @@
-import { integer, pgEnum, pgTable, text, uuid, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { boolean, integer, pgTable, text, uuid, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { timestamps, uuidPK } from "$src/schemas/helpers";
 import { createInsertSchema } from "drizzle-valibot"
 import { entityFields } from "./entityFields";
@@ -8,6 +8,7 @@ export const entities = pgTable("entities", {
   ...uuidPK,
   ...timestamps,
   version: integer("version").notNull(),
+  published: boolean("published").default(false),
   label: text("label").notNull(),
   parentId: uuid("parent_id").notNull().references((): AnyPgColumn => entities.id, { onUpdate: "cascade", onDelete: "restrict" })
 })

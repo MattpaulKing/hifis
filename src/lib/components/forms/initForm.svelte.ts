@@ -13,8 +13,8 @@ export default function <T extends ISchema>({ form, schema, opts }:
   let msgStore = getFormMsgStore()
   let modalStore = getModalStore()
   let drawerStore = getDrawerStore()
-  //@ts-ignore
   return superForm(form, {
+    //@ts-ignore
     id: form.data.id ?? crypto.randomUUID(),
     validators: valibot(schema),
     dataType: "json",

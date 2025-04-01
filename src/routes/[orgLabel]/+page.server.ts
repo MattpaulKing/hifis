@@ -5,34 +5,18 @@ import { entityFieldSchema, entitySchema } from "$src/schemas"
 import { valibot } from "sveltekit-superforms/adapters"
 import type { PageServerLoad } from "./$types"
 import type { TabEntity } from "$src/lib/components/user-grid"
-import type { LayoutItem } from "$src/lib/components/user-grid/types"
 
 export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
-  console.dir(entityFieldSchema, { depth: null })
   return {
-    entityFieldsForm: await superValidate(valibot(entityFieldSchema), { errors: false }),
-    usersComponents: [
-      {
-        id: '1',
-        x: 0,
-        y: 0,
-        heightGridUnits: 4,
-        widthGridUnits: 11,
-        min: { heightGridUnits: 1, widthGridUnits: 2 },
-        moveable: true,
-        resizeable: true
-      },
-      {
-        id: '2',
-        x: 11,
-        y: 0,
-        heightGridUnits: 4,
-        widthGridUnits: 11,
-        min: { heightGridUnits: 1, widthGridUnits: 2 },
-        moveable: true,
-        resizeable: true
-      }
-    ] as LayoutItem[],
+    entityForm: await superValidate({
+      id: crypto.randomUUID(),
+      version: 0,
+      published: false,
+      label: "test"
+    }, valibot(entitySchema), { errors: false }),
+    entityFieldsForm: await superValidate({
+    }, valibot(entityFieldSchema), { errors: false }),
+    usersComponents: [],
     entities: [
       { id: '1', label: 'something', active: false, tabType: "entity" },
       { id: '2', label: 'something else', active: true, tabType: "entity" },

@@ -77,19 +77,17 @@ export default class {
       this.width = position.width;
       this.height = position.height;
 
-      if (this.isOutsideBounds() || hasCollisions(this.item, Object.values(this.settings.items))) {
-        let newCoords = this.getFirstAvailableCoords(this.item)
-        if (newCoords) {
-          this.left = coordinate2position(newCoords.x, this.settings.itemSize.width, this.settings.gap)
-          this.top = coordinate2position(newCoords.y, this.settings.itemSize.height, this.settings.gap)
-        }
-      }
+      // if (hasCollisions(this.item, Object.values(this.settings.items))) {
+      //   let newCoords = this.getFirstAvailableCoords(this.item)
+      //   if (newCoords) {
+      //     this.left = coordinate2position(newCoords.x, this.settings.itemSize.width, this.settings.gap)
+      //     this.top = coordinate2position(newCoords.y, this.settings.itemSize.height, this.settings.gap)
+      //   }
+      // }
       this.initialPosition = { left: this.left, top: this.top }
     }
 
-    if (!this.active && this.item) {
-      this.previewItem = this.item;
-    }
+    this.previewItem = { ...this.item };
   }
   private isOutsideBounds() {
     let rect = this.settings.boundsTo?.getBoundingClientRect()
@@ -120,10 +118,11 @@ export default class {
   private applyPreview() {
     this.item.x = this.previewItem.x;
     this.item.y = this.previewItem.y;
-    this.item.widthGridUnits = this.previewItem.widthGridUnits;
-    this.item.heightGridUnits = this.previewItem.heightGridUnits;
     this.left = this.preview.left;
     this.top = this.preview.top;
+
+    this.item.widthGridUnits = this.previewItem.widthGridUnits;
+    this.item.heightGridUnits = this.previewItem.heightGridUnits;
     this.width = coordinate2size(this.previewItem.widthGridUnits, this.settings.itemSize.width, this.settings.gap)
     this.height = coordinate2size(this.previewItem.heightGridUnits, this.settings.itemSize.height, this.settings.gap)
   }
@@ -157,12 +156,13 @@ export default class {
     this.cleanupMoveEndTouch = on(window, 'touchend', (e) => this.moveEndTouch(e.touches[0]))
   }
   moveStartMouse(event: PointerEvent | DragEvent) {
-    if (event.button !== 0 || this.active) return;
+    if (event.button !== 0 || this.active) {
+      return
+    };
     this.initInteraction(event);
     if ("dataTransfer" in event) {
       this.cleanupMoveMouse = on(window, 'drag', (e) => this.move(e))
       this.cleanupMoveEndMouse = on(window, 'dragend', (e) => this.moveEndMouse(e))
-
     } else {
       this.cleanupMoveMouse = on(window, 'pointermove', (e) => this.move(e));
       this.cleanupMoveEndMouse = on(window, 'pointerup', (e) => this.moveEndMouse(e))
@@ -188,8 +188,8 @@ export default class {
     }
     this.left = _left;
     this.top = _top;
-    //TODO: implement scroll
-    // scroll();
+
+
     const { x, y } = snapOnMove(this.left, this.top, this.previewItem, this.settings);
     if (!hasCollisions({ ...this.previewItem, x, y }, Object.values(this.settings.items))) {
       this.previewItem = { ...this.previewItem, x, y };
@@ -203,6 +203,8 @@ export default class {
     if (!this.active) return
     this.endInteraction(event)
   }
+
+  //TODO: implement scroll
   scroll() {
     // TODO: scroll
   }
