@@ -7,14 +7,16 @@ import type { PageServerLoad } from "./$types"
 import type { TabEntity } from "$src/lib/components/user-grid"
 
 export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
+  let id = crypto.randomUUID()
   return {
     entityForm: await superValidate({
-      id: crypto.randomUUID(),
+      id,
       version: 0,
       published: false,
       label: "test"
     }, valibot(entitySchema), { errors: false }),
     entityFieldsForm: await superValidate({
+      entityId: id,
     }, valibot(entityFieldSchema), { errors: false }),
     usersComponents: [],
     entities: [

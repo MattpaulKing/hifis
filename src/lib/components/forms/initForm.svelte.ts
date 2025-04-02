@@ -13,6 +13,7 @@ export default function <T extends ISchema>({ form, schema, opts }:
   let msgStore = getFormMsgStore()
   let modalStore = getModalStore()
   let drawerStore = getDrawerStore()
+  //@ts-ignore
   return superForm(form, {
     //@ts-ignore
     id: form.data.id ?? crypto.randomUUID(),
@@ -26,14 +27,21 @@ export default function <T extends ISchema>({ form, schema, opts }:
     timeoutMs: 8000,
     resetForm: false,
     invalidateAll: true,
-    // ...opts,
+    ...opts,
     onResult(e) {
       if (e.result.type === "success") {
         msgStore.setMsg({ id: form.id, msg: "Success", status: "success" })
         modalStore.queue[0]?.response({ type: "save" })
         drawerStore.queue[0]?.response({ type: 'save' })
-      } else if (e.result.type === "error" || e.result.type === "failure") {
-        msgStore.setMsg({ id: form.id, msg: "Error", status: "error" })
+      } else if (e.result.type === "failure" && e.result.data) {
+        let errors = e.result.data.form.errors as Record<string, string[]>
+        msgStore.setMsg({
+          id: form.id,
+          msg: Object.keys(errors).map((key) => `${key}: ${errors[key].join(" & ")}`)?.join("\n"),
+          status: "error"
+        })
+      } else if (e.result.type === "error") {
+        msgStore.setMsg({ id: form.id, msg: 'Failure', status: 'error' })
       }
       if (opts?.onResult) {
         opts?.onResult(e)

@@ -1,10 +1,21 @@
 import { ELEMENT_TYPES, Input } from "$lib/components/forms";
+import { entityFieldPositionSchema, type entityFieldSchema } from "$src/schemas";
 import { Type, TextSearch } from "@lucide/svelte"
+import * as v from "valibot";
+
+type EntityFieldLayoutInputDefault = v.InferInput<typeof entityFieldPositionSchema> & {
+  min: {
+    widthGridUnits: number,
+    heightGridUnits: number,
+  },
+  moveable: boolean,
+  resizeable: boolean,
+}
 
 const fields = {
   input: {
-    id: crypto.randomUUID(),
     category: ELEMENT_TYPES.FORM_FIELDS,
+    type: "input",
     component: {
       render: Input,
       icon: Type,
@@ -13,19 +24,19 @@ const fields = {
     properties: {
       name: 'input',
       label: 'Default Label',
-      entityId: "",
-      fieldType: "input",
+      fieldType: "input" as const,
       inputType: "text",
       multiple: false,
       placeholder: "Default Placeholder",
       required: true,
       min: null,
       max: null
-    },
+    } satisfies Omit<v.InferInput<typeof entityFieldSchema>, "entityId">,
     layout: {
       id: "",
-      x: null,
-      y: null,
+      x: Infinity,
+      y: Infinity,
+      fieldId: "input", //TODO: have to actually make this real when pulling from DB
       widthGridUnits: 5,
       heightGridUnits: 2,
       min: {
@@ -34,10 +45,9 @@ const fields = {
       },
       moveable: true,
       resizeable: true,
-    }
+    } satisfies EntityFieldLayoutInputDefault
   },
   lookup: {
-    id: '1',
     category: ELEMENT_TYPES.FORM_FIELDS,
     type: 'select',
     component: {
@@ -49,7 +59,7 @@ const fields = {
       name: 'lookup',
       label: 'Default Label',
       entityId: "",
-      fieldType: "lookup",
+      fieldType: "lookup" as const,
       inputType: null,
       multiple: false,
       placeholder: "Default Placeholder",
@@ -58,9 +68,9 @@ const fields = {
       max: null
     },
     layout: {
-      id: "",
-      x: null,
-      y: null,
+      fieldId: "lookup", //TODO: have to actually make this real when pulling from DB
+      x: Infinity,
+      y: Infinity,
       widthGridUnits: 5,
       heightGridUnits: 2,
       min: {
@@ -69,7 +79,7 @@ const fields = {
       },
       moveable: true,
       resizeable: true,
-    }
+    } satisfies EntityFieldLayoutInputDefault
   }
 }
 export default fields

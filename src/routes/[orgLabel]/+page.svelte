@@ -17,12 +17,28 @@
 	} from '$src/lib/components/forms';
 	import { entityFieldSchema, entitySchema } from '$src/schemas/index.js';
 	import { ArrowLeftIcon } from '@lucide/svelte';
-	import { fade, slide } from 'svelte/transition';
 
 	let { data } = $props();
 	let entityForm = initForm({ form: data.entityForm, schema: entitySchema });
 	let { form: entityFormData } = entityForm;
-	let entityFieldsForm = initForm({ form: data.entityFieldsForm, schema: entityFieldSchema });
+	let entityFieldsForm = initForm({
+		form: data.entityFieldsForm,
+		schema: entityFieldSchema,
+		opts: {
+			SPA: true,
+			onSubmit(input) {
+				input.cancel();
+				if (!fieldMenuState.field?.layout) return;
+				$entityFormData.fields = [
+					...$entityFormData.fields,
+					{
+						properties: $entityFieldsFormData,
+						layout: fieldMenuState.field.layout
+					}
+				];
+			}
+		}
+	});
 	let { form: entityFieldsFormData } = entityFieldsForm;
 
 	let items = $state<BuildableField[]>(data.usersComponents);
@@ -32,13 +48,11 @@
 	type FieldMenuState =
 		| {
 				field: null;
-				fieldIdx: null;
 				tab: 'field-list';
 				label: string;
 		  }
 		| {
 				field: BuildableField;
-				fieldIdx: number;
 				tab: 'properties' | 'layout';
 				label: string;
 		  };
@@ -48,6 +62,7 @@
 	function ondragstart(e: DragEvent, field: BuildableField) {
 		draggedField = previewFieldItemFromFieldSettings({
 			e,
+			entityId: $entityFormData.id,
 			field,
 			gridSettings
 		});
@@ -63,6 +78,7 @@
 		if (!draggedField) return;
 		draggedField = previewFieldItemFromFieldSettings({
 			e,
+			entityId: $entityFormData.id,
 			field: draggedField,
 			gridSettings
 		});
@@ -70,20 +86,19 @@
 	function setActiveField(item: BuildableField) {
 		fieldMenuState = {
 			field: item,
-			fieldIdx: items.findIndex(({ id }) => id === item.id),
 			tab: 'properties',
 			label: `${item.properties.fieldType} Settings`
 		};
-		$entityFieldsFormData = { ...item.properties };
+		$entityFieldsFormData = { ...$entityFieldsFormData, ...item.properties };
 	}
 	function fieldMenuStateDefault() {
 		return {
 			field: null,
-			fieldIdx: null,
 			tab: 'field-list' as const,
 			label: 'Elements'
 		};
 	}
+	//TODO: Fix the types of IDs
 </script>
 
 <div class="flex h-full w-full">
@@ -154,7 +169,7 @@
 			{:else if fieldMenuState.tab === 'properties'}
 				{#if fieldMenuState.field.properties.fieldType === 'input'}
 					<FormContainer form={entityFieldsForm} action="" class="h-full w-full p-0">
-						<Field form={entityFieldsForm} path="label" class="col-span-2">
+						<Field form={entityFieldsForm} path="label" class="col-span-2 mt-4">
 							<Label label="Label"></Label>
 							<Input></Input>
 							<Errors></Errors>
