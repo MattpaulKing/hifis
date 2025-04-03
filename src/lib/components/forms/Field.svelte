@@ -1,7 +1,6 @@
 <script lang="ts" generics="T extends Record<string, unknown>">
 	import { LookupStore, setLookups } from './inputs/LookupStore.svelte';
 	import { getFormCtx, setField } from './inputs/context.svelte';
-	import { writable } from 'svelte/store';
 	import type { FormPathLeaves, SuperForm } from 'sveltekit-superforms';
 	import type { Snippet } from 'svelte';
 
@@ -17,7 +16,7 @@
 	let { form, path, class: classes, disabled = false, lookups, children }: Props = $props();
 
 	let { disabled: formDisabled } = getFormCtx();
-	let { value, focused, disabled: _disabled, errors } = setField({ form, path });
+	let { focused, disabled: _disabled, errors } = setField({ form, path });
 	if (lookups) {
 		setLookups(lookups);
 	}

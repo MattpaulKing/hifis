@@ -2,6 +2,7 @@ import { ELEMENT_TYPES, Input } from "$lib/components/forms";
 import { entityFieldPositionSchema, type entityFieldSchema } from "$src/schemas";
 import { Type, TextSearch } from "@lucide/svelte"
 import * as v from "valibot";
+import type { Component } from "svelte";
 
 type EntityFieldLayoutInputDefault = v.InferInput<typeof entityFieldPositionSchema> & {
   min: {
@@ -34,9 +35,9 @@ const fields = {
     } satisfies Omit<v.InferInput<typeof entityFieldSchema>, "entityId">,
     layout: {
       id: "",
+      fieldId: "", //TODO: have to actually make this real when pulling from DB
       x: Infinity,
       y: Infinity,
-      fieldId: "input", //TODO: have to actually make this real when pulling from DB
       widthGridUnits: 5,
       heightGridUnits: 2,
       min: {
@@ -68,7 +69,8 @@ const fields = {
       max: null
     },
     layout: {
-      fieldId: "lookup", //TODO: have to actually make this real when pulling from DB
+      id: "",
+      fieldId: "",
       x: Infinity,
       y: Infinity,
       widthGridUnits: 5,
@@ -83,4 +85,14 @@ const fields = {
   }
 }
 export default fields
-export type BuildableField = typeof fields[keyof typeof fields]
+export type BuildableField = {
+  category: typeof ELEMENT_TYPES.FORM_FIELDS,
+  type: keyof typeof fields & string,
+  component: {
+    render: Component,
+    icon: Component,
+    title: string
+  },
+  properties: Omit<v.InferInput<typeof entityFieldSchema>, "entityId">,
+  layout: Omit<EntityFieldLayoutInputDefault, "id"> & { id: string }
+}

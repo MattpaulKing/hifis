@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { getGridContext, GridItemState } from '../../user-grid';
 	import { onMount, type Snippet } from 'svelte';
-	import type { LayoutItem } from '../../user-grid/types';
+	import { getBuildableFormFieldMenuState } from '..';
+	import type { BuildableField } from './fields';
 
 	type Props = {
-		item: LayoutItem;
+		item: BuildableField['layout'];
 		children: Snippet;
 		onclick?: (e: MouseEvent) => void;
 		onkeydown?: (e: KeyboardEvent) => void;
@@ -22,14 +23,17 @@
 			gridSettings.unregisterItem(controller.item);
 		};
 	});
+	let buildableFormFieldMenuState = getBuildableFormFieldMenuState();
 </script>
 
 <div
 	role="gridcell"
 	tabindex="0"
-	class="border-primary-500-400-token absolute transition-transform {classes} {controller.active
+	class="border-primary-500-400-token absolute transition-transform rounded-token {classes} {controller.active
 		? 'opacity-80 '
-		: ''} {controller.active ? ' border ' : ''}"
+		: ''} {controller.active || buildableFormFieldMenuState.state.field?.layout.id === item.id
+		? 'border'
+		: ''}"
 	style={`left:${controller.left}px; top:${controller.top}px; width: ${controller.width}px; height: ${controller.height}px;`}
 	bind:this={controller.moveableEl}
 	onpointerdown={(e) => (controller.item.moveable ? controller.moveStartMouse(e) : null)}

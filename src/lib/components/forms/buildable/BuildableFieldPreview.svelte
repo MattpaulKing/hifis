@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getGridContext, GridItemState } from '../../user-grid';
-	import { onMount, tick, type Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import type { LayoutItem } from '../../user-grid/types';
 
 	type Props = {

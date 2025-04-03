@@ -9,6 +9,7 @@ import type { TabEntity } from "$src/lib/components/user-grid"
 export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
   let id = crypto.randomUUID()
   return {
+    entityFormId: id,
     entityForm: await superValidate({
       id,
       version: 0,
@@ -24,7 +25,6 @@ export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
       { id: '2', label: 'something else', active: true, tabType: "entity" },
       { id: '3', label: 'sth else', active: false, tabType: "entity" }
     ] as TabEntity[],
-
     orgsUsers: await db
       .select()
       .from(users)
