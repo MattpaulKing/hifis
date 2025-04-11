@@ -2,22 +2,30 @@
 	import { Grid, setGridContext } from '$lib/components/user-grid';
 	import {
 		BuildableFieldContainer,
-		BuildableFieldPreview,
+		BuildableFieldPreviewEl,
 		BuildableFormFieldButtons,
 		BuildableFormFieldForm,
 		BuildableFormFieldMenuHeader,
 		Field,
 		initForm,
 		Label,
-		previewFieldItemFromFieldSettings,
+		buildableFieldDefault,
 		setBuildableFormFieldMenuState,
-		type BuildableField
+		updateEntityFields,
+		type BuildableField,
+		type BuildableFieldPreview
 	} from '$src/lib/components/forms';
+	import fields from '$src/lib/components/forms/buildable/fields.js';
+	import { route } from '$src/lib/ROUTES';
 	import { entityFieldSchema, entitySchema } from '$src/schemas/index.js';
 
 	let { data } = $props();
-	let entityForm = initForm({ form: data.entityForm, schema: entitySchema });
-	let { form: entityFormData } = entityForm;
+	let entityForm = initForm({
+		form: data.entityForm,
+		schema: entitySchema
+	});
+	let { form: entityFormData, enhance } = entityForm;
+
 	let entityFieldsForm = initForm({
 		form: data.entityFieldsForm,
 		schema: entityFieldSchema,
@@ -26,34 +34,36 @@
 			onUpdate({ cancel, form }) {
 				cancel();
 				if (!fieldMenuState.state.field?.layout) return;
-				$entityFormData.fields = [
-					...$entityFormData.fields,
-					{
-						properties: form.data,
-						layout: fieldMenuState.state.field.layout
-					}
-				];
+				$entityFormData = updateEntityFields({
+					$entityFormData,
+					entityFieldsFormData: form.data,
+					fieldMenuState
+				});
+				fieldMenuState.default();
 			}
 		}
 	});
-	let { form: entityFieldsFormData } = entityFieldsForm;
 
-	let items = $state<BuildableField[]>(data.usersComponents);
+	let { form: entityFieldsFormData } = entityFieldsForm;
 	let gridSettings = setGridContext({ cellSize: 32, bounds: true });
-	let draggedField = $state<BuildableField | null>(null);
+	let draggedField = $state<BuildableFieldPreview | null>(null);
 	let fieldMenuState = setBuildableFormFieldMenuState();
 	let rerender = $state(false);
 
 	function ondragend() {
 		if (!draggedField) return;
-		items.push(draggedField);
-		setActiveField(draggedField);
+		let newField = {
+			properties: { ...draggedField.properties, entityId: $entityFormData.id ?? '' },
+			layout: draggedField.layout
+		};
+		$entityFormData.fields = [...$entityFormData.fields, newField];
+		setActiveField(newField);
 		draggedField = null;
 		rerender = !rerender;
 	}
 	function ondragover(e: DragEvent) {
 		if (!draggedField) return;
-		draggedField = previewFieldItemFromFieldSettings({
+		draggedField = buildableFieldDefault({
 			e,
 			entityId: data.entityFormId,
 			field: draggedField,
@@ -68,16 +78,35 @@
 		};
 		$entityFieldsFormData = { ...$entityFieldsFormData, ...item.properties };
 	}
+	function updateFieldLayout(updatedLayout: BuildableField['layout']) {
+		let idx = $entityFormData.fields.findIndex(({ layout: { id } }) => id === updatedLayout.id);
+		if (idx < 0) return;
+		$entityFormData.fields[idx].layout = updatedLayout;
+	}
+	/*TODO:
+    put default fields into a table
+    resizing inputs
+    updating existing forms
+    publishing / creating forms
+    push the sidebar on the right to the left
+  */
 </script>
 
 <div class="flex h-full w-full">
 	<div class="ml-4 flex h-full w-full p-4">
 		<Grid {ondragover} {gridSettings} userBuilding={true} class="col-span-2 border">
-			{#each items as item, i}
-				{@const FieldInput = item.component.render}
-				<BuildableFieldContainer item={item.layout} onclick={() => setActiveField(item)}>
-					<Field class="mt-0!" form={entityForm} path="fields[{i}].properties.name">
-						<Label label={item.properties.label}></Label>
+			{#each $entityFormData.fields as field, i}
+				{@const fieldMetadata = fields[field.properties.fieldType]}
+				{@const FieldInput = fieldMetadata.component.render}
+				<BuildableFieldContainer
+					item={field.layout as BuildableFieldPreview['layout']}
+					min={fieldMetadata.layout.min}
+					onMoveEnd={updateFieldLayout}
+					onResizeEnd={updateFieldLayout}
+					onclick={() => setActiveField(field as BuildableFieldPreview)}
+				>
+					<Field class="mt-0" form={entityForm} path="fields[{i}].properties.placeholder">
+						<Label label={field.properties.label}></Label>
 						<FieldInput />
 					</Field>
 				</BuildableFieldContainer>
@@ -86,12 +115,16 @@
 				{#key rerender}
 					{#if draggedField}
 						{@const FieldInput = draggedField.component.render}
-						<BuildableFieldPreview item={draggedField.layout} {dragEvent}>
-							<Field class="mt-0!" form={entityForm} path="">
+						<BuildableFieldContainer
+							item={draggedField.layout}
+							min={draggedField.layout.min}
+							{dragEvent}
+						>
+							<Field class="mt-0" form={entityForm} path="">
 								<Label label={draggedField.properties.label}></Label>
 								<FieldInput />
 							</Field>
-						</BuildableFieldPreview>
+						</BuildableFieldContainer>
 					{/if}
 				{/key}
 			{/snippet}
@@ -101,22 +134,26 @@
 		class="bg-surface-100-800-token h-full
           w-fit min-w-72 p-4"
 	>
-		{#key fieldMenuState.state.tab}
+		<form
+			method="POST"
+			action={route('default /[orgLabel]', { orgLabel: data.org.label })}
+			use:enhance
+		>
 			<BuildableFormFieldMenuHeader></BuildableFormFieldMenuHeader>
-			{#if fieldMenuState.state.tab === 'field-list'}
-				<BuildableFormFieldButtons
-					bind:draggedField
-					entityFormId={data.entityFormId}
-					{gridSettings}
-					{ondragend}
-				></BuildableFormFieldButtons>
-			{:else if fieldMenuState.state.tab === 'properties'}
-				{#if fieldMenuState.state.field.properties.fieldType === 'input'}
-					<BuildableFormFieldForm {entityFieldsForm}></BuildableFormFieldForm>
-				{:else if fieldMenuState.state.field.properties.fieldType === 'lookup'}
-					<div></div>
-				{/if}
+		</form>
+		{#if fieldMenuState.state.tab === 'field-list'}
+			<BuildableFormFieldButtons
+				bind:draggedField
+				entityFormId={data.entityFormId}
+				{gridSettings}
+				{ondragend}
+			></BuildableFormFieldButtons>
+		{:else if fieldMenuState.state.tab === 'properties'}
+			{#if fieldMenuState.state.field.properties.fieldType === 'input'}
+				<BuildableFormFieldForm {entityFieldsForm}></BuildableFormFieldForm>
+			{:else if fieldMenuState.state.field.properties.fieldType === 'lookup'}
+				<div></div>
 			{/if}
-		{/key}
+		{/if}
 	</div>
 </div>

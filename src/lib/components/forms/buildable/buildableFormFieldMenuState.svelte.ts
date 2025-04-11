@@ -13,18 +13,18 @@ export type BuildableFieldMenuState =
     label: string;
   };
 
-class BuildableFormFieldMenu {
+export class BuildableFormFieldMenu {
   state = $state<BuildableFieldMenuState>({
     field: null,
     tab: "field-list",
     label: "Elements"
   })
 
-  setActiveField(item: BuildableField) {
+  setActiveField(field: BuildableField) {
     this.state = {
-      field: item,
+      field: field,
       tab: 'properties',
-      label: `${item.properties.fieldType} Settings`
+      label: `${field.properties.fieldType} Settings`
     }
   }
   default() {

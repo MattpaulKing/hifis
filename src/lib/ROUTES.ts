@@ -73,6 +73,7 @@ const PAGES = {
  * SERVERS
  */
 const SERVERS = {
+  "POST /api/v1/buildable/create": `/api/v1/buildable/create`,
   "GET /api/v1/clients": `/api/v1/clients`,
   "GET /api/v1/clients/services": `/api/v1/clients/services`,
   "GET /api/v1/logs/categories": `/api/v1/logs/categories`,
@@ -92,6 +93,9 @@ const SERVERS = {
  * ACTIONS
  */
 const ACTIONS = {
+  "default /[orgLabel]": (params: { orgLabel: (string | number) }) => {
+    return `/${params.orgLabel}`
+  },
   "default /[orgLabel]/clients/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
     return `/${params.orgLabel}/clients/${params.action}`
   },
@@ -232,8 +236,8 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 */
 export type KIT_ROUTES = {
   PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients': 'orgLabel', '/[orgLabel]/clients/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/clients/[clientId=uuid]': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]': 'orgLabel' | 'clientId' | 'action', '/[orgLabel]/clients/[clientId=uuid]/services/events': 'orgLabel' | 'clientId', '/[orgLabel]/custom-entities/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/logs': 'orgLabel', '/[orgLabel]/logs/categories/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services': 'orgLabel', '/[orgLabel]/services/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services/[serviceId=uuid]': 'orgLabel' | 'serviceId', '/[orgLabel]/services/[serviceId=uuid]/referrals': 'orgLabel' | 'serviceId', '/[orgLabel]/services/[serviceId=uuid]/referrals/[action=crud]': 'orgLabel' | 'serviceId' | 'action', '/[orgLabel]/services/categories/create': 'orgLabel', '/[orgLabel]/services/events': 'orgLabel', '/[orgLabel]/services/events/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services/events/clients/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/users/create': 'orgLabel' }
-  SERVERS: { 'GET /api/v1/clients': never, 'GET /api/v1/clients/services': never, 'GET /api/v1/logs/categories': never, 'GET /api/v1/organizations': never, 'GET /api/v1/search': never, 'GET /api/v1/services': never, 'GET /api/v1/services/categories': never, 'GET /api/v1/services/events': never, 'GET /api/v1/services/events/clients': never, 'GET /api/v1/user/grid': never, 'GET /auth/callback': never }
-  ACTIONS: { 'default /[orgLabel]/clients/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/clients/[clientId=uuid]/services/[action=crud]': 'orgLabel' | 'clientId' | 'action', 'create /[orgLabel]/logs': 'orgLabel', 'update /[orgLabel]/logs': 'orgLabel', 'default /[orgLabel]/logs/categories/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/[serviceId=uuid]/referrals/[action=crud]': 'orgLabel' | 'serviceId' | 'action', 'create /[orgLabel]/services/categories/create': 'orgLabel', 'default /[orgLabel]/services/events/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/events/clients/[action=crud]': 'orgLabel' | 'action', 'create /[orgLabel]/users/create': 'orgLabel' }
+  SERVERS: { 'POST /api/v1/buildable/create': never, 'GET /api/v1/clients': never, 'GET /api/v1/clients/services': never, 'GET /api/v1/logs/categories': never, 'GET /api/v1/organizations': never, 'GET /api/v1/search': never, 'GET /api/v1/services': never, 'GET /api/v1/services/categories': never, 'GET /api/v1/services/events': never, 'GET /api/v1/services/events/clients': never, 'GET /api/v1/user/grid': never, 'GET /auth/callback': never }
+  ACTIONS: { 'default /[orgLabel]': 'orgLabel', 'default /[orgLabel]/clients/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/clients/[clientId=uuid]/services/[action=crud]': 'orgLabel' | 'clientId' | 'action', 'create /[orgLabel]/logs': 'orgLabel', 'update /[orgLabel]/logs': 'orgLabel', 'default /[orgLabel]/logs/categories/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/[serviceId=uuid]/referrals/[action=crud]': 'orgLabel' | 'serviceId' | 'action', 'create /[orgLabel]/services/categories/create': 'orgLabel', 'default /[orgLabel]/services/events/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/events/clients/[action=crud]': 'orgLabel' | 'action', 'create /[orgLabel]/users/create': 'orgLabel' }
   LINKS: Record<string, never>
   Params: { orgLabel: never, action: never, clientId: never, serviceId: never, value: never }
 }

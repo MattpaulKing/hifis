@@ -6,13 +6,13 @@ import { relations } from "drizzle-orm";
 import { entityFieldPositions } from "./entityFieldPosititons";
 
 export const entityFieldType = pgEnum("entity_field_type", ['input', 'lookup'])
-export const entityInputType = pgEnum("entity_field_type", ['text', 'tel', 'date'])
+export const entityInputType = pgEnum("entity_input_type", ['text', 'tel', 'date'])
 
 export const entityFields = pgTable("entity_fields", {
   ...uuidPK,
   ...timestamps,
   entityId: uuid("entity_id").notNull(),
-  fieldType: entityFieldType(),
+  fieldType: entityFieldType().notNull(),
   inputType: entityInputType(),
   multiple: boolean("multiple").notNull().default(false),
   label: text("label").notNull(),

@@ -1,9 +1,10 @@
-import { calcPosition, coordinate2position, coordinate2size, snapOnMove, snapOnResize } from "./utils/item";
+import { calcPosition, coordinate2size, snapOnMove, snapOnResize } from "./utils/item";
 import { on } from "svelte/events";
 import { getGridContext } from "./utils/GridContext.svelte";
 import { getAvailablePosition, hasCollisions } from "./utils/grid";
 import type { ItemSize, LayoutItem } from "./types";
 import type { TabEntity } from "./GridItemTabsState.svelte";
+import type { BuildableField, BuildableFieldPreview } from "../forms/buildable/fields";
 
 export default class {
   active = $state(false);
@@ -44,16 +45,17 @@ export default class {
       )
     }
   })
-  item = $state({
+  item: BuildableFieldPreview['layout'] = $state({
     id: "",
     x: 0,
     y: 0,
+    fieldId: "",
     heightGridUnits: 0,
     widthGridUnits: 0,
     min: { widthGridUnits: 0, heightGridUnits: 0 },
     moveable: true,
     resizeable: true
-  } as LayoutItem)
+  })
   previewItem = $state({ ...this.item } as LayoutItem)
   preview = $derived.by(() => {
     return calcPosition(this.previewItem, {
@@ -61,9 +63,14 @@ export default class {
       gap: this.settings.gap
     })
   })
-  constructor({ item }: { item: LayoutItem }) {
-    this.item = item
-    this.previewItem = { ...item }
+  constructor({ item, min, moveable = true, resizeable = true }: { item: BuildableField['layout'], min: BuildableFieldPreview['layout']['min'], moveable: boolean, resizeable: boolean }) {
+    this.item = {
+      ...item,
+      min,
+      moveable,
+      resizeable,
+    }
+    this.previewItem = { ...this.item }
   }
   init() {
     if (!this.active && this.settings.itemSize) {
@@ -71,7 +78,6 @@ export default class {
         itemSize: this.settings.itemSize,
         gap: this.settings.gap
       })
-
       this.left = position.left;
       this.top = position.top;
       this.width = position.width;
@@ -128,7 +134,7 @@ export default class {
   }
 
 
-  private initInteraction(e: PointerEvent | DragEvent | TouchEvent["touches"][0]) {
+  private initInteraction(e: PointerEvent | MouseEvent | DragEvent | TouchEvent["touches"][0]) {
     this.active = true;
     this.initialPointerPosition = { left: e.pageX, top: e.pageY }
     this.initialPosition = { left: this.left, top: this.top }
@@ -209,7 +215,7 @@ export default class {
     // TODO: scroll
   }
 
-  resizeMouseStart(event: PointerEvent) {
+  resizeMouseStart(event: MouseEvent) {
     if (event.button !== 0) return
     this.initInteraction(event);
     this.initialSize = { width: this.width, height: this.height }
@@ -220,31 +226,33 @@ export default class {
     if (!this.settings.itemSize) {
       throw new Error('Grid is not mounted yet');
     }
-    this.width = event.pageX + this.initialSize.width - this.initialPointerPosition.left;
-    this.height = event.pageY + this.initialSize.height - this.initialPointerPosition.top;
+    let _width = event.pageX + this.initialSize.width - this.initialPointerPosition.left;
+    let _height = event.pageY + this.initialSize.height - this.initialPointerPosition.top;
     if (this.settings.bounds && this.settings.boundsTo) {
       const parentRect = this.settings.boundsTo.getBoundingClientRect();
-      if (this.width + this.left > parentRect.width) {
-        this.width = parentRect.width - this.left;
+      if (_width + this.left > parentRect.width + parentRect.left) {
+        _width = parentRect.width - this.left;
       }
-      if (this.height + this.top > parentRect.height) {
-        this.width = parentRect.height - this.top;
+      if (_height + this.top > parentRect.height + parentRect.top) {
+        _height = parentRect.height - this.top;
       }
     }
-    if (this.minSize.width > this.width) {
-      this.width = this.minSize.width
-    } else if (this.maxSize.width < this.width) {
-      this.width = this.maxSize.width
+    if (_width < this.minSize.width) {
+      _width = this.minSize.width
     }
-
-    if (this.minSize.height > this.height) {
-      this.height = this.minSize.height
-    } else if (this.maxSize.height < this.height) {
-      this.height = this.maxSize.height
+    if (_width > this.maxSize.width) {
+      _width = this.maxSize.width
     }
-
-    const { widthGridUnits, heightGridUnits } = snapOnResize(this.width, this.height, this.previewItem, this.settings);
+    if (_height < this.minSize.height) {
+      _height = this.minSize.height
+    }
+    if (_height > this.maxSize.height) {
+      _height = this.maxSize.height
+    }
+    const { widthGridUnits, heightGridUnits } = snapOnResize(_width, _height, this.previewItem, this.settings);
     if (!hasCollisions({ ...this.previewItem, widthGridUnits, heightGridUnits }, Object.values(this.settings.items))) {
+      this.height = _height
+      this.width = _width
       this.previewItem = {
         ...this.previewItem,
         widthGridUnits,

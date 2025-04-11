@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { buildableFormFields, previewFieldItemFromFieldSettings, type BuildableField } from '..';
+	import { buildableFieldDefault, buildableFormFields } from '..';
 	import type { GridSettings } from '../../user-grid';
+	import type { BuildableFieldPreview } from './fields';
 
 	type Props = {
-		draggedField: BuildableField | null;
+		draggedField: BuildableFieldPreview | null;
 		entityFormId: string;
 		gridSettings: GridSettings;
-		ondragstart?: (e: DragEvent, field: BuildableField) => void;
+		ondragstart?: (e: DragEvent, field: BuildableFieldPreview) => void;
 		ondragend: (e: DragEvent) => void;
 	};
 	let {
@@ -17,14 +18,14 @@
 		ondragend
 	}: Props = $props();
 
-	function ondragstart(e: DragEvent, field: BuildableField) {
-		draggedField = previewFieldItemFromFieldSettings({
+	function ondragstart(e: DragEvent, field: BuildableFieldPreview) {
+		draggedField = buildableFieldDefault({
 			e,
 			entityId: entityFormId,
 			field,
 			gridSettings
 		});
-    _ondragstart?.(e, field)
+		_ondragstart?.(e, field);
 	}
 </script>
 
@@ -32,17 +33,19 @@
 	<span class="col-span-2 my-2 px-2">Fields</span>
 	<hr class="divider border-surface-500-400-token mt-1" />
 </div>
-{#each Object.values(buildableFormFields) as field}
-	{@const Icon = field.component.icon}
-	<button
-		draggable={true}
-		ondragstart={(e) => ondragstart(e, field)}
-		{ondragend}
-		class="variant-ghost btn btn-sm w-fit"
-	>
-		<span class="p-1 rounded-token">
-			<Icon size={20} />
-		</span>
-		<span class="">{field.component.title}</span>
-	</button>
-{/each}
+<div class="flex flex-wrap gap-4">
+	{#each Object.values(buildableFormFields) as field}
+		{@const Icon = field.component.icon}
+		<button
+			draggable={true}
+			ondragstart={(e) => ondragstart(e, field)}
+			{ondragend}
+			class="variant-ghost btn btn-sm w-fit"
+		>
+			<span class="p-1 rounded-token">
+				<Icon size={20} />
+			</span>
+			<span class="">{field.component.title}</span>
+		</button>
+	{/each}
+</div>

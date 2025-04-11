@@ -15,7 +15,7 @@ export function position2coordinate(position: number, cellSize: number, gap: num
 }
 
 export function size2coordinate(size: number, cellSize: number, gap: number): number {
-  return position2coordinate(size + gap * 2, cellSize, gap);
+  return Math.round(size / (cellSize + gap))
 }
 
 export function snapOnMove(left: number, top: number, item: LayoutItem, { itemSize, gap, maxDimensions }: GridSettings): Position {
@@ -30,8 +30,8 @@ export function snapOnMove(left: number, top: number, item: LayoutItem, { itemSi
 export function snapOnResize(w: number, h: number, item: LayoutItem, settings: SnapGridParams): Size {
   const { x, y } = item;
   const { itemSize, gap, maxDimensions } = settings
-  let widthGridUnits = position2coordinate(w + gap * 2, itemSize.width, gap);
-  let heightGridUnits = position2coordinate(h + gap * 2, itemSize.height, gap);
+  let widthGridUnits = size2coordinate(w, itemSize.width, gap);
+  let heightGridUnits = size2coordinate(h, itemSize.height, gap);
   widthGridUnits = clamp(widthGridUnits, 0, maxDimensions.cols - x);
   heightGridUnits = clamp(heightGridUnits, 0, maxDimensions.rows - y);
   return { widthGridUnits, heightGridUnits };

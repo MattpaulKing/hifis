@@ -1,16 +1,15 @@
 <script lang="ts">
 	import { getGridContext, GridItemState } from '../../user-grid';
 	import { onMount, type Snippet } from 'svelte';
-	import type { LayoutItem } from '../../user-grid/types';
+	import type { BuildableFieldPreview } from './fields';
 
 	type Props = {
-		item: LayoutItem;
+		item: BuildableFieldPreview['layout'];
 		dragEvent: DragEvent;
 		children: Snippet;
 		class?: string;
 	};
 	let { class: classes, item, dragEvent, children }: Props = $props();
-
 	let gridSettings = getGridContext();
 	let controller = new GridItemState({ item });
 

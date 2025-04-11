@@ -12,7 +12,7 @@ export const entities = pgTable("entities", {
   version: integer("version").notNull(),
   published: boolean("published").default(false),
   label: text("label").notNull(),
-  parentId: uuid("parent_id").notNull().references((): AnyPgColumn => entities.id, { onUpdate: "cascade", onDelete: "restrict" })
+  parentId: uuid("parent_id").references((): AnyPgColumn => entities.id, { onUpdate: "cascade", onDelete: "restrict" })
 })
 
 export const entitySchema = v.object({

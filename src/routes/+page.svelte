@@ -1,9 +1,9 @@
 <script lang="ts">
 	/* 
  TODO:
+ -2. update the updateEntityFields func so that it does layout too
   -1. Create a way to make valibot schemas from fields
   0. LogsSchema - figure out how to have array in schema & Referrals Schema
-  1. Entities - Split to multiple files for relations
   1. change schema so that clientServiceRelation can be attached/referral/etc. and fix ServiceReferralForm
   2. Finish resize logic
   3. Figure out if modals & drawers being open at the same time messes with each other closing
