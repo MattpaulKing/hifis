@@ -46,10 +46,10 @@
 			</div>
 		</div>
 	</div>
-	<div class="relative z-20 flex min-h-fit w-24">
+	<div class="relative z-20 flex h-full min-h-full w-24">
 		<nav
 			in:fade
-			class="bg-surface-200-700-token fixed grid h-full w-fit auto-rows-min grid-cols-1 items-start gap-y-1 [&>.btn]:rounded-none"
+			class="bg-surface-100-800-token border-surface-500-400-token fixed grid h-full w-fit auto-rows-min grid-cols-1 items-start gap-y-1 border-b border-r border-t [&>.btn]:rounded-none"
 		>
 			<SidebarAnchor href={route('/[orgLabel]/clients', { orgLabel: data.org.label })}>
 				<img src="/FolderUser.png" alt="icon" />

@@ -112,9 +112,8 @@ export type BuildableFieldPreview = {
 
 export function buildableFieldDefault({ e, entityId, field, gridSettings }:
   { e: DragEvent, entityId: string, field: BuildableFieldPreview, gridSettings: GridSettings }): BuildableFieldPreview {
-  let { itemSize, gap } = gridSettings
-  let widthGridUnits = field.layout.widthGridUnits
-  let heightGridUnits = field.layout.heightGridUnits
+  let { itemSize, gap, boundsTo } = gridSettings
+  let gridRect = boundsTo?.getBoundingClientRect()
   let fieldId = crypto.randomUUID()
   let fieldMetaData = fields[field.properties.fieldType]
   let previewEntityField = {
@@ -128,10 +127,8 @@ export function buildableFieldDefault({ e, entityId, field, gridSettings }:
       ...field.layout,
       id: field.layout.id ?? crypto.randomUUID(),
       fieldId,
-      x: position2coordinate(e.clientX, itemSize.width, gap) -
-        widthGridUnits,
-      y: position2coordinate(e.clientY, itemSize.height, gap) -
-        heightGridUnits
+      x: position2coordinate(e.pageX - (gridRect?.left ?? 0), itemSize.width, gap),
+      y: position2coordinate(e.pageY - (gridRect?.top ?? 0), itemSize.height, gap)
     }
   }
   return previewEntityField

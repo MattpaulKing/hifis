@@ -52,8 +52,8 @@
 	role="gridcell"
 	tabindex="0"
 	class="border-primary-500-400-token absolute overflow-hidden p-2 transition-transform rounded-token {classes} {controller.active
-		? 'opacity-50'
-		: ''} {controller.active || buildableFormFieldMenuState.state.field?.layout.id === item.id
+		? 'border border-solid opacity-30'
+		: 'border border-dashed'} {buildableFormFieldMenuState.state.field?.layout.id === item.id
 		? 'border'
 		: ''}"
 	style={`left:${controller.left}px; top:${controller.top}px; width: ${controller.width}px; height: ${controller.height}px;`}
@@ -87,7 +87,7 @@
 	<div
 		class="{classes} border-primary-500-400-token overflow-hidden border p-2 opacity-80 transition-transform"
 		style={`position: absolute; left:${controller.preview.left}px; top:${controller.preview.top}px;  
-		width: ${controller.preview.width}px; height: ${controller.preview.height}px; z-index: -10;`}
+		width: ${controller.preview.width}px; height: ${controller.preview.height}px;`}
 	>
 		{@render children()}
 	</div>

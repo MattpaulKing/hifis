@@ -11,7 +11,7 @@
 </script>
 
 <FormContainer form={entityFieldsForm} action="" class="h-full w-full p-0">
-	<Field form={entityFieldsForm} path="label" class="col-span-2 mt-4">
+	<Field form={entityFieldsForm} path="label" class="col-span-2 mt-0">
 		<Label label="Label"></Label>
 		<Input></Input>
 		<Errors></Errors>

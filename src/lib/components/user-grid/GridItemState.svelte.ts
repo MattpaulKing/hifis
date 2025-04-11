@@ -194,8 +194,6 @@ export default class {
     }
     this.left = _left;
     this.top = _top;
-
-
     const { x, y } = snapOnMove(this.left, this.top, this.previewItem, this.settings);
     if (!hasCollisions({ ...this.previewItem, x, y }, Object.values(this.settings.items))) {
       this.previewItem = { ...this.previewItem, x, y };
@@ -216,7 +214,7 @@ export default class {
   }
 
   resizeMouseStart(event: MouseEvent) {
-    if (event.button !== 0) return
+    if (event.button !== 0 || this.active) return
     this.initInteraction(event);
     this.initialSize = { width: this.width, height: this.height }
     this.cleanupResizeMouse = on(window, 'pointermove', (e) => this.resizeMouse(e))

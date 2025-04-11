@@ -7,7 +7,7 @@
 	let fieldMenu = getBuildableFormFieldMenuState();
 </script>
 
-<div class="col-span-2 mb-4 flex w-full place-items-center justify-between">
+<div class="col-span-2 mb-2 flex w-full place-items-center justify-between">
 	<span class="text-lg font-bold capitalize">{fieldMenu.state.label}</span>
 	{#if fieldMenu.state.tab === 'field-list'}
 		<button

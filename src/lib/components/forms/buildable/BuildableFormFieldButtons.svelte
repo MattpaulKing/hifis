@@ -33,16 +33,16 @@
 	<span class="col-span-2 my-2 px-2">Fields</span>
 	<hr class="divider border-surface-500-400-token mt-1" />
 </div>
-<div class="flex flex-wrap gap-4">
+<div class="flex flex-wrap gap-2">
 	{#each Object.values(buildableFormFields) as field}
 		{@const Icon = field.component.icon}
 		<button
 			draggable={true}
 			ondragstart={(e) => ondragstart(e, field)}
 			{ondragend}
-			class="variant-ghost btn btn-sm w-fit"
+			class="variant-ghost border-surface-500-400-token btn h-10 w-fit border"
 		>
-			<span class="p-1 rounded-token">
+			<span class="rounded-token">
 				<Icon size={20} />
 			</span>
 			<span class="">{field.component.title}</span>
