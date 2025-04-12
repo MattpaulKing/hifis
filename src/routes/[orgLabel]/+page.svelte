@@ -8,7 +8,6 @@
 		Field,
 		initForm,
 		Label,
-		buildableFieldDefault,
 		setBuildableFormFieldMenuState,
 		updateEntityFields,
 		type BuildableField,
@@ -52,34 +51,15 @@
 	let draggedField = $state<BuildableFieldPreview | null>(null);
 	let isDragging = $derived(Boolean(draggedField));
 	let fieldMenuState = setBuildableFormFieldMenuState();
-	let rerenderPreview = $state(false);
+	let dragEvent = $state<DragEvent | null>(null);
 
 	function ondragend(e: DragEvent, field: BuildableFieldPreview) {
-		if (!draggedField) return;
-		draggedField = buildableFieldDefault({
-			e,
-			entityId: $entityFormData.id ?? '',
-			field,
-			gridSettings
-		});
 		let newField = {
-			properties: { ...draggedField.properties, entityId: $entityFormData.id ?? '' },
-			layout: draggedField.layout
+			properties: { ...field.properties, entityId: $entityFormData.id ?? '' },
+			layout: field.layout
 		};
 		$entityFormData.fields = [...$entityFormData.fields, newField];
 		setActiveField(newField);
-		draggedField = null;
-	}
-	function ondragover(e: DragEvent) {
-		if (!draggedField) return;
-		draggedField = buildableFieldDefault({
-			e,
-			entityId: $entityFormData.id ?? '',
-			field: draggedField,
-			gridSettings
-		});
-		rerenderPreview = !rerenderPreview;
-		setActiveField(draggedField);
 	}
 	function setActiveField(item: BuildableField) {
 		fieldMenuState.state = {
@@ -115,6 +95,7 @@
 		{#if fieldMenuState.state.tab === 'field-list'}
 			<BuildableFormFieldButtons
 				bind:draggedField
+				bind:dragEvent
 				entityFormId={data.entityFormId}
 				{gridSettings}
 				{ondragend}
@@ -149,7 +130,6 @@
 		</BuildableFormHeader>
 		<Grid
 			{gridSettings}
-			{ondragover}
 			userBuilding={true}
 			class="col-span-2 h-full w-full transition-colors {isDragging
 				? 'bg-surface-100-800-token bg-opacity-50'
@@ -172,23 +152,21 @@
 					</Field>
 				</BuildableFieldContainer>
 			{/each}
-			{#snippet fieldPreview({ dragEvent })}
-				{#key rerenderPreview}
-					{#if draggedField}
-						{@const FieldInput = draggedField.component.render}
-						<BuildableFieldContainer
-							item={draggedField.layout}
-							min={draggedField.layout.min}
-							{dragEvent}
-							onDelete={() => null}
-						>
-							<Field class="-mt-0" form={entityForm} path="">
-								<Label label={draggedField.properties.label}></Label>
-								<FieldInput />
-							</Field>
-						</BuildableFieldContainer>
-					{/if}
-				{/key}
+			{#snippet fieldPreview()}
+				{#if draggedField && dragEvent}
+					{@const FieldInput = draggedField.component.render}
+					<BuildableFieldContainer
+						item={draggedField.layout}
+						min={draggedField.layout.min}
+						{dragEvent}
+						onDelete={() => null}
+					>
+						<Field class="-mt-0" form={entityForm} path="">
+							<Label label={draggedField.properties.label}></Label>
+							<FieldInput />
+						</Field>
+					</BuildableFieldContainer>
+				{/if}
 			{/snippet}
 		</Grid>
 	</FormContainer>

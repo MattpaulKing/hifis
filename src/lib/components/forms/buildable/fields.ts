@@ -110,9 +110,11 @@ export type BuildableFieldPreview = {
 
 export function buildableFieldDefault({ e, entityId, field, gridSettings }:
   { e: DragEvent, entityId: string, field: BuildableFieldPreview, gridSettings: GridSettings }): BuildableFieldPreview {
+
   let { itemSize, gap, boundsTo } = gridSettings
   let gridRect = boundsTo?.getBoundingClientRect()
   if (!gridRect) throw Error("Grid not initialized.")
+
   let fieldId = field.properties.id.length > 0 ? field.properties.id : crypto.randomUUID()
   let layoutId = field.layout.id.length > 0 ? field.layout.id : crypto.randomUUID()
   let fieldMetaData = fields[field.properties.fieldType]
@@ -128,8 +130,8 @@ export function buildableFieldDefault({ e, entityId, field, gridSettings }:
       ...field.layout,
       id: layoutId,
       fieldId,
-      x: Math.max(position2coordinate(e.pageX - (gridRect.left), itemSize.width, gap), 0),
-      y: Math.max(position2coordinate(e.pageY - (gridRect.top), itemSize.height, gap), 0)
+      x: position2coordinate(e.pageX - (gridRect.left), itemSize.width, gap),
+      y: position2coordinate(e.pageY - (gridRect.top), itemSize.height, gap)
     }
   }
   return previewEntityField

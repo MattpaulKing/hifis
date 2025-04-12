@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { buildableFieldDefault, buildableFormFields } from '..';
+	import Drawer from '../../drawer/Drawer.svelte';
 	import type { GridSettings } from '../../user-grid';
 	import type { BuildableFieldPreview } from './fields';
 
 	type Props = {
 		draggedField: BuildableFieldPreview | null;
+		dragEvent: DragEvent | null;
 		entityFormId: string;
 		gridSettings: GridSettings;
 		ondragstart?: (e: DragEvent, field: BuildableFieldPreview) => void;
@@ -12,29 +14,35 @@
 	};
 	let {
 		draggedField = $bindable(),
+		dragEvent = $bindable(),
 		entityFormId,
 		gridSettings,
 		ondragstart: _ondragstart,
 		ondragend: _ondragend
 	}: Props = $props();
 
-	function ondragstart(e: DragEvent, field: BuildableFieldPreview) {
+	function ondragstart(e: DragEvent, fieldDefault: BuildableFieldPreview) {
 		draggedField = buildableFieldDefault({
 			e,
 			entityId: entityFormId,
-			field,
+			field: fieldDefault,
 			gridSettings
 		});
-		_ondragstart?.(e, field);
+		dragEvent = e;
+		_ondragstart?.(e, draggedField);
 	}
 	function ondragend(e: DragEvent, field: BuildableFieldPreview) {
+		if (!draggedField) return;
 		draggedField = buildableFieldDefault({
 			e,
 			entityId: entityFormId,
 			field,
 			gridSettings
 		});
-		_ondragend?.(e, field);
+		let draggedFieldCopy = { ...draggedField };
+		draggedField = null;
+		dragEvent = null;
+		_ondragend?.(e, draggedFieldCopy);
 	}
 </script>
 

@@ -57,7 +57,7 @@
 </script>
 
 <div
-	transition:fade
+	out:fade
 	role="gridcell"
 	tabindex="0"
 	class="border-primary-500-400-token absolute cursor-move overflow-hidden

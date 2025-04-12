@@ -1,7 +1,7 @@
 import { calcPosition, coordinate2position, coordinate2size, snapOnMove, snapOnResize } from "./utils/item";
 import { on } from "svelte/events";
 import { getGridContext } from "./utils/GridContext.svelte";
-import { hasCollisions } from "./utils/grid";
+import { hasCollisions, isOutsideBounds } from "./utils/grid";
 import type { ItemSize, LayoutItem } from "./types";
 import type { TabEntity } from "./GridItemTabsState.svelte";
 import type { BuildableField, BuildableFieldPreview } from "../forms/buildable/fields";
@@ -81,7 +81,7 @@ export default class {
       this.width = position.width;
       this.height = position.height;
 
-      if (hasCollisions(this.item, Object.values(this.settings.items))) { // || this.isOutsideBounds()) {
+      if (hasCollisions(this.item, Object.values(this.settings.items)) || isOutsideBounds(this, this.settings.boundsTo?.getBoundingClientRect())) {
         let newCoords = this.getFirstAvailableCoords()
         if (newCoords) {
           this.previewItem = { ...this.previewItem, x: newCoords.x, y: newCoords.y }
@@ -180,7 +180,6 @@ export default class {
     this.left = _left;
     this.top = _top;
     const { x, y } = snapOnMove(this.left, this.top, this.previewItem, this.settings);
-    console.log(x, y)
     if (!hasCollisions({ ...this.previewItem, x, y }, Object.values(this.settings.items))) {
       this.previewItem = { ...this.previewItem, x, y };
     }
