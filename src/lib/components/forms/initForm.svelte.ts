@@ -16,7 +16,6 @@ export default function <T extends ISchema>({ form, schema, opts }:
   //@ts-ignore
   return superForm(form, {
     //@ts-ignore
-    id: form.data.id ?? crypto.randomUUID(),
     validators: valibot(schema),
     dataType: "json",
     applyAction: true,
@@ -34,10 +33,11 @@ export default function <T extends ISchema>({ form, schema, opts }:
         modalStore.queue[0]?.response({ type: "save" })
         drawerStore.queue[0]?.response({ type: 'save' })
       } else if (e.result.type === "failure" && e.result.data) {
-        let errors = e.result.data.form.errors as Record<string, string[]>
+        //TODO: recursive function to check if array or object and get the error message / key
+        let errors = e.result.data.form.errors as Record<string, unknown>
         msgStore.setMsg({
           id: form.id,
-          msg: Object.keys(errors).map((key) => `${key}: ${errors[key].join(" & ")}`)?.join("\n"),
+          msg: 'Something went wrong',
           status: "error"
         })
       } else if (e.result.type === "error") {

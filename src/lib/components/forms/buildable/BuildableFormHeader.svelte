@@ -37,8 +37,11 @@
 			</button>
 		{/key}
 		<button
-			type="button"
-			onclick={async () => await onSave?.()}
+			type="submit"
+			onclick={async () => {
+				console.log('hit');
+				await onSave?.();
+			}}
 			class="group variant-filled-success btn-icon h-9 rounded-token"
 		>
 			<SaveIcon strokeWidth="2px" class="h-7 w-7"></SaveIcon>
