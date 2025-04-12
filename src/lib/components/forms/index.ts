@@ -27,4 +27,6 @@ export { default as BuildableFormFieldButtons } from "./buildable/BuildableFormF
 export { BuildableFormFieldMenu, setBuildableFormFieldMenuState, getBuildableFormFieldMenuState } from "./buildable/buildableFormFieldMenuState.svelte"
 export { default as BuildableFormFieldMenuHeader } from "./buildable/BuildableFormFieldMenuHeader.svelte"
 export { default as updateEntityFields } from "./buildable/updateEntityFields"
+export { default as BuildableFormHeader } from "./buildable/BuildableFormHeader.svelte"
+export { default as BuildableFormFieldMenuContainer } from "./buildable/BuildableFormFieldMenuContainer.svelte"
 export type { FormMode } from "./formMode"

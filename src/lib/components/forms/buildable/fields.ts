@@ -1,21 +1,12 @@
 import { ELEMENT_TYPES, Input } from "$lib/components/forms";
 import { entityFieldPositionSchema, entityFieldSchema } from "$src/schemas";
 import { Type, TextSearch } from "@lucide/svelte"
-import * as v from "valibot";
 import { position2coordinate } from "$src/lib/components/user-grid/utils/item";
+import { hasCollisions } from "../../user-grid/utils/grid";
 import type { GridSettings } from "$src/lib/components/user-grid";
-import type { InferInput } from "valibot";
 import type { FormValidated } from "$src/lib/interfaces";
 import type { Component } from "svelte";
 
-type EntityFieldLayoutInputDefault = v.InferInput<typeof entityFieldPositionSchema> & {
-  min: {
-    widthGridUnits: number,
-    heightGridUnits: number,
-  },
-  moveable: boolean,
-  resizeable: boolean,
-}
 
 const fields = {
   input: {
@@ -26,6 +17,8 @@ const fields = {
       title: 'Input'
     },
     properties: {
+      id: '',
+      entityId: '',
       name: 'input',
       label: 'Default Label',
       fieldType: "input" as const,
@@ -37,13 +30,15 @@ const fields = {
       max: null
     },
     layout: {
+      id: '',
+      fieldId: '',
       x: Infinity,
       y: Infinity,
-      widthGridUnits: 4,
-      heightGridUnits: 2,
+      widthGridUnits: 10,
+      heightGridUnits: 4,
       min: {
-        widthGridUnits: 4,
-        heightGridUnits: 2,
+        widthGridUnits: 10,
+        heightGridUnits: 4,
       },
       moveable: true,
       resizeable: true,
@@ -57,6 +52,8 @@ const fields = {
       title: 'Select'
     },
     properties: {
+      id: '',
+      entityId: '',
       name: 'lookup',
       label: 'Default Label',
       fieldType: "lookup" as const,
@@ -68,13 +65,15 @@ const fields = {
       max: null
     },
     layout: {
+      id: '',
+      fieldId: '',
       x: Infinity,
       y: Infinity,
-      widthGridUnits: 4,
-      heightGridUnits: 2,
+      widthGridUnits: 10,
+      heightGridUnits: 4,
       min: {
-        widthGridUnits: 4,
-        heightGridUnits: 2,
+        widthGridUnits: 10,
+        heightGridUnits: 4,
       },
       moveable: true,
       resizeable: true,
@@ -111,24 +110,27 @@ export type BuildableFieldPreview = {
 }
 
 export function buildableFieldDefault({ e, entityId, field, gridSettings }:
-  { e: DragEvent, entityId: string, field: BuildableFieldPreview, gridSettings: GridSettings }): BuildableFieldPreview {
+  { e: DragEvent, entityId: string, field: BuildableFieldPreview, gridSettings: GridSettings }): BuildableFieldPreview | null {
   let { itemSize, gap, boundsTo } = gridSettings
   let gridRect = boundsTo?.getBoundingClientRect()
-  let fieldId = crypto.randomUUID()
+
+  let fieldId = field.properties.id.length > 0 ? field.properties.id : crypto.randomUUID()
+  let layoutId = field.layout.id.length > 0 ? field.layout.id : crypto.randomUUID()
   let fieldMetaData = fields[field.properties.fieldType]
+
   let previewEntityField = {
     ...fieldMetaData,
     properties: {
       ...field.properties,
       id: fieldId,
       entityId,
-    } satisfies InferInput<typeof entityFieldSchema>,
+    },
     layout: {
       ...field.layout,
-      id: field.layout.id ?? crypto.randomUUID(),
+      id: layoutId,
       fieldId,
-      x: position2coordinate(e.pageX - (gridRect?.left ?? 0), itemSize.width, gap),
-      y: position2coordinate(e.pageY - (gridRect?.top ?? 0), itemSize.height, gap)
+      x: Math.max(position2coordinate(e.pageX - (gridRect?.left ?? 0), itemSize.width, gap), 0),
+      y: Math.max(position2coordinate(e.pageY - (gridRect?.top ?? 0), itemSize.height, gap), 0)
     }
   }
   return previewEntityField

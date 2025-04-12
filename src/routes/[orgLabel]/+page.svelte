@@ -12,7 +12,11 @@
 		setBuildableFormFieldMenuState,
 		updateEntityFields,
 		type BuildableField,
-		type BuildableFieldPreview
+		type BuildableFieldPreview,
+		BuildableFormHeader,
+		Input,
+		FormContainer,
+		BuildableFormFieldMenuContainer
 	} from '$src/lib/components/forms';
 	import fields from '$src/lib/components/forms/buildable/fields.js';
 	import { route } from '$src/lib/ROUTES';
@@ -23,7 +27,7 @@
 		form: data.entityForm,
 		schema: entitySchema
 	});
-	let { form: entityFormData, enhance } = entityForm;
+	let { form: entityFormData } = entityForm;
 
 	let entityFieldsForm = initForm({
 		form: data.entityFieldsForm,
@@ -44,8 +48,9 @@
 	});
 
 	let { form: entityFieldsFormData } = entityFieldsForm;
-	let gridSettings = setGridContext({ cellSize: 32, bounds: true });
+	let gridSettings = setGridContext({ cellSize: 16, bounds: true });
 	let draggedField = $state<BuildableFieldPreview | null>(null);
+	let isDragging = $derived(Boolean(draggedField));
 	let fieldMenuState = setBuildableFormFieldMenuState();
 	let rerender = $state(false);
 
@@ -69,7 +74,6 @@
 			gridSettings
 		});
 	}
-	$inspect(draggedField);
 	function setActiveField(item: BuildableField) {
 		fieldMenuState.state = {
 			field: item,
@@ -84,23 +88,24 @@
 		$entityFormData.fields[idx].layout = updatedLayout;
 	}
 	/*TODO:
+    weird bug that allows items to be placed on top of each other
     put default fields into a table
     updating existing forms
-    publishing / creating forms
+    creating forms
   */
+	function deleteField(layoutItem: BuildableField['layout']) {
+		$entityFormData.fields = $entityFormData.fields.filter(
+			({ layout: { id } }) => id !== layoutItem.id
+		);
+		if (fieldMenuState.state.field?.layout.id === layoutItem.id) {
+			fieldMenuState.default();
+		}
+	}
 </script>
 
 <div class="flex h-full w-full">
-	<div
-		class="bg-surface-100-800-token border-surface-500-400-token z-10 h-full w-fit min-w-72 border-x border-t p-4"
-	>
-		<form
-			method="POST"
-			action={route('default /[orgLabel]', { orgLabel: data.org.label })}
-			use:enhance
-		>
-			<BuildableFormFieldMenuHeader></BuildableFormFieldMenuHeader>
-		</form>
+	<BuildableFormFieldMenuContainer activeMenuTab={fieldMenuState.state.tab}>
+		<BuildableFormFieldMenuHeader></BuildableFormFieldMenuHeader>
 		{#if fieldMenuState.state.tab === 'field-list'}
 			<BuildableFormFieldButtons
 				bind:draggedField
@@ -115,20 +120,47 @@
 				<div></div>
 			{/if}
 		{/if}
-	</div>
-	<div class="ml-4 flex h-full w-full bg-surface-800 p-4">
-		<Grid {ondragover} {gridSettings} userBuilding={true} class="col-span-2 border">
+	</BuildableFormFieldMenuContainer>
+	<FormContainer
+		class="w-full px-6 pb-6"
+		form={entityForm}
+		action={route('default /[orgLabel]', { orgLabel: data.org.label })}
+		hasFormEl={false}
+	>
+		<BuildableFormHeader
+			onPublishClick={async () => {
+				$entityFormData.published = !$entityFormData.published;
+			}}
+			class="col-span-2 mb-4 h-fit"
+			published={$entityFormData.published}
+		>
+			<Field form={entityForm} path="label" class="max-w-64">
+				<label for="label">
+					<h4 class="h4 mb-2 font-bold">Form Title</h4>
+					<Input />
+				</label>
+			</Field>
+		</BuildableFormHeader>
+		<Grid
+			{ondragover}
+			{gridSettings}
+			userBuilding={true}
+			class="col-span-2 h-full w-full transition-colors {isDragging
+				? 'bg-surface-100-800-token bg-opacity-50'
+				: ''}"
+		>
 			{#each $entityFormData.fields as field, i}
 				{@const fieldMetadata = fields[field.properties.fieldType]}
 				{@const FieldInput = fieldMetadata.component.render}
 				<BuildableFieldContainer
-					item={field.layout as BuildableFieldPreview['layout']}
+					item={field.layout as BuildableField['layout']}
 					min={fieldMetadata.layout.min}
+					onDelete={deleteField}
 					onMoveEnd={updateFieldLayout}
 					onResizeEnd={updateFieldLayout}
-					onclick={() => setActiveField(field as BuildableFieldPreview)}
+					onclick={() => setActiveField(field as BuildableField)}
 				>
-					<Field class="mt-0" form={entityForm} path="fields[{i}].properties.placeholder">
+					<Field class="-mt-0" form={entityForm} path="fields[{i}].properties.placeholder">
 						<Label label={field.properties.label}></Label>
 						<FieldInput />
 					</Field>
@@ -142,8 +174,9 @@
 							item={draggedField.layout}
 							min={draggedField.layout.min}
 							{dragEvent}
+							onDelete={() => null}
 						>
-							<Field class="mt-0" form={entityForm} path="">
+							<Field class="-mt-0" form={entityForm} path="">
 								<Label label={draggedField.properties.label}></Label>
 								<FieldInput />
 							</Field>
@@ -152,5 +185,5 @@
 				{/key}
 			{/snippet}
 		</Grid>
-	</div>
+	</FormContainer>
 </div>

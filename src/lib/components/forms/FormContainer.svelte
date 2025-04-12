@@ -13,7 +13,8 @@
 		children,
 		class: classes,
 		title,
-		btns
+		btns,
+		hasFormEl = true
 	}: {
 		form: SuperForm<T>;
 		action: string;
@@ -23,7 +24,7 @@
 		class?: string;
 		title?: Snippet;
 		btns?: Snippet;
-		stepper?: Snippet;
+		hasFormEl?: boolean;
 	} = $props();
 
 	setFormCtx({ disabled });
@@ -59,13 +60,18 @@
 		<h3 class="h3 font-bold">{@render title?.()}</h3>
 		{@render btns?.()}
 	</div>
-	<form
-		class="flex w-full flex-col lg:grid lg:grid-cols-2 lg:gap-x-4"
-		method="POST"
-		{action}
-		use:enhance
-		{enctype}
-	>
+	{#if hasFormEl}
+		<form
+			class="flex w-full flex-col lg:grid lg:grid-cols-2 lg:gap-x-4"
+			method="POST"
+			{action}
+			use:enhance
+			{enctype}
+		>
+			{@render children()}
+		</form>
+	{:else}
 		{@render children()}
-	</form>
+	{/if}
 </div>
+

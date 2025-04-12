@@ -3,7 +3,7 @@ import type { GridSettings } from './GridContext.svelte';
 export type SnapGridParams = Required<Pick<GridSettings, 'itemSize' | 'gap' | 'maxDimensions'>>
 
 export function coordinate2position(coordinate: number, cellSize: number, gap: number): number {
-  return coordinate * cellSize + (coordinate) * gap;
+  return coordinate * (cellSize + gap)
 }
 
 export function coordinate2size(coordinate: number, cellSize: number, gap: number): number {

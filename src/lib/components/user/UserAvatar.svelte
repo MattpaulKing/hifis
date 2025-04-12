@@ -9,9 +9,9 @@
 
 <button
 	{onclick}
-	class="variant-filled-primary btn btn-sm {!onclick
-		? 'brightness-100!'
-		: ''}  h-8 w-8 rounded-full font-bold hover:text-surface-200-700-token"
+	class="variant-filled-primary btn btn-sm
+    h-10 w-10 rounded-full font-bold
+    hover:text-surface-200-700-token {!onclick ? 'brightness-100!' : ''}"
 >
 	{initials}
 </button>

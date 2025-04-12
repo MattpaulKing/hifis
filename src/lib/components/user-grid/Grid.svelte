@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { GridSettings } from '.';
-	import type { Snippet } from 'svelte';
 	import { setFormCtx } from '../forms/inputs/context.svelte';
+	import type { Snippet } from 'svelte';
 
 	type Props = {
 		gridSettings: GridSettings;
@@ -34,7 +34,7 @@
 	onpointerleave={() => (dragEvent = null)}
 	role="grid"
 	tabindex="0"
-	class="relative h-full w-full {classes}"
+	class="relative {classes}"
 	bind:this={gridSettings.boundsTo}
 >
 	{#if gridSettings.itemSize && gridSettings.boundsTo}

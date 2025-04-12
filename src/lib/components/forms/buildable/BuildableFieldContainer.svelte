@@ -2,12 +2,14 @@
 	import { getGridContext, GridItemState } from '../../user-grid';
 	import { onMount, type Snippet } from 'svelte';
 	import { getBuildableFormFieldMenuState } from '..';
-	import { ScalingIcon } from '@lucide/svelte';
+	import { ScalingIcon, TrashIcon } from '@lucide/svelte';
+	import { fade } from 'svelte/transition';
 	import type { BuildableField, BuildableFieldPreview } from './fields';
 
 	type Props = {
 		item: Omit<BuildableField['layout'], 'id'> & { id: string };
 		min: BuildableFieldPreview['layout']['min'];
+		onDelete: (_item: typeof item) => void;
 		moveable?: BuildableFieldPreview['layout']['moveable'];
 		resizeable?: BuildableFieldPreview['layout']['resizeable'];
 		dragEvent?: DragEvent;
@@ -24,6 +26,7 @@
 		resizeable = true,
 		moveable = true,
 		dragEvent,
+		onDelete,
 		onMoveEnd,
 		onResizeEnd,
 		onclick,
@@ -37,8 +40,9 @@
 
 	onMount(() => {
 		controller.init();
-		gridSettings.registerItem(controller.item);
-		if (dragEvent) {
+		if (!dragEvent) {
+			gridSettings.registerItem(controller.item);
+		} else {
 			controller.moveStartMouse(dragEvent);
 		}
 		return () => {
@@ -49,13 +53,12 @@
 </script>
 
 <div
+	transition:fade
 	role="gridcell"
 	tabindex="0"
-	class="border-primary-500-400-token absolute overflow-hidden p-2 transition-transform rounded-token {classes} {controller.active
-		? 'border border-solid opacity-30'
-		: 'border border-dashed'} {buildableFormFieldMenuState.state.field?.layout.id === item.id
-		? 'border'
-		: ''}"
+	class="border-primary-500-400-token absolute cursor-move overflow-hidden p-2 transition-transform rounded-token [&_*]:cursor-move {classes} 
+  {buildableFormFieldMenuState.state.field?.layout.id === item.id ? 'border border-dashed' : ''} 
+  {controller.active && !dragEvent ? 'opacity-80' : dragEvent ? 'opacity-0' : ''}"
 	style={`left:${controller.left}px; top:${controller.top}px; width: ${controller.width}px; height: ${controller.height}px;`}
 	bind:this={controller.moveableEl}
 	onpointerdown={(e) => {
@@ -68,24 +71,36 @@
 	{onclick}
 	{onkeydown}
 >
-	<button
-		class="variant-ghost btn-icon btn-icon-sm absolute right-0 top-0 rounded-token hover:variant-filled"
-		onpointerdown={(e) => {
-			e.stopPropagation();
-			if (controller.item.resizeable) {
-				controller.resizeMouseStart(e);
-			}
-		}}
-		onpointerup={() => onResizeEnd?.(controller.item)}
-	>
-		<ScalingIcon />
-	</button>
+	<div class="absolute right-1 top-1 flex gap-x-1">
+		<button
+			class="variant-ghost btn-icon btn-icon-sm rounded-token hover:variant-filled-error"
+			onpointerdown={(e) => e.stopPropagation()}
+			onclick={(e) => {
+				e.stopPropagation();
+				onDelete(controller.item);
+			}}
+		>
+			<TrashIcon />
+		</button>
+		<button
+			class="variant-ghost btn-icon btn-icon-sm rounded-token hover:variant-filled"
+			onpointerdown={(e) => {
+				e.stopPropagation();
+				if (controller.item.resizeable) {
+					controller.resizeMouseStart(e);
+				}
+			}}
+			onpointerup={() => onResizeEnd?.(controller.item)}
+		>
+			<ScalingIcon />
+		</button>
+	</div>
 	{@render children()}
 </div>
 
 {#if controller.active}
 	<div
-		class="{classes} border-primary-500-400-token overflow-hidden border p-2 opacity-80 transition-transform"
+		class="{classes} border-primary-500-400-token overflow-hidden border border-dashed p-2 opacity-40 transition-transform rounded-token"
 		style={`position: absolute; left:${controller.preview.left}px; top:${controller.preview.top}px;  
 		width: ${controller.preview.width}px; height: ${controller.preview.height}px;`}
 	>

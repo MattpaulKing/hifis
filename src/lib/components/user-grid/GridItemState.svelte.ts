@@ -1,7 +1,7 @@
-import { calcPosition, coordinate2size, snapOnMove, snapOnResize } from "./utils/item";
+import { calcPosition, coordinate2position, coordinate2size, snapOnMove, snapOnResize } from "./utils/item";
 import { on } from "svelte/events";
 import { getGridContext } from "./utils/GridContext.svelte";
-import { getAvailablePosition, hasCollisions } from "./utils/grid";
+import { hasCollisions } from "./utils/grid";
 import type { ItemSize, LayoutItem } from "./types";
 import type { TabEntity } from "./GridItemTabsState.svelte";
 import type { BuildableField, BuildableFieldPreview } from "../forms/buildable/fields";
@@ -83,16 +83,15 @@ export default class {
       this.width = position.width;
       this.height = position.height;
 
-      // if (hasCollisions(this.item, Object.values(this.settings.items))) {
-      //   let newCoords = this.getFirstAvailableCoords(this.item)
-      //   if (newCoords) {
-      //     this.left = coordinate2position(newCoords.x, this.settings.itemSize.width, this.settings.gap)
-      //     this.top = coordinate2position(newCoords.y, this.settings.itemSize.height, this.settings.gap)
-      //   }
-      // }
+      if (hasCollisions(this.item, Object.values(this.settings.items))) { // || this.isOutsideBounds()) {
+        let newCoords = this.getFirstAvailableCoords()
+        if (newCoords) {
+          this.left = coordinate2position(newCoords.x, this.settings.itemSize.width, this.settings.gap)
+          this.top = coordinate2position(newCoords.y, this.settings.itemSize.height, this.settings.gap)
+        }
+      }
       this.initialPosition = { left: this.left, top: this.top }
     }
-
     this.previewItem = { ...this.item };
   }
   private isOutsideBounds() {
@@ -100,25 +99,25 @@ export default class {
     if (!rect) return false
     return this.left < rect.left || this.top < rect.top || this.left + this.width > rect.right || this.top + this.height > rect.bottom
   }
-  private getFirstAvailableCoords({ widthGridUnits, heightGridUnits }: { widthGridUnits: number, heightGridUnits: number }): {
+  private getFirstAvailableCoords(): {
     x: number;
     y: number;
   } | null {
-    // let rect = this.settings.boundsTo?.getBoundingClientRect()
-    // if (!rect) return null
-    // let maxCols = Math.round(rect.width / (this.settings.itemSize.width + this.settings.gap)) - 1
-    // let maxRows = Math.round(rect.height / (this.settings.itemSize.height + this.settings.gap)) - 1
-    let dimensions = this.settings.getGridDimensions()
-    return getAvailablePosition({
-      id: '',
-      x: 0,
-      y: 0,
-      widthGridUnits,
-      heightGridUnits,
-      min: { widthGridUnits: 32, heightGridUnits: 32 },
-      moveable: true,
-      resizeable: true,
-    }, Object.values(this.settings.items), dimensions.cols, dimensions.rows);
+    let rect = this.settings.boundsTo?.getBoundingClientRect()
+    if (!rect) return null
+    let maxCols = Math.round(rect.width / (this.settings.itemSize.width + this.settings.gap)) - 1
+    let maxRows = Math.round(rect.height / (this.settings.itemSize.height + this.settings.gap)) - 1
+
+    for (let y = 0; y <= maxRows - this.item.heightGridUnits; y++) {
+      for (let x = 0; x <= maxCols - this.item.widthGridUnits; x++) {
+        const _item = { ...this.item, x, y };
+        if (!hasCollisions(_item, Object.values(this.settings.items))) {
+          const newPosition = { x, y };
+          return newPosition;
+        }
+      }
+    }
+    return null
   }
 
   private applyPreview() {
@@ -179,6 +178,8 @@ export default class {
     if (!this.settings.itemSize) {
       throw new Error('Grid is not mounted yet');
     }
+    console.log(event)
+    console.log(this.initialPointerPosition)
     let _left = event.pageX - this.initialPointerPosition.left + this.initialPosition.left;
     let _top = event.pageY - this.initialPointerPosition.top + this.initialPosition.top;
     if (this.settings.bounds && this.settings.boundsTo) {
