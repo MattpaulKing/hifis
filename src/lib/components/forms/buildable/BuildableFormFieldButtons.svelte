@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { buildableFieldDefault, buildableFormFields } from '..';
-	import Drawer from '../../drawer/Drawer.svelte';
 	import type { GridSettings } from '../../user-grid';
+	import { getValidCoordsIfCollisionOrOutsideBounds } from '../../user-grid/utils/grid';
+	import Label from '../Label.svelte';
 	import type { BuildableFieldPreview } from './fields';
 
 	type Props = {
@@ -10,7 +11,7 @@
 		entityFormId: string;
 		gridSettings: GridSettings;
 		ondragstart?: (e: DragEvent, field: BuildableFieldPreview) => void;
-		ondragend?: (e: DragEvent, field: BuildableFieldPreview) => void;
+		ondragend?: (field: BuildableFieldPreview) => void;
 	};
 	let {
 		draggedField = $bindable(),
@@ -42,7 +43,7 @@
 		let draggedFieldCopy = { ...draggedField };
 		draggedField = null;
 		dragEvent = null;
-		_ondragend?.(e, draggedFieldCopy);
+		_ondragend?.(draggedFieldCopy);
 	}
 </script>
 

@@ -60,13 +60,13 @@
 	out:fade
 	role="gridcell"
 	tabindex="0"
-	class="border-primary-500-400-token absolute cursor-move overflow-hidden
+	class=" absolute cursor-move overflow-hidden
   p-2 transition-transform rounded-token
   [&>div>input]:cursor-move [&>div>label]:cursor-move [&>div]:cursor-move
   {classes} {buildableFormFieldMenuState.state.field?.layout.id === item.id
-		? 'border border-dashed'
-		: ''} 
-  {controller.active && !dragEvent ? 'opacity-80' : dragEvent ? 'opacity-0' : ''}"
+		? 'border-primary-500-400-token border border-solid'
+		: 'border-primary-200-700-token border border-dashed'} 
+  {controller.active && !dragEvent ? 'opacity-60' : dragEvent ? 'opacity-0' : ''}"
 	style={`left:${controller.left}px; top:${controller.top}px; width: ${controller.width}px; height: ${controller.height}px;`}
 	bind:this={controller.moveableEl}
 	onpointerdown={(e) => {
@@ -108,7 +108,7 @@
 
 {#if controller.active}
 	<div
-		class="{classes} border-primary-500-400-token overflow-hidden border border-dashed p-2 opacity-40 transition-transform rounded-token"
+		class="{classes} border-primary-500-400-token overflow-hidden border p-2 opacity-80 transition-transform rounded-token"
 		style={`position: absolute; left:${controller.preview.left}px; top:${controller.preview.top}px;  
 		width: ${controller.preview.width}px; height: ${controller.preview.height}px;`}
 	>

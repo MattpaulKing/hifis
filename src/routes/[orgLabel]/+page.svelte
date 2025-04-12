@@ -53,7 +53,7 @@
 	let fieldMenuState = setBuildableFormFieldMenuState();
 	let dragEvent = $state<DragEvent | null>(null);
 
-	function ondragend(e: DragEvent, field: BuildableFieldPreview) {
+	function ondragend(field: BuildableFieldPreview) {
 		let newField = {
 			properties: { ...field.properties, entityId: $entityFormData.id ?? '' },
 			layout: field.layout
@@ -76,8 +76,7 @@
 	}
 	/*TODO:
     put default fields into a table
-    updating existing forms
-    creating forms
+    backend functions
   */
 	function deleteField(layoutItem: BuildableField['layout']) {
 		$entityFormData.fields = $entityFormData.fields.filter(
@@ -87,10 +86,11 @@
 			fieldMenuState.default();
 		}
 	}
+	$inspect($entityFormData.fields);
 </script>
 
 <div class="flex h-full w-full">
-	<BuildableFormFieldMenuContainer activeMenuTab={fieldMenuState.state.tab}>
+	<BuildableFormFieldMenuContainer rerenderKey={fieldMenuState.state.field?.properties.id}>
 		<BuildableFormFieldMenuHeader></BuildableFormFieldMenuHeader>
 		{#if fieldMenuState.state.tab === 'field-list'}
 			<BuildableFormFieldButtons

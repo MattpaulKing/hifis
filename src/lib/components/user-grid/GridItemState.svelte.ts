@@ -1,10 +1,12 @@
-import { calcPosition, coordinate2position, coordinate2size, snapOnMove, snapOnResize } from "./utils/item";
+import { calcPosition, coordinate2size, snapOnMove, snapOnResize } from "./utils/item";
 import { on } from "svelte/events";
 import { getGridContext } from "./utils/GridContext.svelte";
-import { hasCollisions, isOutsideBounds } from "./utils/grid";
+import { getValidCoordsIfCollisionOrOutsideBounds, hasCollisions, isOutsideBounds } from "./utils/grid";
 import type { ItemSize, LayoutItem } from "./types";
 import type { TabEntity } from "./GridItemTabsState.svelte";
 import type { BuildableField, BuildableFieldPreview } from "../forms/buildable/fields";
+
+
 
 export default class {
   active = $state(false);
@@ -81,36 +83,11 @@ export default class {
       this.width = position.width;
       this.height = position.height;
 
-      if (hasCollisions(this.item, Object.values(this.settings.items)) || isOutsideBounds(this, this.settings.boundsTo?.getBoundingClientRect())) {
-        let newCoords = this.getFirstAvailableCoords()
-        if (newCoords) {
-          this.previewItem = { ...this.previewItem, x: newCoords.x, y: newCoords.y }
-        }
-      }
+      this.previewItem = { ...this.previewItem, ...getValidCoordsIfCollisionOrOutsideBounds({ item: this.item, gridSettings: this.settings }) }
     } else {
       this.previewItem = { ...this.item };
     }
     this.initialPosition = { left: this.left, top: this.top }
-  }
-  private getFirstAvailableCoords(): {
-    x: number;
-    y: number;
-  } | null {
-    let rect = this.settings.boundsTo?.getBoundingClientRect()
-    if (!rect) return null
-    let maxCols = Math.round(rect.width / (this.settings.itemSize.width + this.settings.gap)) - 1
-    let maxRows = Math.round(rect.height / (this.settings.itemSize.height + this.settings.gap)) - 1
-
-    for (let y = 0; y <= maxRows - this.item.heightGridUnits; y++) {
-      for (let x = 0; x <= maxCols - this.item.widthGridUnits; x++) {
-        const _item = { ...this.item, x, y };
-        if (!hasCollisions(_item, Object.values(this.settings.items))) {
-          const newPosition = { x, y };
-          return newPosition;
-        }
-      }
-    }
-    return null
   }
 
   private applyPreview() {
