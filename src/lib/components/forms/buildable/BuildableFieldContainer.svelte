@@ -18,6 +18,7 @@
 		onkeydown?: (e: KeyboardEvent) => void;
 		onMoveEnd?: (item: BuildableField['layout']) => void;
 		onResizeEnd?: (item: BuildableField['layout']) => void;
+		onDestroy?: () => void;
 		class?: string;
 	};
 	let {
@@ -32,7 +33,8 @@
 		onclick,
 		onkeydown,
 		class: classes,
-		children
+		children,
+		onDestroy: _onDestroy
 	}: Props = $props();
 
 	let gridSettings = getGridContext();
@@ -40,13 +42,15 @@
 
 	onMount(() => {
 		controller.init();
-		if (!dragEvent) {
-			gridSettings.registerItem(controller.item);
-		} else {
+		if (dragEvent) {
 			controller.moveStartMouse(dragEvent);
+		} else {
+			gridSettings.registerItem(controller.item);
 		}
 		return () => {
-			gridSettings.unregisterItem(controller.item);
+			if (!dragEvent) {
+				gridSettings.unregisterItem(controller.item);
+			}
 		};
 	});
 	let buildableFormFieldMenuState = getBuildableFormFieldMenuState();
@@ -56,8 +60,12 @@
 	transition:fade
 	role="gridcell"
 	tabindex="0"
-	class="border-primary-500-400-token absolute cursor-move overflow-hidden p-2 transition-transform rounded-token [&_*]:cursor-move {classes} 
-  {buildableFormFieldMenuState.state.field?.layout.id === item.id ? 'border border-dashed' : ''} 
+	class="border-primary-500-400-token absolute cursor-move overflow-hidden
+  p-2 transition-transform rounded-token
+  [&>div>input]:cursor-move [&>div>label]:cursor-move [&>div]:cursor-move
+  {classes} {buildableFormFieldMenuState.state.field?.layout.id === item.id
+		? 'border border-dashed'
+		: ''} 
   {controller.active && !dragEvent ? 'opacity-80' : dragEvent ? 'opacity-0' : ''}"
 	style={`left:${controller.left}px; top:${controller.top}px; width: ${controller.width}px; height: ${controller.height}px;`}
 	bind:this={controller.moveableEl}

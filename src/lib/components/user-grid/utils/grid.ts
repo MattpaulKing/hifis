@@ -23,3 +23,7 @@ export function getGridDimensions(items: LayoutItem[]): GridDimensions {
   });
   return { cols, rows };
 }
+export function isOutsideBounds({ left, top, width, height }: { left: number, top: number, width: number, height: number }, rect: DOMRect | undefined) {
+  if (!rect) return false
+  return left <= 0 || top <= 0 || rect.left + left + width > rect.right || top + height > rect.top + rect.height
+}

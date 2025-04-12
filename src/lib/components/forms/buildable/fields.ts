@@ -2,7 +2,6 @@ import { ELEMENT_TYPES, Input } from "$lib/components/forms";
 import { entityFieldPositionSchema, entityFieldSchema } from "$src/schemas";
 import { Type, TextSearch } from "@lucide/svelte"
 import { position2coordinate } from "$src/lib/components/user-grid/utils/item";
-import { hasCollisions } from "../../user-grid/utils/grid";
 import type { GridSettings } from "$src/lib/components/user-grid";
 import type { FormValidated } from "$src/lib/interfaces";
 import type { Component } from "svelte";
@@ -110,10 +109,10 @@ export type BuildableFieldPreview = {
 }
 
 export function buildableFieldDefault({ e, entityId, field, gridSettings }:
-  { e: DragEvent, entityId: string, field: BuildableFieldPreview, gridSettings: GridSettings }): BuildableFieldPreview | null {
+  { e: DragEvent, entityId: string, field: BuildableFieldPreview, gridSettings: GridSettings }): BuildableFieldPreview {
   let { itemSize, gap, boundsTo } = gridSettings
   let gridRect = boundsTo?.getBoundingClientRect()
-
+  if (!gridRect) throw Error("Grid not initialized.")
   let fieldId = field.properties.id.length > 0 ? field.properties.id : crypto.randomUUID()
   let layoutId = field.layout.id.length > 0 ? field.layout.id : crypto.randomUUID()
   let fieldMetaData = fields[field.properties.fieldType]
@@ -129,8 +128,8 @@ export function buildableFieldDefault({ e, entityId, field, gridSettings }:
       ...field.layout,
       id: layoutId,
       fieldId,
-      x: Math.max(position2coordinate(e.pageX - (gridRect?.left ?? 0), itemSize.width, gap), 0),
-      y: Math.max(position2coordinate(e.pageY - (gridRect?.top ?? 0), itemSize.height, gap), 0)
+      x: Math.max(position2coordinate(e.pageX - (gridRect.left), itemSize.width, gap), 0),
+      y: Math.max(position2coordinate(e.pageY - (gridRect.top), itemSize.height, gap), 0)
     }
   }
   return previewEntityField

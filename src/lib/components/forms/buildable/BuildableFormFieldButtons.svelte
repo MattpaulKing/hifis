@@ -8,14 +8,14 @@
 		entityFormId: string;
 		gridSettings: GridSettings;
 		ondragstart?: (e: DragEvent, field: BuildableFieldPreview) => void;
-		ondragend: (e: DragEvent) => void;
+		ondragend?: (e: DragEvent, field: BuildableFieldPreview) => void;
 	};
 	let {
 		draggedField = $bindable(),
 		entityFormId,
 		gridSettings,
 		ondragstart: _ondragstart,
-		ondragend
+		ondragend: _ondragend
 	}: Props = $props();
 
 	function ondragstart(e: DragEvent, field: BuildableFieldPreview) {
@@ -26,6 +26,15 @@
 			gridSettings
 		});
 		_ondragstart?.(e, field);
+	}
+	function ondragend(e: DragEvent, field: BuildableFieldPreview) {
+		draggedField = buildableFieldDefault({
+			e,
+			entityId: entityFormId,
+			field,
+			gridSettings
+		});
+		_ondragend?.(e, field);
 	}
 </script>
 
@@ -39,7 +48,7 @@
 		<button
 			draggable={true}
 			ondragstart={(e) => ondragstart(e, field)}
-			{ondragend}
+			ondragend={(e) => ondragend(e, field)}
 			class="variant-ghost border-surface-500-400-token btn h-10 w-fit border"
 		>
 			<span class="rounded-token">

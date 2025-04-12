@@ -57,12 +57,10 @@ export default class {
     resizeable: true
   })
   previewItem = $state({ ...this.item } as LayoutItem)
-  preview = $derived.by(() => {
-    return calcPosition(this.previewItem, {
-      itemSize: this.settings.itemSize,
-      gap: this.settings.gap
-    })
-  })
+  preview = $derived(calcPosition(this.previewItem, {
+    itemSize: this.settings.itemSize,
+    gap: this.settings.gap
+  }))
   constructor({ item, min, moveable = true, resizeable = true }: { item: BuildableField['layout'], min: BuildableFieldPreview['layout']['min'], moveable: boolean, resizeable: boolean }) {
     this.item = {
       ...item,
@@ -86,18 +84,13 @@ export default class {
       if (hasCollisions(this.item, Object.values(this.settings.items))) { // || this.isOutsideBounds()) {
         let newCoords = this.getFirstAvailableCoords()
         if (newCoords) {
-          this.left = coordinate2position(newCoords.x, this.settings.itemSize.width, this.settings.gap)
-          this.top = coordinate2position(newCoords.y, this.settings.itemSize.height, this.settings.gap)
+          this.previewItem = { ...this.previewItem, x: newCoords.x, y: newCoords.y }
         }
       }
-      this.initialPosition = { left: this.left, top: this.top }
+    } else {
+      this.previewItem = { ...this.item };
     }
-    this.previewItem = { ...this.item };
-  }
-  private isOutsideBounds() {
-    let rect = this.settings.boundsTo?.getBoundingClientRect()
-    if (!rect) return false
-    return this.left < rect.left || this.top < rect.top || this.left + this.width > rect.right || this.top + this.height > rect.bottom
+    this.initialPosition = { left: this.left, top: this.top }
   }
   private getFirstAvailableCoords(): {
     x: number;
@@ -175,27 +168,19 @@ export default class {
     }
   }
   private move(event: PointerEvent | DragEvent | Touch) {
-    if (!this.settings.itemSize) {
-      throw new Error('Grid is not mounted yet');
-    }
-    console.log(event)
-    console.log(this.initialPointerPosition)
     let _left = event.pageX - this.initialPointerPosition.left + this.initialPosition.left;
     let _top = event.pageY - this.initialPointerPosition.top + this.initialPosition.top;
     if (this.settings.bounds && this.settings.boundsTo) {
       const parentRect = this.settings.boundsTo.getBoundingClientRect();
       _left = Math.max(_left, 0)
-      _left = Math.min(_left, parentRect.width - this.width)
-      if (_left + this.width > parentRect.width) {
-        _left = parentRect.width - this.width - this.settings.gap
-      }
-      if (_top + this.height > parentRect.height) {
-        _top = parentRect.height - this.height
-      }
+      _left = Math.min(_left, parentRect.right - this.width)
+      _top = Math.max(_top, 0)
+      _top = Math.min(_top, parentRect.bottom - this.height)
     }
     this.left = _left;
     this.top = _top;
     const { x, y } = snapOnMove(this.left, this.top, this.previewItem, this.settings);
+    console.log(x, y)
     if (!hasCollisions({ ...this.previewItem, x, y }, Object.values(this.settings.items))) {
       this.previewItem = { ...this.previewItem, x, y };
     }

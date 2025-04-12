@@ -48,7 +48,9 @@ export class GridSettings {
     this.items[item.id] = item;
   }
   unregisterItem(item: LayoutItem) {
-    delete this.items[item.id];
+    if (item.id in this.items) {
+      delete this.items[item.id];
+    }
   }
   getGridDimensions(): GridDimensions {
     let cols = 0;

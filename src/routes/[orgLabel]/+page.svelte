@@ -52,27 +52,34 @@
 	let draggedField = $state<BuildableFieldPreview | null>(null);
 	let isDragging = $derived(Boolean(draggedField));
 	let fieldMenuState = setBuildableFormFieldMenuState();
-	let rerender = $state(false);
+	let rerenderPreview = $state(false);
 
-	function ondragend() {
+	function ondragend(e: DragEvent, field: BuildableFieldPreview) {
 		if (!draggedField) return;
+		draggedField = buildableFieldDefault({
+			e,
+			entityId: $entityFormData.id ?? '',
+			field,
+			gridSettings
+		});
 		let newField = {
 			properties: { ...draggedField.properties, entityId: $entityFormData.id ?? '' },
 			layout: draggedField.layout
 		};
-		draggedField = null;
 		$entityFormData.fields = [...$entityFormData.fields, newField];
 		setActiveField(newField);
-		rerender = !rerender;
+		draggedField = null;
 	}
 	function ondragover(e: DragEvent) {
 		if (!draggedField) return;
 		draggedField = buildableFieldDefault({
 			e,
-			entityId: data.entityFormId,
+			entityId: $entityFormData.id ?? '',
 			field: draggedField,
 			gridSettings
 		});
+		rerenderPreview = !rerenderPreview;
+		setActiveField(draggedField);
 	}
 	function setActiveField(item: BuildableField) {
 		fieldMenuState.state = {
@@ -88,7 +95,6 @@
 		$entityFormData.fields[idx].layout = updatedLayout;
 	}
 	/*TODO:
-    weird bug that allows items to be placed on top of each other
     put default fields into a table
     updating existing forms
     creating forms
@@ -142,8 +148,8 @@
 			</Field>
 		</BuildableFormHeader>
 		<Grid
-			{ondragover}
 			{gridSettings}
+			{ondragover}
 			userBuilding={true}
 			class="col-span-2 h-full w-full transition-colors {isDragging
 				? 'bg-surface-100-800-token bg-opacity-50'
@@ -167,7 +173,7 @@
 				</BuildableFieldContainer>
 			{/each}
 			{#snippet fieldPreview({ dragEvent })}
-				{#key rerender}
+				{#key rerenderPreview}
 					{#if draggedField}
 						{@const FieldInput = draggedField.component.render}
 						<BuildableFieldContainer
