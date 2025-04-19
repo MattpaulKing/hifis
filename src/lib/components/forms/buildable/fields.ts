@@ -1,5 +1,5 @@
 import { ELEMENT_TYPES, Input } from "$lib/components/forms";
-import { entityFieldPositionSchema, entityFieldSchema } from "$src/schemas";
+import { entityFieldLayoutSchema, entityFieldsSchema } from "$src/schemas";
 import { Type, TextSearch } from "@lucide/svelte"
 import { position2coordinate } from "$src/lib/components/user-grid/utils/item";
 import type { GridSettings } from "$src/lib/components/user-grid";
@@ -35,6 +35,7 @@ const fields = {
       y: Infinity,
       widthGridUnits: 10,
       heightGridUnits: 4,
+      view: 'xl',
       min: {
         widthGridUnits: 10,
         heightGridUnits: 4,
@@ -70,6 +71,7 @@ const fields = {
       y: Infinity,
       widthGridUnits: 10,
       heightGridUnits: 4,
+      view: 'xl',
       min: {
         widthGridUnits: 10,
         heightGridUnits: 4,
@@ -82,8 +84,8 @@ const fields = {
 export default fields
 
 export type BuildableField = {
-  properties: Omit<FormValidated<typeof entityFieldSchema>['data'], 'id'> & { id: string; },
-  layout: Omit<FormValidated<typeof entityFieldPositionSchema>['data'], 'id'> & { id: string }
+  properties: Omit<FormValidated<typeof entityFieldsSchema>['data'], 'id'> & { id: string; },
+  layout: Omit<FormValidated<typeof entityFieldLayoutSchema>['data'], 'id'> & { id: string }
 }
 export type BuildableFieldPreview = {
   category: typeof ELEMENT_TYPES.FORM_FIELDS,
@@ -92,8 +94,8 @@ export type BuildableFieldPreview = {
     icon: Component,
     title: string
   },
-  properties: Omit<FormValidated<typeof entityFieldSchema>['data'], 'id'> & { id: string; },
-  layout: Omit<FormValidated<typeof entityFieldPositionSchema>['data'], 'id'> & {
+  properties: Omit<FormValidated<typeof entityFieldsSchema>['data'], 'id'> & { id: string; },
+  layout: Omit<FormValidated<typeof entityFieldLayoutSchema>['data'], 'id'> & {
     id: string;
     min: {
       widthGridUnits: number,

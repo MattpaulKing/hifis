@@ -8,7 +8,6 @@ export default async function <T extends PgTable>({ rows, table, db }: { rows: T
       .insert(table)
       .values(rows)
       .returning()
-    console.log(insertedRows)
     return insertedRows
   } catch (e) {
     console.log(e)

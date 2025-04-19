@@ -1,10 +1,10 @@
 import { boolean, integer, pgTable, text, uuid, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { timestamps, uuidPK } from "$src/schemas/helpers";
 import { createInsertSchema } from "drizzle-valibot"
-import { entityFields, entityFieldSchema } from "./entityFields";
+import { entityFields, entityFieldsSchema } from "./entityFields";
 import { relations } from "drizzle-orm";
 import * as v from "valibot"
-import { entityFieldPositionSchema } from "./entityFieldPosititons";
+import { entityFieldLayoutSchema } from "./entityFieldPosititons";
 
 export const entities = pgTable("entities", {
   ...uuidPK,
@@ -18,8 +18,8 @@ export const entities = pgTable("entities", {
 export const entitySchema = v.object({
   ...createInsertSchema(entities).entries,
   fields: v.array(v.object({
-    properties: entityFieldSchema,
-    layout: entityFieldPositionSchema
+    properties: entityFieldsSchema,
+    layout: entityFieldLayoutSchema
   })),
 })
 

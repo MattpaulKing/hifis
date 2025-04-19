@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm"
 import { users } from "./users/schema"
 import { superValidate } from "sveltekit-superforms"
-import { entities, entityFieldPositions, entityFields, entityFieldSchema, entitySchema } from "$src/schemas"
+import { entities, entityFieldLayouts, entityFields, entityFieldsSchema, entitySchema } from "$src/schemas"
 import { valibot } from "sveltekit-superforms/adapters"
 import type { Actions, PageServerLoad } from "./$types"
 import type { TabEntity } from "$src/lib/components/user-grid"
@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ locals: { db, subject } }) => {
     }, valibot(entitySchema), { errors: false }),
     entityFieldsForm: await superValidate({
       entityId: id,
-    }, valibot(entityFieldSchema), { errors: false }),
+    }, valibot(entityFieldsSchema), { errors: false }),
     usersComponents: [],
     entities: [
       { id: '1', label: 'something', active: false, tabType: "entity" },
@@ -55,7 +55,7 @@ export const actions = {
     }
     try {
       const insertedEntityPositions = await db
-        .insert(entityFieldPositions)
+        .insert(entityFieldLayouts)
         .values(fields.map(({ layout }) => layout))
         .returning()
     } catch (e) {

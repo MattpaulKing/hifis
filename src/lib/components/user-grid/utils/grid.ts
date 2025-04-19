@@ -49,7 +49,7 @@ export function getFirstAvailableCoords({ item, gridSettings }: { item: Buildabl
   return null
 }
 
-export function getValidCoordsIfCollisionOrOutsideBounds({ item, gridSettings }: { item: BuildableFieldPreview['layout'], gridSettings: GridSettings }) {
+export function getValidCoordsIfCollisionOrOutsideBounds({ item, items, gridSettings }: { item: BuildableFieldPreview['layout'], items: BuildableFieldPreview['layout'][], gridSettings: GridSettings }) {
   let existingCoords = { x: item.x, y: item.y }
   if (hasCollisions(item, Object.values(gridSettings.items)) || isOutsideBounds(calcPosition(item, { gap: gridSettings.gap, itemSize: gridSettings.itemSize }), gridSettings.boundsTo?.getBoundingClientRect())) {
     let newCoords = getFirstAvailableCoords({ item, gridSettings })

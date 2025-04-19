@@ -9,5 +9,5 @@ export { clientServiceEvents, clientServiceEventsRelations, clientServiceEventsS
 export { logCategories, logs, logsRelations, logsClients, logsServices, logsClientsRelations, logsServicesRelations } from "../routes/[orgLabel]/logs/schema"
 export { usersClients } from "../routes/[orgLabel]/users/clients/schema"
 export { entities, entitySchema, entityRelations } from "../routes/[orgLabel]/custom-entities/schema/entities"
-export { entityFields, entityFieldSchema, entityFieldRelations, entityFieldType, entityInputType } from "../routes/[orgLabel]/custom-entities/schema/entityFields"
-export { entityFieldPositions, entityFieldPositionSchema, entityFieldPositionRelations, inputLayoutViewType } from "../routes/[orgLabel]/custom-entities/schema/entityFieldPosititons"
+export { entityFields, entityFieldsSchema, entityFieldRelations, entityFieldType, entityInputType } from "../routes/[orgLabel]/custom-entities/schema/entityFields"
+export { entityFieldLayouts, entityFieldLayoutSchema, entityFieldLayoutRelations, inputLayoutViewType } from "../routes/[orgLabel]/custom-entities/schema/entityFieldPosititons"

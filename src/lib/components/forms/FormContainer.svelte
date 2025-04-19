@@ -14,6 +14,7 @@
 		class: classes,
 		title,
 		btns,
+		showMsg = true,
 		hasFormEl = true
 	}: {
 		form: SuperForm<T>;
@@ -24,6 +25,7 @@
 		class?: string;
 		title?: Snippet;
 		btns?: Snippet;
+		showMsg?: boolean;
 		hasFormEl?: boolean;
 	} = $props();
 
@@ -37,7 +39,7 @@
 
 <div in:fade class="relative flex flex-col {classes ?? 'p-6'}">
 	<div class="absolute right-0 top-0 z-50 flex w-full flex-col items-end">
-		{#if msgStore.current && msgStore.current.id === $formId}
+		{#if showMsg && msgStore.current && msgStore.current.id === $formId}
 			<div
 				transition:fade
 				class="badge m-4 flex h-fit w-fit p-2
@@ -74,4 +76,3 @@
 		{@render children()}
 	{/if}
 </div>
-

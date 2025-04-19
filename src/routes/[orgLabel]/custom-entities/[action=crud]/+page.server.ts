@@ -1,15 +1,15 @@
 import { eq } from "drizzle-orm"
 import { superValidate } from "sveltekit-superforms"
-import { entities, entityFieldPositions, entityFields, entityFieldSchema, entitySchema, users } from "$src/schemas"
+import { entities, entityFieldLayoutSchema, entityFieldsSchema, entitySchema, users } from "$src/schemas"
 import { valibot } from "sveltekit-superforms/adapters"
 import { ar, validateForm } from "$src/lib/server/forms"
-import { error, redirect } from "@sveltejs/kit"
-import { insertAndReturn } from "$src/lib/server/db"
-import { route } from "$src/lib/ROUTES"
+import { error } from "@sveltejs/kit"
+import { insertAndReturn, tryQuery } from "$src/lib/server/db"
+import { entityCreate } from "../lib"
 import type { DB } from "$src/lib/server/db/client"
 import type { Actions, PageServerLoad } from "./$types"
-import type { TabEntity } from "$src/lib/components/user-grid"
 import type { FormValidated } from "$src/lib/interfaces"
+import type { CRUD } from "$src/params/crud"
 
 type SearchParams = {
   entityId?: string
@@ -17,14 +17,17 @@ type SearchParams = {
 
 export const load: PageServerLoad = async ({ url, params: { action }, locals: { db, subject } }) => {
   let searchParams: SearchParams = Object.fromEntries(url.searchParams)
-  let entityId = searchParams.entityId ?? crypto.randomUUID()
+  let entityForm = await getEntityFormValidated({ action: action as CRUD, entityId: searchParams.entityId, db })
+  if (!entityForm.data.id) return error(500, "Something went wrong")
   return {
     action,
-    entityId,
-    entityForm: await getEntityFormValidated({ entityId, db }),
+    entityId: entityForm.data.id,
+    entityForm,
     entityFieldsForm: await superValidate({
-      entityId,
-    }, valibot(entityFieldSchema), { errors: false }),
+      entityId: entityForm.data.id,
+    }, valibot(entityFieldsSchema), { errors: false }),
+    entityFieldLayoutForm: await superValidate({
+    }, valibot(entityFieldLayoutSchema), { errors: false }),
     orgsUsers: await db
       .select()
       .from(users)
@@ -34,47 +37,47 @@ export const load: PageServerLoad = async ({ url, params: { action }, locals: { 
 
 export const actions = {
   default: async (e) => {
-    let { locals: { db } } = e
     const form = await validateForm({ requestEvent: e, schema: entitySchema })
     if (!form.valid) return ar.invalid({ form })
-    let { fields = [], ...entity } = form.data
     if (e.params.action === 'create') {
-      let [entityInserted] = await insertAndReturn({ rows: [entity], table: entities, db })
-      await insertAndReturn({ rows: fields.map(({ properties }) => ({ ...properties, entityId: entityInserted.id })), table: entityFields, db })
-      await insertAndReturn({ rows: fields.map(({ layout }) => layout), table: entityFieldPositions, db })
-      return redirect(302, `${route('/[orgLabel]/custom-entities/[action=crud]', {
-        orgLabel: e.params.orgLabel,
-        action: 'update'
-      })}?entityId=${entity.id}`)
+      return await entityCreate({ e, entity: form.data })
     } else if (e.params.action === 'update') {
-      //TODO: update entity -> then check if fields / positions exist and update or add depending on result
+
     }
     return ar.success({ form })
   }
 } satisfies Actions
 
-async function getEntityFormValidated({ entityId, db }: { entityId: string | undefined, db: DB }) {
+async function getEntityFormValidated({ action, entityId, db }: { action: CRUD, entityId: string | undefined, db: DB }): Promise<FormValidated<typeof entitySchema>> {
   let entityFormData: FormValidated<typeof entitySchema>['data']
-  if (!entityId) {
+  if (action === 'create') {
+    let [entity] = await insertAndReturn({ db, table: entities, rows: [{ label: "Form Title", version: 0 }] })
+    entityFormData = { ...entity, fields: [] }
+  } else if (entityId) {
+    let [entity] = await tryQuery({
+      fn: db
+        .query.entities.findMany({
+          with: {
+            fields: {
+              with: {
+                layouts: {}
+              }
+            }
+          },
+          where: eq(entities.id, entityId)
+        }),
+      errorMsg: "Entity not found"
+    })
+    let fields = entity?.fields.map(({ layouts, ...field }) => ({
+      properties: field,
+      layout: layouts[0]
+    })) ?? []
     entityFormData = {
-      id: crypto.randomUUID(),
-      version: 0,
-      published: false,
-      label: "",
-      fields: []
+      ...entity,
+      fields
     }
   } else {
-    //TODO: get fields and positions
-    try {
-      const [entity] = await db
-        .select()
-        .from(entities)
-        .where(eq(entities.id, entityId))
-      entityFormData = { ...entity, fields: [] }
-    } catch (e) {
-      console.log(e)
-      return error(500, 'error')
-    }
+    return error(500, "Something went wrong")
   }
   return await superValidate(entityFormData, valibot(entitySchema), { id: 'entity-form', errors: false })
 }

@@ -1,3 +1,5 @@
 export { db } from "./client"
 export { single } from "./query/single"
 export { default as insertAndReturn } from "./query/insertAndReturn"
+export { default as updateAndReturn } from "./query/updateAndReturn"
+export { default as tryQuery } from "./query/tryQuery"

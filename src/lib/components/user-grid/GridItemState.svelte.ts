@@ -1,7 +1,7 @@
 import { calcPosition, coordinate2size, snapOnMove, snapOnResize } from "./utils/item";
 import { on } from "svelte/events";
 import { getGridContext } from "./utils/GridContext.svelte";
-import { getValidCoordsIfCollisionOrOutsideBounds, hasCollisions, isOutsideBounds } from "./utils/grid";
+import { getValidCoordsIfCollisionOrOutsideBounds, hasCollisions } from "./utils/grid";
 import type { ItemSize, LayoutItem } from "./types";
 import type { TabEntity } from "./GridItemTabsState.svelte";
 import type { BuildableField, BuildableFieldPreview } from "../forms/buildable/fields";
@@ -27,6 +27,7 @@ export default class {
   cleanupResizeMouse = $state<void | (() => void)>()
   cleanupResizeMouseEnd = $state<void | (() => void)>()
   settings = $state(getGridContext())
+  onChanged = $state<((item: BuildableField['layout']) => void) | null>(null)
   minSize: ItemSize = $derived.by(() => {
     return {
       width: coordinate2size(this.item.min.widthGridUnits, this.settings.itemSize.width, this.settings.gap),
@@ -52,6 +53,7 @@ export default class {
     x: 0,
     y: 0,
     fieldId: "",
+    view: "xl",
     heightGridUnits: 0,
     widthGridUnits: 0,
     min: { widthGridUnits: 0, heightGridUnits: 0 },
@@ -63,7 +65,7 @@ export default class {
     itemSize: this.settings.itemSize,
     gap: this.settings.gap
   }))
-  constructor({ item, min, moveable = true, resizeable = true }: { item: BuildableField['layout'], min: BuildableFieldPreview['layout']['min'], moveable: boolean, resizeable: boolean }) {
+  constructor({ item, min, onChanged, moveable = true, resizeable = true }: { item: BuildableField['layout'], min: BuildableFieldPreview['layout']['min'], onChanged?: (item: BuildableField['layout']) => void, moveable: boolean, resizeable: boolean }) {
     this.item = {
       ...item,
       min,
@@ -71,6 +73,7 @@ export default class {
       resizeable,
     }
     this.previewItem = { ...this.item }
+    this.onChanged = onChanged ?? null
   }
   init() {
     if (!this.active && this.settings.itemSize) {
@@ -117,6 +120,7 @@ export default class {
     if ("pointerId" in event) {
       this.moveableEl?.releasePointerCapture(event.pointerId)
     }
+    if (this.onChanged) this.onChanged(this.item)
     if (this.cleanupMoveMouse) this.cleanupMoveMouse()
     if (this.cleanupMoveEndMouse) this.cleanupMoveEndMouse()
     if (this.cleanupMoveTouch) this.cleanupMoveTouch()

@@ -1,5 +1,5 @@
 import type { FormValidated } from "$src/lib/interfaces";
-import type { entityFieldSchema, entitySchema } from "$src/schemas";
+import type { entityFieldsSchema, entitySchema } from "$src/schemas";
 import type { BuildableFormFieldMenu } from "./buildableFormFieldMenuState.svelte";
 
 export default function({
@@ -8,7 +8,7 @@ export default function({
   fieldMenuState
 }: {
   $entityFormData: FormValidated<typeof entitySchema>['data'];
-  entityFieldsFormData: FormValidated<typeof entityFieldSchema>['data'];
+  entityFieldsFormData: FormValidated<typeof entityFieldsSchema>['data'];
   fieldMenuState: BuildableFormFieldMenu
 }) {
   let idx = $entityFormData.fields.findIndex(

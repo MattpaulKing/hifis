@@ -16,6 +16,7 @@
 		children: Snippet;
 		onclick?: (e: MouseEvent) => void;
 		onkeydown?: (e: KeyboardEvent) => void;
+		onChanged?: (item: BuildableField['layout']) => void;
 		onMoveEnd?: (item: BuildableField['layout']) => void;
 		onResizeEnd?: (item: BuildableField['layout']) => void;
 		onDestroy?: () => void;
@@ -27,6 +28,7 @@
 		resizeable = true,
 		moveable = true,
 		dragEvent,
+		onChanged,
 		onDelete,
 		onMoveEnd,
 		onResizeEnd,
@@ -38,7 +40,7 @@
 	}: Props = $props();
 
 	let gridSettings = getGridContext();
-	let controller = new GridItemState({ item, min, moveable, resizeable });
+	let controller = new GridItemState({ item, min, moveable, resizeable, onChanged });
 
 	onMount(() => {
 		controller.init();

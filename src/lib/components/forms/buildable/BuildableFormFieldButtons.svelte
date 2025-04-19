@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { buildableFieldDefault, buildableFormFields } from '..';
 	import type { GridSettings } from '../../user-grid';
-	import { getValidCoordsIfCollisionOrOutsideBounds } from '../../user-grid/utils/grid';
-	import Label from '../Label.svelte';
 	import type { BuildableFieldPreview } from './fields';
 
 	type Props = {

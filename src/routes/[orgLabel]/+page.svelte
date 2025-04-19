@@ -19,7 +19,7 @@
 	} from '$src/lib/components/forms';
 	import fields from '$src/lib/components/forms/buildable/fields.js';
 	import { route } from '$src/lib/ROUTES';
-	import { entityFieldSchema, entitySchema } from '$src/schemas/index.js';
+	import { entityFieldsSchema, entitySchema } from '$src/schemas/index.js';
 
 	let { data } = $props();
 	let entityForm = initForm({
@@ -30,7 +30,7 @@
 
 	let entityFieldsForm = initForm({
 		form: data.entityFieldsForm,
-		schema: entityFieldSchema,
+		schema: entityFieldsSchema,
 		opts: {
 			SPA: true,
 			onUpdate({ cancel, form }) {

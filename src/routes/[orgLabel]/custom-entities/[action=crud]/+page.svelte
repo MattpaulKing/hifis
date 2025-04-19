@@ -1,6 +1,9 @@
 <script lang="ts">
+	import fields from '$src/lib/components/forms/buildable/fields.js';
 	import { goto } from '$app/navigation';
 	import { Grid, setGridContext } from '$lib/components/user-grid';
+	import { route } from '$src/lib/ROUTES';
+	import { entityFieldLayoutSchema, entityFieldsSchema, entitySchema } from '$src/schemas/index.js';
 	import {
 		BuildableFieldContainer,
 		BuildableFormFieldButtons,
@@ -10,17 +13,13 @@
 		initForm,
 		Label,
 		setBuildableFormFieldMenuState,
-		updateEntityFields,
-		type BuildableField,
-		type BuildableFieldPreview,
 		BuildableFormHeader,
 		Input,
 		FormContainer,
-		BuildableFormFieldMenuContainer
+		BuildableFormFieldMenuContainer,
+		type BuildableField,
+		type BuildableFieldPreview
 	} from '$src/lib/components/forms';
-	import fields from '$src/lib/components/forms/buildable/fields.js';
-	import { route } from '$src/lib/ROUTES';
-	import { entityFieldSchema, entitySchema } from '$src/schemas/index.js';
 
 	let { data } = $props();
 	let entityForm = initForm({
@@ -44,35 +43,32 @@
 
 	let entityFieldsForm = initForm({
 		form: data.entityFieldsForm,
-		schema: entityFieldSchema,
-		opts: {
-			SPA: true,
-			onUpdate({ cancel, form }) {
-				cancel();
-				if (!fieldMenuState.state.field?.layout) return;
-				$entityFormData = updateEntityFields({
-					$entityFormData,
-					entityFieldsFormData: form.data,
-					fieldMenuState
-				});
-				fieldMenuState.default();
-			}
-		}
+		schema: entityFieldsSchema
 	});
-
 	let { form: entityFieldsFormData } = entityFieldsForm;
+
+	let entityFieldLayoutForm = initForm({
+		form: data.entityFieldLayoutForm,
+		schema: entityFieldLayoutSchema
+	});
+	let { form: entityFieldLayoutFormData } = entityFieldLayoutForm;
+
 	let gridSettings = setGridContext({ cellSize: 16, bounds: true });
 	let draggedField = $state<BuildableFieldPreview | null>(null);
 	let isDragging = $derived(Boolean(draggedField));
 	let fieldMenuState = setBuildableFormFieldMenuState();
 	let dragEvent = $state<DragEvent | null>(null);
 
-	function ondragend(field: BuildableFieldPreview) {
+	function addFieldToEntity(field: BuildableFieldPreview) {
 		let newField = {
 			properties: { ...field.properties, entityId: data.entityId },
 			layout: field.layout
 		};
 		$entityFormData.fields = [...$entityFormData.fields, newField];
+		$entityFieldsFormData = newField.properties;
+		$entityFieldLayoutFormData = newField.layout;
+		entityFieldsForm.submit();
+		entityFieldLayoutForm.submit();
 		setActiveField(newField);
 	}
 	function setActiveField(item: BuildableField) {
@@ -86,11 +82,10 @@
 	function updateFieldLayout(updatedLayout: BuildableField['layout']) {
 		let idx = $entityFormData.fields.findIndex(({ layout: { id } }) => id === updatedLayout.id);
 		if (idx < 0) return;
+		$entityFieldLayoutFormData = updatedLayout;
 		$entityFormData.fields[idx].layout = updatedLayout;
+		entityFieldLayoutForm.submit();
 	}
-	/*TODO:
-    put default fields into a table
-  */
 	function deleteField(layoutItem: BuildableField['layout']) {
 		$entityFormData.fields = $entityFormData.fields.filter(
 			({ layout: { id } }) => id !== layoutItem.id
@@ -99,41 +94,48 @@
 			fieldMenuState.default();
 		}
 	}
+	/*
+  TODO: 
+    0. add a delete for the fields
+   */
+	$inspect($entityFieldsFormData);
 </script>
 
 <div class="flex h-full w-full">
 	<BuildableFormFieldMenuContainer rerenderKey={fieldMenuState.state.field?.properties.id}>
 		<BuildableFormFieldMenuHeader></BuildableFormFieldMenuHeader>
-		{#if fieldMenuState.state.tab === 'field-list'}
-			<BuildableFormFieldButtons
-				bind:draggedField
-				bind:dragEvent
-				entityFormId={data.entityId}
-				{gridSettings}
-				{ondragend}
-			></BuildableFormFieldButtons>
-		{:else if fieldMenuState.state.tab === 'properties'}
-			{#if fieldMenuState.state.field.properties.fieldType === 'input'}
-				<BuildableFormFieldForm {entityFieldsForm}></BuildableFormFieldForm>
-			{:else if fieldMenuState.state.field.properties.fieldType === 'lookup'}
-				<div></div>
-			{/if}
-		{/if}
+		<FormContainer
+			form={entityFieldsForm}
+			action={route('default /[orgLabel]/custom-entities/properties', { orgLabel: data.org.label })}
+		>
+			<div class="col-span-2 flex h-full w-fit flex-col">
+				{#if fieldMenuState.state.tab === 'field-list'}
+					<BuildableFormFieldButtons
+						bind:draggedField
+						bind:dragEvent
+						entityFormId={data.entityId}
+						{gridSettings}
+						ondragend={addFieldToEntity}
+					></BuildableFormFieldButtons>
+				{:else if fieldMenuState.state.tab === 'properties'}
+					{#if fieldMenuState.state.field.properties.fieldType === 'input'}
+						<BuildableFormFieldForm {entityFieldsForm}></BuildableFormFieldForm>
+					{:else if fieldMenuState.state.field.properties.fieldType === 'lookup'}
+						<div></div>
+					{/if}
+				{/if}
+			</div>
+		</FormContainer>
 	</BuildableFormFieldMenuContainer>
 	<FormContainer class="w-full px-6 pb-6" form={entityForm} action={''} hasFormEl={false}>
 		<form
 			class="h-full w-full"
 			method="POST"
-			action={route('default /[orgLabel]/custom-entities/[action=crud]', {
-				orgLabel: data.org.label,
-				action: data.action
+			action={route('default /[orgLabel]/custom-entities/properties', {
+				orgLabel: data.org.label
 			})}
 			use:entityForm.enhance
 		>
-			<Field form={entityForm} path="id" class="hidden">
-				<Label label="id" />
-				<input type="text" hidden bind:value={$entityFormData.id} />
-			</Field>
 			<BuildableFormHeader
 				onPublishClick={async () => {
 					$entityFormData.published = !$entityFormData.published;
@@ -162,8 +164,7 @@
 						item={field.layout as BuildableField['layout']}
 						min={fieldMetadata.layout.min}
 						onDelete={deleteField}
-						onMoveEnd={updateFieldLayout}
-						onResizeEnd={updateFieldLayout}
+						onChanged={updateFieldLayout}
 						onclick={() => setActiveField(field as BuildableField)}
 					>
 						<Field class="-mt-0" form={entityForm} path="fields[{i}].properties.placeholder">
@@ -181,7 +182,7 @@
 							{dragEvent}
 							onDelete={() => null}
 						>
-							<Field class="-mt-0" form={entityForm} path="">
+							<Field class="-mt-0" form={entityForm} path="createdAt">
 								<Label label={draggedField.properties.label}></Label>
 								<FieldInput />
 							</Field>
@@ -192,3 +193,12 @@
 		</form>
 	</FormContainer>
 </div>
+<FormContainer
+	form={entityFieldLayoutForm}
+	action={route('default /[orgLabel]/custom-entities/layouts', {
+		orgLabel: data.org.label
+	})}
+	showMsg={false}
+>
+	<div></div>
+</FormContainer>
