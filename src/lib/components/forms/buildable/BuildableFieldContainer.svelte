@@ -7,11 +7,14 @@
 	import { enhance } from '$app/forms';
 	import { route } from '$src/lib/ROUTES';
 	import { page } from '$app/state';
-	import type { BuildableField, BuildableFieldDefault } from './fields';
 	import { getToaster } from '../../toast';
+	import type { BuildableField, BuildableFieldDefault } from './fields';
+	import type { FormValidated } from '$src/lib/interfaces';
+	import type { entityFieldsSchema } from '$src/schemas';
 
 	type Props = {
 		item: Omit<BuildableField['layout'], 'id'> & { id: string };
+		taintedInputFields?: Record<string, FormValidated<typeof entityFieldsSchema>['data']>;
 		min: BuildableFieldDefault['layout']['min'];
 		onDelete: (_item: typeof item) => void;
 		moveable?: BuildableFieldDefault['layout']['moveable'];
@@ -28,6 +31,7 @@
 	};
 	let {
 		item,
+		taintedInputFields = {},
 		min,
 		resizeable = true,
 		moveable = true,
@@ -70,9 +74,11 @@
 	class=" absolute cursor-move overflow-hidden
   p-2 transition-transform rounded-token
   [&>div>input]:cursor-move [&>div>label]:cursor-move [&>div]:cursor-move
-  {classes} {buildableFormFieldMenuState.state.field?.layout?.id === item?.id
-		? 'border-primary-500-400-token border border-solid'
-		: 'border-primary-200-700-token border border-dashed'} 
+  {classes} {item.fieldId in taintedInputFields
+		? 'border border-dashed border-warning-500'
+		: buildableFormFieldMenuState.state.field?.layout?.id === item?.id
+			? 'border-success-500-400-token border border-solid'
+			: 'border-primary-200-700-token border border-dashed'} 
   {controller.active && !dragEvent ? 'opacity-60' : dragEvent ? 'opacity-0' : ''}"
 	style={`left:${controller.left}px; top:${controller.top}px; width: ${controller.width}px; height: ${controller.height}px;`}
 	bind:this={controller.moveableEl}

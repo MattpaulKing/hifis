@@ -22,6 +22,9 @@
 		setLookups(lookups);
 	}
 	$_disabled = disabled || $_disabled || $formDisabled;
+	$effect(() => {
+		$_disabled = disabled || $formDisabled;
+	});
 
 	function handleLostFocus(e: FocusEvent) {
 		if (!fieldContainer?.contains(e.relatedTarget as Node | null)) {

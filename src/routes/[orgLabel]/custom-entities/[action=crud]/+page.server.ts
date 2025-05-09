@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm"
 import { superValidate } from "sveltekit-superforms"
-import { entities, entityFieldLayoutSchema, entityFieldsSchema, entitySchema, users } from "$src/schemas"
+import { entities, entityFieldLayoutSchema, entityFields, entityFieldsSchema, entitySchema, users } from "$src/schemas"
 import { valibot } from "sveltekit-superforms/adapters"
 import { ar, validateForm } from "$src/lib/server/forms"
 import { error, redirect } from "@sveltejs/kit"
@@ -54,7 +54,20 @@ export const actions = {
     if (e.params.action === 'create') {
       return await entityCreate({ e, entity: form.data })
     } else if (e.params.action === 'update') {
-
+      if (!form.data.id) return ar.invalid({ form, msg: "No ID found." })
+      let { fields, ...entityData } = form.data
+      await tryQuery({
+        fn: e.locals.db.update(entities).set(entityData).where(eq(entities.id, form.data.id)),
+        errorMsg: "Something went wrong."
+      })
+      fields.forEach(async ({ properties }) => {
+        if (!properties.id) return ar.dbError({ form, msg: "Some fields weren't saved, please save manually." })
+        await tryQuery({
+          fn: e.locals.db.update(entityFields).set(properties).where(eq(entityFields.id, properties.id)),
+          errorMsg: "Something went wrong."
+        })
+      })
+      return ar.success({ form })
     }
     return ar.success({ form })
   }
@@ -76,10 +89,9 @@ async function getEntityFormValidated({ entityId, db }: { entityId: string, db: 
       }),
     errorMsg: "Entity not found"
   })
-  console.dir(entity, { depth: null })
   let fields = entity?.fields.map(({ layouts, ...field }) => ({
     properties: field,
-    layout: layouts[0]
+    layout: layouts[0],
   })) ?? []
   entityFormData = {
     ...entity,

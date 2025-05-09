@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { ArrowLeftIcon } from '@lucide/svelte';
 	import { getBuildableFormFieldMenuState } from './buildableFormFieldMenuState.svelte';
-
 	let fieldMenu = getBuildableFormFieldMenuState();
 </script>
 
@@ -10,7 +9,9 @@
 	<button
 		type="button"
 		disabled={fieldMenu.state.tab === 'field-list'}
-		onclick={() => fieldMenu.default()}
+		onclick={() => {
+			fieldMenu.default();
+		}}
 		class="group variant-ghost btn-icon btn-icon-sm rounded-token hover:variant-soft"
 	>
 		<ArrowLeftIcon class="transition-transform group-hover:-translate-x-1"></ArrowLeftIcon>

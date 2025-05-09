@@ -12,15 +12,16 @@ export const entities = pgTable("entities", {
   version: integer("version").notNull(),
   published: boolean("published").default(false),
   label: text("label").notNull(),
+  description: text("description"),
   parentId: uuid("parent_id").references((): AnyPgColumn => entities.id, { onUpdate: "cascade", onDelete: "restrict" })
 })
 
 export const entitySchema = v.object({
   ...createInsertSchema(entities).entries,
-  fields: v.array(v.object({
+  fields: v.fallback(v.array(v.object({
     properties: entityFieldsSchema,
-    layout: entityFieldLayoutSchema
-  })),
+    layout: entityFieldLayoutSchema,
+  })), []),
 })
 
 export const entityRelations = relations(entities, ({ one, many }) => ({

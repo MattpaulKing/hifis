@@ -49,5 +49,5 @@ type FormFieldMetadata = {
   isArray: boolean
 }
 export function getField<T>() {
-  return getContext(FIELD_CTX) as (FormFieldProxy<T> | (Omit<ArrayProxy<T>, "values"> & { value: Writable<string[]> })) & FormFieldMetadata
+  return getContext(FIELD_CTX) as (FormFieldProxy<T> | (Omit<ArrayProxy<T>, "values"> & { value: Writable<T> })) & FormFieldMetadata
 }

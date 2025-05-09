@@ -6,6 +6,7 @@ import { getFirstAvailableCoords } from "../../user-grid/utils/grid";
 import type { GridSettings } from "$src/lib/components/user-grid";
 import type { FormValidated } from "$src/lib/interfaces";
 import type { Component } from "svelte";
+import type { Lookup } from "$src/lib/interfaces/Lookup";
 
 
 const fields = {
@@ -27,7 +28,8 @@ const fields = {
       placeholder: "Default Placeholder",
       required: true,
       min: null,
-      max: null
+      max: null,
+      inputOptions: [] as Lookup[]
     },
     layout: {
       id: '',
@@ -43,7 +45,7 @@ const fields = {
       },
       moveable: true,
       resizeable: true,
-    }
+    },
   },
   lookup: {
     category: ELEMENT_TYPES.FORM_FIELDS,
@@ -63,7 +65,8 @@ const fields = {
       placeholder: "Default Placeholder",
       required: true,
       min: null,
-      max: null
+      max: null,
+      inputOptions: [] as Lookup[]
     },
     layout: {
       id: '',
@@ -79,14 +82,14 @@ const fields = {
       },
       moveable: true,
       resizeable: true,
-    }
+    },
   }
 } satisfies Record<string, BuildableFieldDefault>
 export default fields
 
 export type BuildableField = {
   properties: Omit<FormValidated<typeof entityFieldsSchema>['data'], 'id'> & { id: string; },
-  layout: Omit<FormValidated<typeof entityFieldLayoutSchema>['data'], 'id'> & { id: string }
+  layout: Omit<FormValidated<typeof entityFieldLayoutSchema>['data'], 'id'> & { id: string },
 }
 export type BuildableFieldDefault = {
   category: typeof ELEMENT_TYPES.FORM_FIELDS,
@@ -95,8 +98,8 @@ export type BuildableFieldDefault = {
     icon: Component,
     title: string
   },
-  properties: Omit<FormValidated<typeof entityFieldsSchema>['data'], 'id'> & { id: string; },
-  layout: Omit<FormValidated<typeof entityFieldLayoutSchema>['data'], 'id'> & {
+  properties: BuildableField['properties'] & { id: string; },
+  layout: BuildableField['layout'] & {
     id: string;
     min: {
       widthGridUnits: number,
@@ -108,7 +111,7 @@ export type BuildableFieldDefault = {
     }
     moveable: boolean,
     resizeable: boolean
-  }
+  },
 }
 
 export function buildableFieldDefault({ e, entityId, field, gridSettings }:

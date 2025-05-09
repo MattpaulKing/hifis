@@ -1,9 +1,11 @@
-import { boolean, integer, pgEnum, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, pgEnum, pgTable, text, uuid } from "drizzle-orm/pg-core";
 import { timestamps, uuidPK } from "$src/schemas/helpers";
 import { createInsertSchema } from "drizzle-valibot"
 import { entities } from "./entities";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { entityFieldLayouts } from "./entityFieldLayouts";
+import { object, array, string } from "valibot";
+import type { Lookup } from "$src/lib/interfaces/Lookup";
 
 export const entityFieldType = pgEnum("entity_field_type", ['input', 'lookup'])
 export const entityInputType = pgEnum("entity_input_type", ['text', 'tel', 'date'])
@@ -21,12 +23,15 @@ export const entityFields = pgTable("entity_fields", {
   required: boolean("required").default(false),
   min: integer("min"),
   max: integer("max"),
+  inputOptions: jsonb("input_options").array().notNull().default(sql`'{}'::jsonb[]`).$type<Lookup[]>()
 })
-export const entityFieldsSchema = createInsertSchema(entityFields)
+export const entityFieldsSchema = createInsertSchema(entityFields, {
+  inputOptions: array(object({ id: string(), label: string() }))
+})
 
 export const entityFieldRelations = relations(entityFields, ({ one, many }) => ({
   entity: one(entities, { fields: [entityFields.entityId], references: [entities.id] }),
-  layouts: many(entityFieldLayouts)
+  layouts: many(entityFieldLayouts),
 }))
 
 

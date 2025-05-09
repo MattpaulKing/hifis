@@ -2,12 +2,18 @@
 	import { getField } from './context.svelte';
 	import { getLookups } from './LookupStore.svelte';
 	import type { Lookup } from '$lib/interfaces/Lookup';
+	import type { HTMLInputAttributes } from 'svelte/elements';
 	type Props = {
-		apiRoute: string;
+		apiRoute: string | null;
 		onkeydown?: (e: KeyboardEvent) => void;
-		restProps?: Record<keyof HTMLInputElement, string>;
-	};
-	let { apiRoute: _apiRoute, onkeydown: _onkeydown, ...restProps }: Props = $props();
+		onInputKeydown?: (e: KeyboardEvent) => void;
+	} & HTMLInputAttributes;
+	let {
+		apiRoute: _apiRoute,
+		onkeydown: _onkeydown,
+		onInputKeydown,
+		...restProps
+	}: Props = $props();
 	let { value, focused, disabled, errors, isArray, path } = getField<
 		string | string[] | undefined
 	>();
@@ -18,11 +24,13 @@
 	function handleSearch(e: Event) {
 		e.stopImmediatePropagation();
 		$focused = true;
+		if (!_apiRoute) return;
 		store.searching = true;
 		if (timeout) clearTimeout(timeout);
 		timeout = setTimeout(fetchLookups, 400);
 	}
 	async function fetchLookups() {
+		if (!_apiRoute) return;
 		if (_apiRoute.includes('?')) {
 			apiRoute = _apiRoute.concat(`&search=${store.inputValue}&looukps=true`);
 		} else {
@@ -84,9 +92,7 @@
 		title={store.inputValue}
 		bind:value={store.inputValue}
 		aria-invalid={$errors ? 'true' : 'false'}
+		onkeydown={onInputKeydown}
 		{...restProps}
 	/>
-	<div class="input-group-shim pointer-events-none select-none">
-		<img src="/MagnifyingGlass.png" class="w-5 dark:invert" alt="magnifying-glass" />
-	</div>
 </div>

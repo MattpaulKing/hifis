@@ -1,5 +1,5 @@
 import { ar } from "$src/lib/server/forms";
-import { entityFieldLayouts, entityFields, entityFieldsSchema } from "$src/schemas";
+import { entityFields, entityFieldsSchema } from "$src/schemas";
 import { superValidate } from "sveltekit-superforms";
 import { valibot } from "sveltekit-superforms/adapters";
 import { tryQuery } from "$src/lib/server/db";
@@ -33,6 +33,7 @@ export const actions = {
     let { locals: { db } } = e
     let form = Object.fromEntries(await e.request.formData()) as { fieldId?: string }
     if (!form.fieldId) return error(404, 'Field Id not found')
+    console.log(form.fieldId)
     await tryQuery({
       fn: await db
         .delete(entityFields)
