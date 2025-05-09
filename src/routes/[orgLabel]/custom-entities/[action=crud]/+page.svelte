@@ -20,6 +20,7 @@
 		type BuildableField,
 		type BuildableFieldPreview
 	} from '$src/lib/components/forms';
+	import SuperDebug from 'sveltekit-superforms';
 
 	let { data } = $props();
 	let entityForm = initForm({
@@ -43,13 +44,27 @@
 
 	let entityFieldsForm = initForm({
 		form: data.entityFieldsForm,
-		schema: entityFieldsSchema
+		schema: entityFieldsSchema,
+		opts: {
+			invalidateAll: false,
+			applyAction: false,
+			onUpdate(event) {
+				const idx = $entityFormData.fields.findIndex(
+					({ properties: { id } }) => id === event.form.data.id
+				);
+				$entityFormData.fields[idx].properties = event.form.data;
+			}
+		}
 	});
 	let { form: entityFieldsFormData } = entityFieldsForm;
 
 	let entityFieldLayoutForm = initForm({
 		form: data.entityFieldLayoutForm,
-		schema: entityFieldLayoutSchema
+		schema: entityFieldLayoutSchema,
+		opts: {
+			invalidateAll: false,
+			applyAction: false
+		}
 	});
 	let { form: entityFieldLayoutFormData } = entityFieldLayoutForm;
 
@@ -84,7 +99,9 @@
 		if (idx < 0) return;
 		$entityFieldLayoutFormData = updatedLayout;
 		$entityFormData.fields[idx].layout = updatedLayout;
+		$entityFieldsFormData = $entityFormData.fields[idx].properties;
 		entityFieldLayoutForm.submit();
+		setActiveField($entityFormData.fields[idx]);
 	}
 	function deleteField(layoutItem: BuildableField['layout']) {
 		$entityFormData.fields = $entityFormData.fields.filter(
@@ -94,11 +111,6 @@
 			fieldMenuState.default();
 		}
 	}
-	/*
-  TODO: 
-    0. add a delete for the fields
-   */
-	$inspect($entityFieldsFormData);
 </script>
 
 <div class="flex h-full w-full">
@@ -106,9 +118,13 @@
 		<BuildableFormFieldMenuHeader></BuildableFormFieldMenuHeader>
 		<FormContainer
 			form={entityFieldsForm}
-			action={route('default /[orgLabel]/custom-entities/properties', { orgLabel: data.org.label })}
+			action={route('createOrUpdate /[orgLabel]/custom-entities/properties', {
+				orgLabel: data.org.label
+			})}
+			class="p-0"
+			showMsg={false}
 		>
-			<div class="col-span-2 flex h-full w-fit flex-col">
+			<div class="col-span-2 flex h-full flex-col">
 				{#if fieldMenuState.state.tab === 'field-list'}
 					<BuildableFormFieldButtons
 						bind:draggedField
@@ -131,10 +147,11 @@
 		<form
 			class="h-full w-full"
 			method="POST"
-			action={route('default /[orgLabel]/custom-entities/properties', {
-				orgLabel: data.org.label
-			})}
 			use:entityForm.enhance
+			action={route('default /[orgLabel]/custom-entities/[action=crud]', {
+				orgLabel: data.org.label,
+				action: data.action
+			})}
 		>
 			<BuildableFormHeader
 				onPublishClick={async () => {
@@ -161,11 +178,11 @@
 					{@const fieldMetadata = fields[field.properties.fieldType]}
 					{@const FieldInput = fieldMetadata.component.render}
 					<BuildableFieldContainer
+						fieldId={field.layout.fieldId}
 						item={field.layout as BuildableField['layout']}
 						min={fieldMetadata.layout.min}
 						onDelete={deleteField}
 						onChanged={updateFieldLayout}
-						onclick={() => setActiveField(field as BuildableField)}
 					>
 						<Field class="-mt-0" form={entityForm} path="fields[{i}].properties.placeholder">
 							<Label label={field.properties.label}></Label>
@@ -177,12 +194,13 @@
 					{#if draggedField && dragEvent}
 						{@const FieldInput = draggedField.component.render}
 						<BuildableFieldContainer
+							fieldId=""
 							item={draggedField.layout}
 							min={draggedField.layout.min}
 							{dragEvent}
 							onDelete={() => null}
 						>
-							<Field class="-mt-0" form={entityForm} path="createdAt">
+							<Field class="-mt-0" form={entityFieldsForm} path="placeholder">
 								<Label label={draggedField.properties.label}></Label>
 								<FieldInput />
 							</Field>
@@ -192,6 +210,7 @@
 			</Grid>
 		</form>
 	</FormContainer>
+	<SuperDebug data={$entityFieldsFormData}></SuperDebug>
 </div>
 <FormContainer
 	form={entityFieldLayoutForm}

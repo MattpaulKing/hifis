@@ -120,7 +120,10 @@ export default class {
     if ("pointerId" in event) {
       this.moveableEl?.releasePointerCapture(event.pointerId)
     }
-    if (this.onChanged) this.onChanged(this.item)
+    if (this.onChanged) {
+      console.log('ran')
+      this.onChanged(this.item)
+    }
     if (this.cleanupMoveMouse) this.cleanupMoveMouse()
     if (this.cleanupMoveEndMouse) this.cleanupMoveEndMouse()
     if (this.cleanupMoveTouch) this.cleanupMoveTouch()

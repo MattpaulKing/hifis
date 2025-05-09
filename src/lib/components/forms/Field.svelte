@@ -15,7 +15,8 @@
 
 	let { form, path, class: classes, disabled = false, lookups, children }: Props = $props();
 
-	let { disabled: formDisabled } = getFormCtx();
+	let formCtx = getFormCtx();
+	let formDisabled = formCtx?.disabled;
 	let { focused, disabled: _disabled, errors } = setField({ form, path });
 	if (lookups) {
 		setLookups(lookups);

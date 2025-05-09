@@ -5,8 +5,12 @@
 	import { ScalingIcon, TrashIcon } from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
 	import type { BuildableField, BuildableFieldPreview } from './fields';
+	import { enhance } from '$app/forms';
+	import { route } from '$src/lib/ROUTES';
+	import { page } from '$app/state';
 
 	type Props = {
+		fieldId: string;
 		item: Omit<BuildableField['layout'], 'id'> & { id: string };
 		min: BuildableFieldPreview['layout']['min'];
 		onDelete: (_item: typeof item) => void;
@@ -23,6 +27,7 @@
 		class?: string;
 	};
 	let {
+		fieldId,
 		item,
 		min,
 		resizeable = true,
@@ -82,16 +87,26 @@
 	{onkeydown}
 >
 	<div class="absolute right-1 top-1 flex gap-x-1">
-		<button
-			class="variant-ghost btn-icon btn-icon-sm rounded-token hover:variant-filled-error"
-			onpointerdown={(e) => e.stopPropagation()}
-			onclick={(e) => {
-				e.stopPropagation();
-				onDelete(controller.item);
-			}}
+		<form
+			action={route('delete /[orgLabel]/custom-entities/properties', {
+				orgLabel: page.data.org.label
+			})}
+			method="POST"
+			use:enhance
 		>
-			<TrashIcon />
-		</button>
+			<button
+				class="variant-ghost btn-icon btn-icon-sm rounded-token hover:variant-filled-error"
+				name="fieldId"
+				value={fieldId}
+				onpointerdown={(e) => e.stopPropagation()}
+				onclick={(e) => {
+					e.stopPropagation();
+					onDelete(controller.item);
+				}}
+			>
+				<TrashIcon />
+			</button>
+		</form>
 		<button
 			class="variant-ghost btn-icon btn-icon-sm rounded-token hover:variant-filled"
 			onpointerdown={(e) => {
