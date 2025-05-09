@@ -8,6 +8,7 @@
 	import { route } from '$src/lib/ROUTES';
 	import { page } from '$app/state';
 	import type { BuildableField, BuildableFieldDefault } from './fields';
+	import { getToaster } from '../../toast';
 
 	type Props = {
 		item: Omit<BuildableField['layout'], 'id'> & { id: string };
@@ -44,6 +45,7 @@
 
 	let gridSettings = getGridContext();
 	let controller = new GridItemState({ item, min, moveable, resizeable, onChanged });
+	let toast = getToaster();
 
 	onMount(() => {
 		controller.init();
@@ -99,6 +101,7 @@
 				onpointerdown={(e) => e.stopPropagation()}
 				onclick={(e) => {
 					e.stopPropagation();
+					toast.add({ type: 'save', message: 'Deleted' });
 					onDelete(controller.item);
 				}}
 			>
