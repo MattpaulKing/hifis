@@ -8,12 +8,15 @@
 	import { route } from '$src/lib/ROUTES';
 	import { fade } from 'svelte/transition';
 	import SidebarAnchor from '$src/lib/components/sidebar/SidebarAnchor.svelte';
+	import { setToaster, Toast } from '$src/lib/components/toast/index.js';
 
 	let { data, children } = $props();
 
+	setToaster();
 	setFormMsgStore();
 	setDrawerStore({ isOpen: false });
 	setModalStore();
+
 	setUser({
 		user: { ...data.user, orgLabel: data.org.label },
 		clients: data.usersClients,
@@ -28,6 +31,8 @@
 
 <Drawer />
 <Modal />
+<Toast />
+
 <div
 	class="grid h-full max-h-screen min-h-screen w-full grid-cols-[auto_1fr] grid-rows-[auto_1fr] items-start overflow-hidden"
 >

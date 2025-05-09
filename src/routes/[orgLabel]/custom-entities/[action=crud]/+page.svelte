@@ -3,6 +3,7 @@
 	import { Grid, setGridContext } from '$lib/components/user-grid';
 	import { route } from '$src/lib/ROUTES';
 	import { entityFieldLayoutSchema, entityFieldsSchema, entitySchema } from '$src/schemas/index.js';
+	import { getToaster } from '$src/lib/components/toast';
 	import {
 		BuildableFieldContainer,
 		BuildableFormFieldButtons,
@@ -39,11 +40,11 @@
 				);
 				if (idx < 0) return;
 				$entityFormData.fields[idx].properties = event.form.data;
+				toaster.add({ type: 'save', message: 'Saved' });
 			}
 		}
 	});
 	let { form: entityFieldsFormData } = entityFieldsForm;
-
 	let entityFieldLayoutForm = initForm({
 		form: data.entityFieldLayoutForm,
 		schema: entityFieldLayoutSchema,
@@ -54,6 +55,7 @@
 	});
 	let { form: entityFieldLayoutFormData } = entityFieldLayoutForm;
 
+	let toaster = getToaster();
 	let gridSettings = setGridContext({ cellSize: 16, bounds: true });
 	let draggedField = $state<BuildableFieldDefault | null>(null);
 	let isDragging = $derived(Boolean(draggedField));
@@ -149,7 +151,7 @@
 		>
 			<Field form={entityForm} path="label" class="max-w-64">
 				<label for="label">
-					<h4 class="h4 mb-2 font-bold">Form Title</h4>
+					<h4 class="h4 mb-2 ml-1 font-bold">Form Title</h4>
 					<Input />
 				</label>
 			</Field>

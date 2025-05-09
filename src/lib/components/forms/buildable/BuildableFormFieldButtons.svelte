@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { buildableFieldDefault, buildableFormFields } from '..';
+	import { buildableFieldDefault, buildableFieldPlacedInBounds, buildableFormFields } from '..';
 	import type { GridSettings } from '../../user-grid';
 	import type { BuildableFieldDefault } from './fields';
 
@@ -38,7 +38,10 @@
 			field,
 			gridSettings
 		});
-
+		draggedField = buildableFieldPlacedInBounds({
+			item: draggedField,
+			gridSettings
+		});
 		let draggedFieldCopy = { ...draggedField };
 		draggedField = null;
 		dragEvent = null;

@@ -2,10 +2,10 @@ import { ELEMENT_TYPES, Input } from "$lib/components/forms";
 import { entityFieldLayoutSchema, entityFieldsSchema } from "$src/schemas";
 import { Type, TextSearch } from "@lucide/svelte"
 import { position2coordinate } from "$src/lib/components/user-grid/utils/item";
+import { getFirstAvailableCoords } from "../../user-grid/utils/grid";
 import type { GridSettings } from "$src/lib/components/user-grid";
 import type { FormValidated } from "$src/lib/interfaces";
 import type { Component } from "svelte";
-import { getFirstAvailableCoords, getValidCoordsIfCollisionOrOutsideBounds } from "../../user-grid/utils/grid";
 
 
 const fields = {
@@ -137,17 +137,22 @@ export function buildableFieldDefault({ e, entityId, field, gridSettings }:
       y: position2coordinate(e.pageY - (gridRect.top), itemSize.height, gap)
     }
   }
-  if (
-    previewEntityField.layout.x < 0 ||
-    previewEntityField.layout.x + previewEntityField.layout.widthGridUnits >
-    gridSettings.maxDimensions.cols ||
-    previewEntityField.layout.y < 0 ||
-    previewEntityField.layout.y + previewEntityField.layout.heightGridUnits > gridSettings.maxDimensions.rows
-  ) {
-    let coords = getFirstAvailableCoords({ item: previewEntityField.layout, gridSettings })
-    if (!coords) throw Error("Something went wrong")
-    previewEntityField.layout.x = coords.x
-    previewEntityField.layout.y = coords.y
-  }
+
   return previewEntityField
+}
+
+export function buildableFieldPlacedInBounds({ item, gridSettings }: { item: BuildableFieldDefault, gridSettings: GridSettings }) {
+  if (
+    item.layout.x < 0 ||
+    item.layout.x + item.layout.widthGridUnits >
+    gridSettings.maxDimensions.cols ||
+    item.layout.y < 0 ||
+    item.layout.y + item.layout.heightGridUnits > gridSettings.maxDimensions.rows
+  ) {
+    let coords = getFirstAvailableCoords({ item: item.layout, gridSettings })
+    if (!coords) throw Error("Something went wrong")
+    item.layout.x = coords.x
+    item.layout.y = coords.y
+  }
+  return item
 }

@@ -1,9 +1,9 @@
 <script lang="ts">
 	/* 
  TODO:
-  1. update the updateEntityFields func so that it does layout too
-  2. Create a way to make valibot schemas from fields
-  3. Figure out if modals & drawers being open at the same time messes with each other closing
+  0. Implement path finding algo for finding firstAvailableCoords
+  1. Create a way to make valibot schemas from fields
+  2. Figure out if modals & drawers being open at the same time messes with each other closing
  */
 </script>
 
