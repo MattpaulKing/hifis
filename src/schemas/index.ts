@@ -10,4 +10,4 @@ export { logCategories, logs, logsRelations, logsClients, logsServices, logsClie
 export { usersClients } from "../routes/[orgLabel]/users/clients/schema"
 export { entities, entitySchema, entityRelations } from "../routes/[orgLabel]/custom-entities/schema/entities"
 export { entityFields, entityFieldsSchema, entityFieldRelations, entityFieldType, entityInputType } from "../routes/[orgLabel]/custom-entities/schema/entityFields"
-export { entityFieldLayouts, entityFieldLayoutSchema, entityFieldLayoutRelations, inputLayoutViewType } from "../routes/[orgLabel]/custom-entities/schema/entityFieldPosititons"
+export { entityFieldLayouts, entityFieldLayoutSchema, entityFieldLayoutRelations, inputLayoutViewType } from "../routes/[orgLabel]/custom-entities/schema/entityFieldLayouts"

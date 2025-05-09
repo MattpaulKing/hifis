@@ -9,7 +9,7 @@ export const inputLayoutViewType = pgEnum("entity_form_view", ['xs', 'sm', 'md',
 export const entityFieldLayouts = pgTable("entity_field_layouts", {
   ...uuidPK,
   ...timestamps,
-  fieldId: uuid("field_id").notNull().references(() => entityFields.id, { onUpdate: "cascade", onDelete: "restrict" }),
+  fieldId: uuid("field_id").notNull().references(() => entityFields.id, { onUpdate: "cascade", onDelete: "cascade" }),
   view: inputLayoutViewType().notNull(),
   x: integer("x").notNull(),
   y: integer("y").notNull(),

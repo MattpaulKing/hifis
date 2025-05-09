@@ -31,8 +31,6 @@ export const load: PageServerLoad = async ({ url, params: { orgLabel, action }, 
   let entityForm = await getEntityFormValidated({ entityId: searchParams.entityId, db })
   if (!entityForm.data.id) return error(500, "Something went wrong")
 
-  console.dir(entityForm.data.fields.map(({ layout }) => layout))
-
   return {
     action,
     entityId: entityForm.data.id,
@@ -70,14 +68,15 @@ async function getEntityFormValidated({ entityId, db }: { entityId: string, db: 
         with: {
           fields: {
             with: {
-              layouts: {}
-            }
+              layouts: {},
+            },
           }
         },
         where: eq(entities.id, entityId)
       }),
     errorMsg: "Entity not found"
   })
+  console.dir(entity, { depth: null })
   let fields = entity?.fields.map(({ layouts, ...field }) => ({
     properties: field,
     layout: layouts[0]

@@ -11,7 +11,7 @@
 		setBuildableFormFieldMenuState,
 		updateEntityFields,
 		type BuildableField,
-		type BuildableFieldPreview,
+		type BuildableFieldDefault,
 		BuildableFormHeader,
 		Input,
 		FormContainer,
@@ -48,12 +48,12 @@
 
 	let { form: entityFieldsFormData } = entityFieldsForm;
 	let gridSettings = setGridContext({ cellSize: 16, bounds: true });
-	let draggedField = $state<BuildableFieldPreview | null>(null);
+	let draggedField = $state<BuildableFieldDefault | null>(null);
 	let isDragging = $derived(Boolean(draggedField));
 	let fieldMenuState = setBuildableFormFieldMenuState();
 	let dragEvent = $state<DragEvent | null>(null);
 
-	function ondragend(field: BuildableFieldPreview) {
+	function ondragend(field: BuildableFieldDefault) {
 		let newField = {
 			properties: { ...field.properties, entityId: $entityFormData.id ?? '' },
 			layout: field.layout

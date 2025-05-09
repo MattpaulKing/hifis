@@ -3,8 +3,8 @@ import { timestamps, uuidPK } from "$src/schemas/helpers";
 import { createInsertSchema } from "drizzle-valibot"
 import { entityFields, entityFieldsSchema } from "./entityFields";
 import { relations } from "drizzle-orm";
+import { entityFieldLayoutSchema } from "./entityFieldLayouts";
 import * as v from "valibot"
-import { entityFieldLayoutSchema } from "./entityFieldPosititons";
 
 export const entities = pgTable("entities", {
   ...uuidPK,

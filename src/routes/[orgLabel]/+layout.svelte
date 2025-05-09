@@ -29,7 +29,7 @@
 <Drawer />
 <Modal />
 <div
-	class="grid h-full max-h-screen min-h-screen w-full max-w-full grid-cols-[auto_1fr] grid-rows-[auto_1fr] items-start overflow-hidden"
+	class="grid h-full max-h-screen min-h-screen w-full grid-cols-[auto_1fr] grid-rows-[auto_1fr] items-start overflow-hidden"
 >
 	<div class="relative z-20 col-span-2 h-14">
 		<div class="fixed flex h-14 w-full place-items-center justify-between bg-surface-500 px-6">

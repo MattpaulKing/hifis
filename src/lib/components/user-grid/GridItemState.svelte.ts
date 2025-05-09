@@ -4,7 +4,7 @@ import { getGridContext } from "./utils/GridContext.svelte";
 import { getValidCoordsIfCollisionOrOutsideBounds, hasCollisions } from "./utils/grid";
 import type { ItemSize, LayoutItem } from "./types";
 import type { TabEntity } from "./GridItemTabsState.svelte";
-import type { BuildableField, BuildableFieldPreview } from "../forms/buildable/fields";
+import type { BuildableField, BuildableFieldDefault } from "../forms/buildable/fields";
 
 
 
@@ -48,7 +48,7 @@ export default class {
       )
     }
   })
-  item: BuildableFieldPreview['layout'] = $state({
+  item: BuildableFieldDefault['layout'] = $state({
     id: "",
     x: 0,
     y: 0,
@@ -65,7 +65,7 @@ export default class {
     itemSize: this.settings.itemSize,
     gap: this.settings.gap
   }))
-  constructor({ item, min, onChanged, moveable = true, resizeable = true }: { item: BuildableField['layout'], min: BuildableFieldPreview['layout']['min'], onChanged?: (item: BuildableField['layout']) => void, moveable: boolean, resizeable: boolean }) {
+  constructor({ item, min, onChanged, moveable = true, resizeable = true }: { item: BuildableField['layout'], min: BuildableFieldDefault['layout']['min'], onChanged?: (item: BuildableField['layout']) => void, moveable: boolean, resizeable: boolean }) {
     this.item = {
       ...item,
       min,
@@ -120,10 +120,7 @@ export default class {
     if ("pointerId" in event) {
       this.moveableEl?.releasePointerCapture(event.pointerId)
     }
-    if (this.onChanged) {
-      console.log('ran')
-      this.onChanged(this.item)
-    }
+    if (this.onChanged) this.onChanged(this.item)
     if (this.cleanupMoveMouse) this.cleanupMoveMouse()
     if (this.cleanupMoveEndMouse) this.cleanupMoveEndMouse()
     if (this.cleanupMoveTouch) this.cleanupMoveTouch()

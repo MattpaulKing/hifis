@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { buildableFieldDefault, buildableFormFields } from '..';
 	import type { GridSettings } from '../../user-grid';
-	import type { BuildableFieldPreview } from './fields';
+	import type { BuildableFieldDefault } from './fields';
 
 	type Props = {
-		draggedField: BuildableFieldPreview | null;
+		draggedField: BuildableFieldDefault | null;
 		dragEvent: DragEvent | null;
 		entityFormId: string;
 		gridSettings: GridSettings;
-		ondragstart?: (e: DragEvent, field: BuildableFieldPreview) => void;
-		ondragend?: (field: BuildableFieldPreview) => void;
+		ondragstart?: (e: DragEvent, field: BuildableFieldDefault) => void;
+		ondragend?: (field: BuildableFieldDefault) => void;
 	};
 	let {
 		draggedField = $bindable(),
@@ -20,7 +20,7 @@
 		ondragend: _ondragend
 	}: Props = $props();
 
-	function ondragstart(e: DragEvent, fieldDefault: BuildableFieldPreview) {
+	function ondragstart(e: DragEvent, fieldDefault: BuildableFieldDefault) {
 		draggedField = buildableFieldDefault({
 			e,
 			entityId: entityFormId,
@@ -30,7 +30,7 @@
 		dragEvent = e;
 		_ondragstart?.(e, draggedField);
 	}
-	function ondragend(e: DragEvent, field: BuildableFieldPreview) {
+	function ondragend(e: DragEvent, field: BuildableFieldDefault) {
 		if (!draggedField) return;
 		draggedField = buildableFieldDefault({
 			e,
@@ -38,6 +38,7 @@
 			field,
 			gridSettings
 		});
+
 		let draggedFieldCopy = { ...draggedField };
 		draggedField = null;
 		dragEvent = null;

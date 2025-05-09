@@ -11,7 +11,6 @@ export const actions = {
   createOrUpdate: async (e) => {
     let { locals: { db } } = e
     const form = await superValidate(e.request, valibot(entityFieldsSchema))
-    console.log(form.data.id)
     if (!form.data.id) return ar.invalid({ form, msg: "ID not found" })
     let [entityField] = await tryQuery({
       fn: db.select({ id: entityFields.id }).from(entityFields).where(eq(entityFields.id, form.data.id)),
@@ -34,16 +33,12 @@ export const actions = {
     let { locals: { db } } = e
     let form = Object.fromEntries(await e.request.formData()) as { fieldId?: string }
     if (!form.fieldId) return error(404, 'Field Id not found')
-    try {
-      await db
-        .delete(entityFieldLayouts)
-        .where(eq(entityFieldLayouts.fieldId, form.fieldId))
-      await db
+    await tryQuery({
+      fn: await db
         .delete(entityFields)
-        .where(eq(entityFields.id, form.fieldId))
-    } catch (e) {
-      return error(500, "Something went wrong")
-    }
+        .where(eq(entityFields.id, form.fieldId)),
+      errorMsg: "Something went wrong"
+    })
     return {}
   }
 } satisfies Actions

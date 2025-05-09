@@ -5,6 +5,7 @@ import { position2coordinate } from "$src/lib/components/user-grid/utils/item";
 import type { GridSettings } from "$src/lib/components/user-grid";
 import type { FormValidated } from "$src/lib/interfaces";
 import type { Component } from "svelte";
+import { getFirstAvailableCoords, getValidCoordsIfCollisionOrOutsideBounds } from "../../user-grid/utils/grid";
 
 
 const fields = {
@@ -80,14 +81,14 @@ const fields = {
       resizeable: true,
     }
   }
-} satisfies Record<string, BuildableFieldPreview>
+} satisfies Record<string, BuildableFieldDefault>
 export default fields
 
 export type BuildableField = {
   properties: Omit<FormValidated<typeof entityFieldsSchema>['data'], 'id'> & { id: string; },
   layout: Omit<FormValidated<typeof entityFieldLayoutSchema>['data'], 'id'> & { id: string }
 }
-export type BuildableFieldPreview = {
+export type BuildableFieldDefault = {
   category: typeof ELEMENT_TYPES.FORM_FIELDS,
   component: {
     render: Component,
@@ -111,7 +112,7 @@ export type BuildableFieldPreview = {
 }
 
 export function buildableFieldDefault({ e, entityId, field, gridSettings }:
-  { e: DragEvent, entityId: string, field: BuildableFieldPreview, gridSettings: GridSettings }): BuildableFieldPreview {
+  { e: DragEvent, entityId: string, field: BuildableFieldDefault, gridSettings: GridSettings }): BuildableFieldDefault {
 
   let { itemSize, gap, boundsTo } = gridSettings
   let gridRect = boundsTo?.getBoundingClientRect()
@@ -135,6 +136,18 @@ export function buildableFieldDefault({ e, entityId, field, gridSettings }:
       x: position2coordinate(e.pageX - (gridRect.left), itemSize.width, gap),
       y: position2coordinate(e.pageY - (gridRect.top), itemSize.height, gap)
     }
+  }
+  if (
+    previewEntityField.layout.x < 0 ||
+    previewEntityField.layout.x + previewEntityField.layout.widthGridUnits >
+    gridSettings.maxDimensions.cols ||
+    previewEntityField.layout.y < 0 ||
+    previewEntityField.layout.y + previewEntityField.layout.heightGridUnits > gridSettings.maxDimensions.rows
+  ) {
+    let coords = getFirstAvailableCoords({ item: previewEntityField.layout, gridSettings })
+    if (!coords) throw Error("Something went wrong")
+    previewEntityField.layout.x = coords.x
+    previewEntityField.layout.y = coords.y
   }
   return previewEntityField
 }

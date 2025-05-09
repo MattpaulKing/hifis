@@ -3,7 +3,7 @@ import { timestamps, uuidPK } from "$src/schemas/helpers";
 import { createInsertSchema } from "drizzle-valibot"
 import { entities } from "./entities";
 import { relations } from "drizzle-orm";
-import { entityFieldLayouts } from "./entityFieldPosititons";
+import { entityFieldLayouts } from "./entityFieldLayouts";
 
 export const entityFieldType = pgEnum("entity_field_type", ['input', 'lookup'])
 export const entityInputType = pgEnum("entity_input_type", ['text', 'tel', 'date'])

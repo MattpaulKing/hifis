@@ -4,18 +4,17 @@
 	import { getBuildableFormFieldMenuState } from '..';
 	import { ScalingIcon, TrashIcon } from '@lucide/svelte';
 	import { fade } from 'svelte/transition';
-	import type { BuildableField, BuildableFieldPreview } from './fields';
 	import { enhance } from '$app/forms';
 	import { route } from '$src/lib/ROUTES';
 	import { page } from '$app/state';
+	import type { BuildableField, BuildableFieldDefault } from './fields';
 
 	type Props = {
-		fieldId: string;
 		item: Omit<BuildableField['layout'], 'id'> & { id: string };
-		min: BuildableFieldPreview['layout']['min'];
+		min: BuildableFieldDefault['layout']['min'];
 		onDelete: (_item: typeof item) => void;
-		moveable?: BuildableFieldPreview['layout']['moveable'];
-		resizeable?: BuildableFieldPreview['layout']['resizeable'];
+		moveable?: BuildableFieldDefault['layout']['moveable'];
+		resizeable?: BuildableFieldDefault['layout']['resizeable'];
 		dragEvent?: DragEvent;
 		children: Snippet;
 		onclick?: (e: MouseEvent) => void;
@@ -27,7 +26,6 @@
 		class?: string;
 	};
 	let {
-		fieldId,
 		item,
 		min,
 		resizeable = true,
@@ -70,7 +68,7 @@
 	class=" absolute cursor-move overflow-hidden
   p-2 transition-transform rounded-token
   [&>div>input]:cursor-move [&>div>label]:cursor-move [&>div]:cursor-move
-  {classes} {buildableFormFieldMenuState.state.field?.layout.id === item.id
+  {classes} {buildableFormFieldMenuState.state.field?.layout?.id === item?.id
 		? 'border-primary-500-400-token border border-solid'
 		: 'border-primary-200-700-token border border-dashed'} 
   {controller.active && !dragEvent ? 'opacity-60' : dragEvent ? 'opacity-0' : ''}"
@@ -97,7 +95,7 @@
 			<button
 				class="variant-ghost btn-icon btn-icon-sm rounded-token hover:variant-filled-error"
 				name="fieldId"
-				value={fieldId}
+				value={item.fieldId}
 				onpointerdown={(e) => e.stopPropagation()}
 				onclick={(e) => {
 					e.stopPropagation();

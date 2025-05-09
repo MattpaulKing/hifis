@@ -1,5 +1,5 @@
 import { calcPosition } from './item';
-import type { BuildableFieldPreview } from '../../forms';
+import type { BuildableFieldDefault } from '../../forms';
 import type { GridDimensions, LayoutItem } from '../types';
 import type { GridSettings } from './GridContext.svelte';
 
@@ -32,7 +32,7 @@ export function isOutsideBounds({ left, top, width, height }: { left: number, to
   return left <= 0 || top <= 0 || rect.left + left + width > rect.right || top + height > rect.top + rect.height
 }
 
-export function getFirstAvailableCoords({ item, gridSettings }: { item: BuildableFieldPreview['layout'], gridSettings: GridSettings }): {
+export function getFirstAvailableCoords({ item, gridSettings }: { item: BuildableFieldDefault['layout'], gridSettings: GridSettings }): {
   x: number;
   y: number;
 } | null {
@@ -49,7 +49,7 @@ export function getFirstAvailableCoords({ item, gridSettings }: { item: Buildabl
   return null
 }
 
-export function getValidCoordsIfCollisionOrOutsideBounds({ item, items, gridSettings }: { item: BuildableFieldPreview['layout'], items: BuildableFieldPreview['layout'][], gridSettings: GridSettings }) {
+export function getValidCoordsIfCollisionOrOutsideBounds({ item, gridSettings }: { item: BuildableFieldDefault['layout'], gridSettings: GridSettings }) {
   let existingCoords = { x: item.x, y: item.y }
   if (hasCollisions(item, Object.values(gridSettings.items)) || isOutsideBounds(calcPosition(item, { gap: gridSettings.gap, itemSize: gridSettings.itemSize }), gridSettings.boundsTo?.getBoundingClientRect())) {
     let newCoords = getFirstAvailableCoords({ item, gridSettings })
