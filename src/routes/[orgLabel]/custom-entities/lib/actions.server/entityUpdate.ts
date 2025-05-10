@@ -6,6 +6,7 @@ import type { FormValidated } from "$src/lib/interfaces"
 import type { RequestEvent } from "../../[action=crud]/$types"
 
 export default async function({ e, form }: { e: RequestEvent, form: FormValidated<typeof entitySchema> }) {
+  console.dir(form, { depth: null })
   if (!form.data.id) return ar.invalid({ form, msg: "No ID found." })
   let { fields, ...entityData } = form.data
   await tryQuery({

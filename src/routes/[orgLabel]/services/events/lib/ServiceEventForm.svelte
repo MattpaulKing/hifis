@@ -34,8 +34,6 @@
 		opts
 	});
 	let user = getUser();
-	let { form: formData } = form;
-	$inspect($formData);
 </script>
 
 <FormContainer

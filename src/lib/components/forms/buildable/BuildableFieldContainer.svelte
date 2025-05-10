@@ -63,7 +63,6 @@
 		};
 	});
 	let buildableFormFieldMenuState = getBuildableFormFieldMenuState();
-	$inspect(item.fieldId in taintedFieldInputs);
 </script>
 
 <div

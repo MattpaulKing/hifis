@@ -4,6 +4,7 @@
 	import { route } from '$src/lib/ROUTES';
 	import { entityFieldLayoutSchema, entityFieldsSchema, entitySchema } from '$src/schemas/index.js';
 	import { getModalStore, ModalConfirmation, openModal } from '$src/lib/components/modal/index.js';
+	import { beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { entityPushOrUpdateField } from '../lib';
 	import { getToaster } from '$src/lib/components/toast';
@@ -24,7 +25,7 @@
 		type BuildableField,
 		type BuildableFieldDefault
 	} from '$src/lib/components/forms';
-	import { beforeNavigate, goto } from '$app/navigation';
+	import type { ModalResponse } from '$src/lib/components/modal/store.svelte';
 
 	let { data } = $props();
 	let entityForm = initForm({
@@ -84,11 +85,15 @@
 	let taintedFieldInputs = new TaintedFieldInputs({});
 
 	beforeNavigate(async (nav) => {
-		if (nav.type === 'form') return;
-		if (nav.to) {
+		if (nav.type === 'goto' && nav.to?.url.searchParams.has('prompted')) return;
+		if (nav.to?.url) {
 			nav.cancel();
-			await promptToSaveChanges();
-			await goto(nav.to?.url);
+			let userAction = await promptToSaveChanges();
+			if (userAction.type === 'save') {
+				return await goto(`${nav.to.url}?prompted=true`, { invalidateAll: true });
+			} else if (userAction.type === 'navigate') {
+				return await goto(`${nav.to.url}?prompted=true`, { invalidateAll: true });
+			}
 		}
 	});
 
@@ -105,41 +110,37 @@
 		entityFieldLayoutForm.submit();
 	}
 
-	async function promptToSaveChanges() {
+	async function promptToSaveChanges(): Promise<ModalResponse> {
 		if (entityFieldsFormTainted()) {
 			await openModal({
 				modalStore,
-				id: $entityFieldsFormData.id,
+				id: $entityFormData.id,
 				ref: ModalConfirmation,
 				props: () => ({
-					id: $entityFieldsFormData,
+					id: $entityFormData.id,
 					message: "There are changes that haven't been saved!"
 				}),
 				routes: { from: page.url.href, to: page.url.href }
 			}).then((r) => {
 				if (r?.type === 'save' && $entityFieldsFormData.id) {
-					$entityFormData = entityPushOrUpdateField({
-						$entityFormData,
-						fieldKey: 'properties',
-						field: { properties: $entityFieldsFormData, layout: $entityFieldLayoutFormData }
-					});
-					taintedFieldInputs.remove($entityFieldsFormData.id);
 					entityForm.submit();
+					return r;
 				} else if ($entityFieldsFormData.id) {
 					taintedFieldInputs.fields[$entityFieldsFormData.id] = $entityFieldsFormData;
 				}
 				modalStore.close();
+				return r;
 			});
 		}
+		return { type: 'navigate' };
 	}
 	async function updateFieldLayout(layout: BuildableField['layout']) {
-		console.log($entityFieldsFormData);
 		if (entityFieldsFormTainted() && $entityFieldsFormData.id) {
 			taintedFieldInputs.fields[$entityFieldsFormData.id] = $entityFieldsFormData;
 		}
 		let idx = $entityFormData.fields.findIndex(({ layout: { id } }) => id === layout.id);
 		if (idx < 0) return;
-		//@ts-expect-error HACK: id has to exist at this point on properties
+		//@ts-expect-error  | id has to exist at this point
 		setActiveField({ ...$entityFormData.fields[idx], layout });
 		entityFieldLayoutForm.submit();
 	}

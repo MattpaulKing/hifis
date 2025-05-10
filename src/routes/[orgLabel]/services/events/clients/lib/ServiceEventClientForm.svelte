@@ -37,7 +37,6 @@
 		schema: clientserviceEventsSchema
 	});
 	let { form: formData } = form;
-	$inspect(lookups.serviceEvent.inputValue);
 </script>
 
 <FormCard>

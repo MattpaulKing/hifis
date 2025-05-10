@@ -23,7 +23,10 @@
 	</div>
 	<span class="max-w-80 text-lg">{data.message}</span>
 	<div class="flex w-full justify-end gap-x-4">
-		<button class="variant-ghost btn" onclick={() => handleModal({ type: 'save' })}>Cancel</button>
+		<button
+			class="variant-ghost btn transition-colors hover:variant-filled-error"
+			onclick={() => handleModal({ type: 'navigate' })}>Close without saving</button
+		>
 		<button class="variant-filled-success btn" onclick={() => handleModal({ type: 'save' })}>
 			Save
 		</button>

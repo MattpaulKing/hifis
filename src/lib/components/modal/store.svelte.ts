@@ -1,7 +1,7 @@
 import type { Component } from "svelte";
 
 export interface ModalResponse {
-  type: "save" | "close"
+  type: "save" | "navigate" | "close"
 }
 
 export interface Modal<P extends Record<string, unknown> = {}> {
