@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getGridContext, GridItemState } from '../../user-grid';
+	import { getGridContext, GridItemState, TaintedFieldInputs } from '../../user-grid';
 	import { onMount, type Snippet } from 'svelte';
 	import { getBuildableFormFieldMenuState } from '..';
 	import { ScalingIcon, TrashIcon } from '@lucide/svelte';
@@ -9,12 +9,10 @@
 	import { page } from '$app/state';
 	import { getToaster } from '../../toast';
 	import type { BuildableField, BuildableFieldDefault } from './fields';
-	import type { FormValidated } from '$src/lib/interfaces';
-	import type { entityFieldsSchema } from '$src/schemas';
 
 	type Props = {
 		item: Omit<BuildableField['layout'], 'id'> & { id: string };
-		taintedInputFields?: Record<string, FormValidated<typeof entityFieldsSchema>['data']>;
+		taintedFieldInputs?: TaintedFieldInputs['fields'];
 		min: BuildableFieldDefault['layout']['min'];
 		onDelete: (_item: typeof item) => void;
 		moveable?: BuildableFieldDefault['layout']['moveable'];
@@ -31,7 +29,7 @@
 	};
 	let {
 		item,
-		taintedInputFields = {},
+		taintedFieldInputs = {},
 		min,
 		resizeable = true,
 		moveable = true,
@@ -65,16 +63,17 @@
 		};
 	});
 	let buildableFormFieldMenuState = getBuildableFormFieldMenuState();
+	$inspect(item.fieldId in taintedFieldInputs);
 </script>
 
 <div
 	out:fade
 	role="gridcell"
 	tabindex="0"
-	class=" absolute cursor-move overflow-hidden
+	class="cursor-mov group absolute overflow-hidden
   p-2 transition-transform rounded-token
   [&>div>input]:cursor-move [&>div>label]:cursor-move [&>div]:cursor-move
-  {classes} {item.fieldId in taintedInputFields
+  {classes} {item.fieldId in taintedFieldInputs
 		? 'border border-dashed border-warning-500'
 		: buildableFormFieldMenuState.state.field?.layout?.id === item?.id
 			? 'border-success-500-400-token border border-solid'

@@ -1,5 +1,6 @@
 import { getContext, setContext } from "svelte";
 import type { GridDimensions, ItemSize, LayoutItem } from "../types";
+import { MediaQuery } from "svelte/reactivity";
 
 type GridSettingsParams = {
   cellSize: number,
@@ -30,6 +31,13 @@ export class GridSettings {
       rows: Math.round(rect.height / (this.itemSize.height + this.gap)),
     }
   })
+  screenView = $state(
+    new MediaQuery('min-width: 1080px', true).current
+      ? 'xl'
+      : new MediaQuery('min-width: 1024px')
+        ? 'lg'
+        : 'sm'
+  );
   constructor(params: GridSettingsParams) {
     this.cols = params.cols ?? this.cols
     this.rows = params.rows ?? this.rows

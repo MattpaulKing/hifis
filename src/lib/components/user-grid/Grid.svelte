@@ -34,7 +34,13 @@
 	onpointerleave={() => (dragEvent = null)}
 	role="grid"
 	tabindex="0"
-	class="relative {classes}"
+	class="relative bg-gray-800 {classes} {gridSettings.screenView === 'xl'
+		? 'max-w-full'
+		: gridSettings.screenView === 'lg'
+			? 'max-w-5xl'
+			: gridSettings.screenView === 'sm'
+				? 'max-w-md'
+				: ''}"
 	bind:this={gridSettings.boundsTo}
 >
 	{#if gridSettings.itemSize && gridSettings.boundsTo}

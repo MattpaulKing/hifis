@@ -21,7 +21,7 @@
 			out:fade
 			class="{toast.type === 'error'
 				? 'ring-error-400-500-token'
-				: 'ring-surface-400-500-token'} relative flex h-fit w-fit py-3 pl-4 pr-10 text-lg shadow-lg ring-1 rounded-token hover:opacity-50"
+				: 'ring-surface-400-500-token'} bg-surface-200-700-token relative flex h-fit w-fit py-3 pl-4 pr-10 text-lg shadow-lg ring-1 rounded-token hover:opacity-50"
 		>
 			<div class="flex place-items-center gap-x-3">
 				<span class="badge p-1">

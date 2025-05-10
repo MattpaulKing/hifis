@@ -5,8 +5,8 @@ import { valibot } from "sveltekit-superforms/adapters"
 import { ar, validateForm } from "$src/lib/server/forms"
 import { error, redirect } from "@sveltejs/kit"
 import { insertAndReturn, tryQuery } from "$src/lib/server/db"
-import { entityCreate } from "../lib"
 import { route } from "$src/lib/ROUTES"
+import { entityCreate, entityUpdate } from "../lib/actions.server"
 import type { DB } from "$src/lib/server/db/client"
 import type { Actions, PageServerLoad } from "./$types"
 import type { FormValidated } from "$src/lib/interfaces"
@@ -54,22 +54,8 @@ export const actions = {
     if (e.params.action === 'create') {
       return await entityCreate({ e, entity: form.data })
     } else if (e.params.action === 'update') {
-      if (!form.data.id) return ar.invalid({ form, msg: "No ID found." })
-      let { fields, ...entityData } = form.data
-      await tryQuery({
-        fn: e.locals.db.update(entities).set(entityData).where(eq(entities.id, form.data.id)),
-        errorMsg: "Something went wrong."
-      })
-      fields.forEach(async ({ properties }) => {
-        if (!properties.id) return ar.dbError({ form, msg: "Some fields weren't saved, please save manually." })
-        await tryQuery({
-          fn: e.locals.db.update(entityFields).set(properties).where(eq(entityFields.id, properties.id)),
-          errorMsg: "Something went wrong."
-        })
-      })
-      return ar.success({ form })
+      return await entityUpdate({ e, form })
     }
-    return ar.success({ form })
   }
 } satisfies Actions
 

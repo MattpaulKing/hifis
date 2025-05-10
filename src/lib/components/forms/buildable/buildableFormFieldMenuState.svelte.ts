@@ -20,7 +20,7 @@ export class BuildableFormFieldMenu {
     label: "Elements"
   })
 
-  setActiveField(field: BuildableField) {
+  setInputField(field: BuildableField) {
     this.state = {
       field: field,
       tab: 'properties',

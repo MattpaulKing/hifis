@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { SquareXIcon, TriangleAlertIcon } from '@lucide/svelte';
 	import { getModalStore } from './context';
 	import type { ModalResponse } from './store.svelte';
 
@@ -9,14 +10,22 @@
 	}
 </script>
 
-<div class="card flex max-w-80 flex-col p-4">
-	<span class="text-lg">{data.message}</span>
-	<div class="flex w-full justify-between">
-		<button onclick={() => handleModal({ type: 'close' })} class="variant-filled-error btn"
-			>Close</button
-		>
-		<button onclick={() => handleModal({ type: 'save' })} class="variant-filled-success btn"
-			>Save</button
-		>
+<div class="card relative flex flex-col items-center justify-start gap-y-4 p-6">
+	<button
+		class="btn-icon btn-icon-sm absolute right-2 top-2 transition-colors rounded-token hover:variant-filled"
+		onclick={() => handleModal({ type: 'close' })}
+	>
+		<SquareXIcon class="h-7 w-7" />
+	</button>
+	<div class="flex w-full place-items-center justify-start gap-x-4">
+		<TriangleAlertIcon class="h-12 w-12 stroke-warning-500" />
+		<span class="text-2xl font-bold">Warning</span>
+	</div>
+	<span class="max-w-80 text-lg">{data.message}</span>
+	<div class="flex w-full justify-end gap-x-4">
+		<button class="variant-ghost btn" onclick={() => handleModal({ type: 'save' })}>Cancel</button>
+		<button class="variant-filled-success btn" onclick={() => handleModal({ type: 'save' })}>
+			Save
+		</button>
 	</div>
 </div>
