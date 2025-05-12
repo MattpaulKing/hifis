@@ -1,12 +1,13 @@
 import { getContext, setContext } from "svelte";
-import type { GridDimensions, ItemSize, LayoutItem } from "../types";
 import { MediaQuery } from "svelte/reactivity";
+import type { GridDimensions, ItemSize, LayoutItem } from "../types";
+import type { BuildableField } from "../../forms";
 
 type GridSettingsParams = {
   cellSize: number,
   cols?: number,
   rows?: number,
-  items?: Record<string, LayoutItem>,
+  items?: Record<string, BuildableField['layout']>,
   bounds?: boolean,
   boundsTo?: HTMLDivElement,
   readOnly?: boolean,
@@ -17,21 +18,15 @@ export class GridSettings {
   cols = $state<number>(0)
   rows = $state(0)
   gap = $state(0)
-  items = $state<Record<string, LayoutItem>>({})
+  items = $state<Record<string, BuildableField['layout']>>({})
   itemSize = $state<ItemSize>({ width: 0, height: 0 })
   bounds = $state(false)
   boundsTo = $state<HTMLDivElement | undefined>()
   readOnly = $state(false)
   debug = $state(false)
-  maxDimensions = $derived.by(() => {
-    let rect = this.boundsTo?.getBoundingClientRect()
-    if (!rect) return { cols: this.cols, rows: this.rows }
-    return {
-      cols: Math.round(rect.width / (this.itemSize.width + this.gap)),
-      rows: Math.round(rect.height / (this.itemSize.height + this.gap)),
-    }
-  })
-  screenView = $state(
+  maxDimensions = $state({ cols: this.cols, rows: this.rows })
+
+  screenView: "xl" | "lg" | "sm" = $state(
     new MediaQuery('min-width: 1080px', true).current
       ? 'xl'
       : new MediaQuery('min-width: 1024px')
@@ -49,9 +44,9 @@ export class GridSettings {
     this.readOnly = params.readOnly ?? false
     this.debug = params.debug ?? false
   }
-  registerItem(item: LayoutItem) {
+  registerItem(item: BuildableField['layout']) {
     if (item.id in this.items) {
-      throw new Error(`Item with id ${item.id} already exists`);
+      delete this.items[item.id]
     }
     this.items[item.id] = item;
   }

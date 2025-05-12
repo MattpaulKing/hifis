@@ -19,7 +19,7 @@ export default class TaintedFieldInputs {
     this.fields = {}
   }
 
-  saveTaintedFields({ $entityFormData }:
+  getTaintedFields({ $entityFormData }:
     { $entityFormData: FormValidated<typeof entitySchema>['data'] }) {
     return $entityFormData.fields.map((field) => {
       if (field.properties.id && field.properties.id in this.fields) {

@@ -1,5 +1,7 @@
 import { getContext, setContext } from "svelte";
 import type { BuildableField } from "./fields";
+import type { FormValidated } from "$src/lib/interfaces";
+import type { entityFieldsSchema, entitySchema } from "$src/schemas";
 
 export type BuildableFieldMenuState =
   | {
@@ -20,7 +22,7 @@ export class BuildableFormFieldMenu {
     label: "Elements"
   })
 
-  setInputField(field: BuildableField) {
+  setInputField(field: FormValidated<typeof entitySchema>['data']['fields'][0]) {
     this.state = {
       field: field,
       tab: 'properties',

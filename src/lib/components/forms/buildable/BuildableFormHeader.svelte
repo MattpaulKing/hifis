@@ -2,6 +2,7 @@
 	import { LaptopIcon, ShieldAlertIcon, SmartphoneIcon, TabletIcon } from '@lucide/svelte';
 	import { SaveIcon, SaveOffIcon, StarIcon } from '$src/lib';
 	import type { Snippet } from 'svelte';
+	import type { GridSettings } from '../../user-grid';
 
 	let {
 		published,
@@ -9,16 +10,18 @@
 		taintedInputFieldsExist,
 		class: classes,
 		children,
+		onScreenSizeClick,
 		onSave,
 		onPublishClick
 	}: {
 		published: boolean | null | undefined;
-		screenView: string;
+		screenView: GridSettings['screenView'];
 		taintedInputFieldsExist: boolean;
 		class?: string;
 		children: Snippet;
-		onSave?: () => void;
-		onPublishClick?: () => void;
+		onScreenSizeClick: (screenView: GridSettings['screenView']) => void;
+		onSave: () => void;
+		onPublishClick: () => void;
 	} = $props();
 
 	let hoveringSave = $state(false);
@@ -78,6 +81,7 @@
 		type="button"
 		onclick={() => {
 			screenView = view;
+			onScreenSizeClick();
 		}}
 		class="w-min hover:brightness-150 {screenView === view
 			? 'transition-colors [&>*]:stroke-warning-500'

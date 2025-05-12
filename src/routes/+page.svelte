@@ -1,7 +1,7 @@
 <script lang="ts">
 	/* 
  TODO:
-  -1. Implement a view selector for the layouts
+  -1. Figure out how to manage the layouts
   0. Implement path finding algo for finding firstAvailableCoords
   1. Create a way to make valibot schemas from fields
   2. Figure out if modals & drawers being open at the same time messes with each other closing

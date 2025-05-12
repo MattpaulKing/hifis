@@ -65,8 +65,9 @@ export default class {
     itemSize: this.settings.itemSize,
     gap: this.settings.gap
   }))
-  constructor({ item, min, onChanged, moveable = true, resizeable = true }: { item: BuildableField['layout'], min: BuildableFieldDefault['layout']['min'], onChanged?: (item: BuildableField['layout']) => void, moveable: boolean, resizeable: boolean }) {
+  constructor({ item, min, onChanged, moveable = true, resizeable = true }: { item: Omit<BuildableField['layout'], "id"> & { id?: string }, min: BuildableFieldDefault['layout']['min'], onChanged?: (item: BuildableField['layout']) => void, moveable: boolean, resizeable: boolean }) {
     this.item = {
+      id: crypto.randomUUID(),
       ...item,
       min,
       moveable,

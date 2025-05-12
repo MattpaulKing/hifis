@@ -1,11 +1,21 @@
 <script lang="ts">
-	import fields from '$src/lib/components/forms/buildable/fields.js';
-	import { Grid, setGridContext, TaintedFieldInputs } from '$lib/components/user-grid';
+	import fields, {
+		buildableFieldPlacedInBounds
+	} from '$src/lib/components/forms/buildable/fields.js';
+	import {
+		entityFieldsFormOpts,
+		entityFormOpts,
+		Grid,
+		GridSettings,
+		handleUserPromptAction,
+		promptUserToSaveChanges,
+		setGridContext,
+		TaintedFieldInputs
+	} from '$lib/components/user-grid';
 	import { route } from '$src/lib/ROUTES';
 	import { entityFieldLayoutSchema, entityFieldsSchema, entitySchema } from '$src/schemas/index.js';
-	import { getModalStore, ModalConfirmation, openModal } from '$src/lib/components/modal/index.js';
-	import { beforeNavigate, goto } from '$app/navigation';
-	import { page } from '$app/state';
+	import { getModalStore } from '$src/lib/components/modal/index.js';
+	import { beforeNavigate } from '$app/navigation';
 	import { entityPushOrUpdateField } from '../lib';
 	import { getToaster } from '$src/lib/components/toast';
 	import {
@@ -25,43 +35,29 @@
 		type BuildableField,
 		type BuildableFieldDefault
 	} from '$src/lib/components/forms';
-	import type { ModalResponse } from '$src/lib/components/modal/store.svelte';
+	import type { FormValidated } from '$src/lib/interfaces';
 
 	let { data } = $props();
+	let modalStore = getModalStore();
+	let toaster = getToaster();
+	let gridSettings = setGridContext({ cellSize: 16, bounds: true });
+	let draggedField = $state<BuildableFieldDefault | null>(null);
+	let isDragging = $derived(Boolean(draggedField));
+	let fieldMenuState = setBuildableFormFieldMenuState();
+	let dragEvent = $state<DragEvent | null>(null);
+	let taintedFieldInputs = new TaintedFieldInputs({});
+	let rerender = $state(false);
+
 	let entityForm = initForm({
 		form: data.entityForm,
 		schema: entitySchema,
-		opts: {
-			onSubmit() {
-				if (taintedFieldInputs.hasEntries) {
-					$entityFormData.fields = taintedFieldInputs.saveTaintedFields({ $entityFormData });
-				}
-			},
-			onUpdate({ form }) {
-				if (!form.valid) return;
-				taintedFieldInputs.reset();
-			}
-		}
+		opts: entityFormOpts({ taintedFieldInputs })
 	});
 	let { form: entityFormData } = entityForm;
 	let entityFieldsForm = initForm({
 		form: data.entityFieldsForm,
 		schema: entityFieldsSchema,
-		opts: {
-			invalidateAll: false,
-			applyAction: false,
-			onUpdate({ form }) {
-				const idx = $entityFormData.fields.findIndex(
-					({ properties: { id } }) => id === form.data.id
-				);
-				if (idx < 0) return;
-				$entityFormData.fields[idx].properties = form.data;
-				if (form.data.id && form.data.id in taintedFieldInputs.fields) {
-					delete taintedFieldInputs.fields[form.data.id];
-				}
-				toaster.add({ type: 'save', message: 'Saved' });
-			}
-		}
+		opts: entityFieldsFormOpts({ $entityFormData, taintedFieldInputs, toaster })
 	});
 	let { form: entityFieldsFormData, isTainted: entityFieldsFormTainted } = entityFieldsForm;
 
@@ -75,29 +71,19 @@
 	});
 	let { form: entityFieldLayoutFormData } = entityFieldLayoutForm;
 
-	let modalStore = getModalStore();
-	let toaster = getToaster();
-	let gridSettings = setGridContext({ cellSize: 16, bounds: true });
-	let draggedField = $state<BuildableFieldDefault | null>(null);
-	let isDragging = $derived(Boolean(draggedField));
-	let fieldMenuState = setBuildableFormFieldMenuState();
-	let dragEvent = $state<DragEvent | null>(null);
-	let taintedFieldInputs = new TaintedFieldInputs({});
-
 	beforeNavigate(async (nav) => {
-		if (nav.type === 'goto' && nav.to?.url.searchParams.has('prompted')) return;
-		if (nav.to?.url) {
-			nav.cancel();
-			let userAction = await promptToSaveChanges();
-			if (userAction.type === 'save') {
-				return await goto(`${nav.to.url}?prompted=true`, { invalidateAll: true });
-			} else if (userAction.type === 'navigate') {
-				return await goto(`${nav.to.url}?prompted=true`, { invalidateAll: true });
-			}
-		}
+		if (!nav.to?.url || (nav.type === 'goto' && nav.to?.url.searchParams.has('prompted'))) return;
+		nav.cancel();
+		let userAction = await promptUserToSaveChanges({
+			entityFieldsFormTainted,
+			modalStore,
+			$entityFormData,
+			entityForm
+		});
+		handleUserPromptAction({ userAction, nav, $entityFieldsFormData, taintedFieldInputs });
 	});
 
-	function setActiveField(field: BuildableField) {
+	function setActiveField(field: FormValidated<typeof entitySchema>['data']['fields'][0]) {
 		$entityFormData = entityPushOrUpdateField({ $entityFormData, fieldKey: 'properties', field });
 		entityFieldsFormData.update(() => field.properties, { taint: false });
 		$entityFieldLayoutFormData = field.layout;
@@ -110,37 +96,12 @@
 		entityFieldLayoutForm.submit();
 	}
 
-	async function promptToSaveChanges(): Promise<ModalResponse> {
-		if (entityFieldsFormTainted()) {
-			await openModal({
-				modalStore,
-				id: $entityFormData.id,
-				ref: ModalConfirmation,
-				props: () => ({
-					id: $entityFormData.id,
-					message: "There are changes that haven't been saved!"
-				}),
-				routes: { from: page.url.href, to: page.url.href }
-			}).then((r) => {
-				if (r?.type === 'save' && $entityFieldsFormData.id) {
-					entityForm.submit();
-					return r;
-				} else if ($entityFieldsFormData.id) {
-					taintedFieldInputs.fields[$entityFieldsFormData.id] = $entityFieldsFormData;
-				}
-				modalStore.close();
-				return r;
-			});
-		}
-		return { type: 'navigate' };
-	}
-	async function updateFieldLayout(layout: BuildableField['layout']) {
+	async function syncEntityFormsWithTainted(layout: BuildableField['layout']) {
 		if (entityFieldsFormTainted() && $entityFieldsFormData.id) {
 			taintedFieldInputs.fields[$entityFieldsFormData.id] = $entityFieldsFormData;
 		}
 		let idx = $entityFormData.fields.findIndex(({ layout: { id } }) => id === layout.id);
 		if (idx < 0) return;
-		//@ts-expect-error  | id has to exist at this point
 		setActiveField({ ...$entityFormData.fields[idx], layout });
 		entityFieldLayoutForm.submit();
 	}
@@ -148,8 +109,38 @@
 		fieldMenuState.default();
 	}
 	function saveGrid() {
+		$entityFormData.fields = taintedFieldInputs.getTaintedFields({ $entityFormData });
 		entityForm.submit();
 		fieldMenuState.default();
+	}
+
+	function setFieldLayouts() {
+		$entityFormData.fields = $entityFormData.fields.map((field) => {
+			if (!field.properties.id) throw Error('Unable to find field id');
+			let newLayout = data.layouts[field.properties.id]?.find(
+				({ view }) => view === gridSettings.screenView
+			);
+			if (!newLayout) {
+				console.log('ran');
+				let item = fields[field.properties.fieldType];
+				item.layout = {
+					...item.layout,
+					...field.layout
+				};
+				item = buildableFieldPlacedInBounds({
+					item,
+					gridSettings
+				});
+				field.layout = item.layout;
+			}
+			field.layout.view = gridSettings.screenView;
+			return {
+				properties: field.properties,
+				layout: field.layout
+			};
+		});
+		rerender = !rerender;
+		saveGrid();
 	}
 </script>
 
@@ -199,6 +190,7 @@
 			published={$entityFormData.published}
 			taintedInputFieldsExist={taintedFieldInputs.hasEntries}
 			bind:screenView={gridSettings.screenView}
+			onScreenSizeClick={setFieldLayouts}
 			onSave={saveGrid}
 			onPublishClick={() => {
 				$entityFormData.published = !$entityFormData.published;
@@ -220,6 +212,7 @@
 		</BuildableFormHeader>
 		<Grid
 			{gridSettings}
+			onGridResize={setFieldLayouts}
 			userBuilding={true}
 			class="col-span-2 h-full w-full transition-colors {isDragging
 				? 'bg-surface-100-800-token bg-opacity-50'
@@ -228,18 +221,20 @@
 			{#each $entityFormData.fields as field, i}
 				{@const fieldMetadata = fields[field.properties.fieldType]}
 				{@const FieldInput = fieldMetadata.component.render}
-				<BuildableFieldContainer
-					item={field.layout as BuildableField['layout']}
-					min={fieldMetadata.layout.min}
-					taintedFieldInputs={taintedFieldInputs.fields}
-					onDelete={deleteField}
-					onChanged={updateFieldLayout}
-				>
-					<Field class="-mt-0" form={entityForm} path="fields[{i}].properties.placeholder">
-						<Label label={field.properties.label}></Label>
-						<FieldInput />
-					</Field>
-				</BuildableFieldContainer>
+				{#key rerender}
+					<BuildableFieldContainer
+						item={field.layout}
+						min={fieldMetadata.layout.min}
+						taintedFieldInputs={taintedFieldInputs.fields}
+						onDelete={deleteField}
+						onChanged={syncEntityFormsWithTainted}
+					>
+						<Field class="-mt-0" form={entityForm} path="fields[{i}].properties.placeholder">
+							<Label label={field.properties.label}></Label>
+							<FieldInput />
+						</Field>
+					</BuildableFieldContainer>
+				{/key}
 			{/each}
 			{#snippet fieldPreview()}
 				{#if draggedField && dragEvent}

@@ -11,7 +11,7 @@
 	import type { BuildableField, BuildableFieldDefault } from './fields';
 
 	type Props = {
-		item: Omit<BuildableField['layout'], 'id'> & { id: string };
+		item: Omit<BuildableField['layout'], 'id'> & { id?: string };
 		taintedFieldInputs?: TaintedFieldInputs['fields'];
 		min: BuildableFieldDefault['layout']['min'];
 		onDelete: (_item: typeof item) => void;

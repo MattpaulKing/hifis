@@ -7,6 +7,7 @@ import type { GridSettings } from "$src/lib/components/user-grid";
 import type { FormValidated } from "$src/lib/interfaces";
 import type { Component } from "svelte";
 import type { Lookup } from "$src/lib/interfaces/Lookup";
+import type { LayoutItem } from "../../user-grid/types";
 
 
 const fields = {

@@ -7,7 +7,7 @@ export interface IToast {
 }
 const toastCtx = Symbol("TOAST_CTX")
 
-class Toaster {
+export class Toaster {
 
   queue: IToast[] = $state([])
   timeoutMap = new Map<string, ReturnType<typeof setTimeout>>()

@@ -12,12 +12,11 @@ import type { Actions, PageServerLoad } from "./$types"
 import type { FormValidated } from "$src/lib/interfaces"
 
 type SearchParams = {
-  entityId?: string
+  entityId?: string,
 }
 
 export const load: PageServerLoad = async ({ url, params: { orgLabel, action }, locals: { db, subject } }) => {
   let searchParams: SearchParams = Object.fromEntries(url.searchParams)
-
   if (action === 'create') {
     let [entity] = await insertAndReturn({ db, table: entities, rows: [{ label: "Form Title", version: 0 }] })
     redirect(302, `${route("/[orgLabel]/custom-entities/[action=crud]", {
@@ -28,13 +27,15 @@ export const load: PageServerLoad = async ({ url, params: { orgLabel, action }, 
     return error(404, "Entity not found")
   }
 
-  let entityForm = await getEntityFormValidated({ entityId: searchParams.entityId, db })
+  let { entityFormData, layouts } = await getEntityFormDataAndLayouts({ entityId: searchParams.entityId, db })
+  let entityForm = await superValidate(entityFormData, valibot(entitySchema), { id: 'entity-form', errors: false })
   if (!entityForm.data.id) return error(500, "Something went wrong")
 
   return {
     action,
     entityId: entityForm.data.id,
     entityForm,
+    layouts,
     entityFieldsForm: await superValidate({
       entityId: entityForm.data.id,
     }, valibot(entityFieldsSchema), { errors: false }),
@@ -59,7 +60,7 @@ export const actions = {
   }
 } satisfies Actions
 
-async function getEntityFormValidated({ entityId, db }: { entityId: string, db: DB }): Promise<FormValidated<typeof entitySchema>> {
+async function getEntityFormDataAndLayouts({ db, entityId }: { entityId: string, db: DB }) {
   let entityFormData: FormValidated<typeof entitySchema>['data']
   let [entity] = await tryQuery({
     fn: db
@@ -75,13 +76,16 @@ async function getEntityFormValidated({ entityId, db }: { entityId: string, db: 
       }),
     errorMsg: "Entity not found"
   })
-  let fields = entity?.fields.map(({ layouts, ...field }) => ({
-    properties: field,
-    layout: layouts[0],
-  })) ?? []
+  console.dir(entity, { depth: null })
+  let fields: typeof entityFormData['fields'] = []
+  let layoutsMap: Record<string, typeof entityFormData['fields'][0]['layout'][]> = {}
+  entity?.fields.forEach(({ layouts, ...properties }) => {
+    fields.push({ properties, layout: layouts[0] })
+    layoutsMap[properties.id] = layouts
+  })
   entityFormData = {
     ...entity,
     fields
   }
-  return await superValidate(entityFormData, valibot(entitySchema), { id: 'entity-form', errors: false })
+  return { entityFormData, layouts: layoutsMap }
 }
