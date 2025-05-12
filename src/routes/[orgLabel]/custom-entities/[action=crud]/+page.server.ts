@@ -28,6 +28,8 @@ export const load: PageServerLoad = async ({ url, params: { orgLabel, action }, 
   }
 
   let { entityFormData, layouts } = await getEntityFormDataAndLayouts({ entityId: searchParams.entityId, db })
+  console.log('layouts')
+  console.dir(layouts, { depth: null })
   let entityForm = await superValidate(entityFormData, valibot(entitySchema), { id: 'entity-form', errors: false })
   if (!entityForm.data.id) return error(500, "Something went wrong")
 
@@ -76,7 +78,6 @@ async function getEntityFormDataAndLayouts({ db, entityId }: { entityId: string,
       }),
     errorMsg: "Entity not found"
   })
-  console.dir(entity, { depth: null })
   let fields: typeof entityFormData['fields'] = []
   let layoutsMap: Record<string, typeof entityFormData['fields'][0]['layout'][]> = {}
   entity?.fields.forEach(({ layouts, ...properties }) => {

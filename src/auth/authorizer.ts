@@ -41,7 +41,8 @@ export default authorizer({
     password: PasswordAdapter(
       PasswordUI({
         sendCode: async (email, code) => {
-          console.log(email, code) //TODO: figure out how to turn off register
+          console.log(email, code)
+          //TODO: Send code & Make a record in public.users
         },
       }),
     ),

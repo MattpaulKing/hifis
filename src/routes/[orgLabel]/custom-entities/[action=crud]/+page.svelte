@@ -6,7 +6,6 @@
 		entityFieldsFormOpts,
 		entityFormOpts,
 		Grid,
-		GridSettings,
 		handleUserPromptAction,
 		promptUserToSaveChanges,
 		setGridContext,
@@ -96,13 +95,14 @@
 		entityFieldLayoutForm.submit();
 	}
 
-	async function syncEntityFormsWithTainted(layout: BuildableField['layout']) {
+	function syncEntityFormsWithTainted(layout: BuildableField['layout']) {
 		if (entityFieldsFormTainted() && $entityFieldsFormData.id) {
 			taintedFieldInputs.fields[$entityFieldsFormData.id] = $entityFieldsFormData;
 		}
 		let idx = $entityFormData.fields.findIndex(({ layout: { id } }) => id === layout.id);
 		if (idx < 0) return;
 		setActiveField({ ...$entityFormData.fields[idx], layout });
+		console.log('hit');
 		entityFieldLayoutForm.submit();
 	}
 	function deleteField() {
@@ -121,7 +121,6 @@
 				({ view }) => view === gridSettings.screenView
 			);
 			if (!newLayout) {
-				console.log('ran');
 				let item = fields[field.properties.fieldType];
 				item.layout = {
 					...item.layout,
@@ -133,12 +132,16 @@
 				});
 				field.layout = item.layout;
 			}
-			field.layout.view = gridSettings.screenView;
 			return {
 				properties: field.properties,
-				layout: field.layout
+				layout: {
+					...field.layout,
+					id: crypto.randomUUID(),
+					view: gridSettings.screenView
+				}
 			};
 		});
+    $entityFormData = $entityFormData
 		rerender = !rerender;
 		saveGrid();
 	}
