@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { buildableFieldDefault, buildableFieldPlacedInBounds, buildableFormFields } from '..';
+	import { buildableFieldCreate, buildableFieldPlacedInBounds, buildableFormFields } from '..';
 	import type { GridSettings } from '../../user-grid';
-	import type { BuildableFieldDefault } from './fields';
+	import type { BuildableField, BuildableFieldDefault } from './fields';
 
 	type Props = {
-		draggedField: BuildableFieldDefault | null;
+		draggedField: BuildableField | null;
 		dragEvent: DragEvent | null;
 		entityFormId: string;
 		gridSettings: GridSettings;
-		ondragstart?: (e: DragEvent, field: BuildableFieldDefault) => void;
-		ondragend?: (field: BuildableFieldDefault) => void;
+		ondragstart?: (e: DragEvent, field: BuildableField) => void;
+		ondragend?: (field: BuildableField) => void;
 	};
 	let {
 		draggedField = $bindable(),
@@ -21,7 +21,7 @@
 	}: Props = $props();
 
 	function ondragstart(e: DragEvent, fieldDefault: BuildableFieldDefault) {
-		draggedField = buildableFieldDefault({
+		draggedField = buildableFieldCreate({
 			e,
 			entityId: entityFormId,
 			field: fieldDefault,
@@ -32,7 +32,7 @@
 	}
 	function ondragend(e: DragEvent, field: BuildableFieldDefault) {
 		if (!draggedField) return;
-		draggedField = buildableFieldDefault({
+		draggedField = buildableFieldCreate({
 			e,
 			entityId: entityFormId,
 			field,

@@ -5,6 +5,8 @@ import type { Toaster } from "$src/lib/components/toast"
 
 export function entityFormOpts({ taintedFieldInputs }: { taintedFieldInputs: TaintedFieldInputs }): FormOpts<typeof entitySchema> {
   return {
+    invalidateAll: false,
+    applyAction: false,
     onUpdate({ form }) {
       if (!form.valid) return;
       taintedFieldInputs.reset();

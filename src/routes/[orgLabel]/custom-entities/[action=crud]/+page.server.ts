@@ -14,6 +14,7 @@ import type { FormValidated } from "$src/lib/interfaces"
 type SearchParams = {
   entityId?: string,
 }
+export const ssr = false
 
 export const load: PageServerLoad = async ({ url, params: { orgLabel, action }, locals: { db, subject } }) => {
   let searchParams: SearchParams = Object.fromEntries(url.searchParams)
@@ -28,8 +29,6 @@ export const load: PageServerLoad = async ({ url, params: { orgLabel, action }, 
   }
 
   let { entityFormData, layouts } = await getEntityFormDataAndLayouts({ entityId: searchParams.entityId, db })
-  console.log('layouts')
-  console.dir(layouts, { depth: null })
   let entityForm = await superValidate(entityFormData, valibot(entitySchema), { id: 'entity-form', errors: false })
   if (!entityForm.data.id) return error(500, "Something went wrong")
 

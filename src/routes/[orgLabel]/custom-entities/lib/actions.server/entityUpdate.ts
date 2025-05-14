@@ -8,8 +8,6 @@ import type { RequestEvent } from "../../[action=crud]/$types"
 export default async function({ e, form }: { e: RequestEvent, form: FormValidated<typeof entitySchema> }) {
   if (!form.data.id) return ar.invalid({ form, msg: "No ID found." })
   let { fields, ...entityData } = form.data
-  console.log('update')
-  console.dir(fields, { depth: null })
   await tryQuery({
     fn: e.locals.db.update(entities).set(entityData).where(eq(entities.id, form.data.id)),
     errorMsg: "Something went wrong."
@@ -20,10 +18,20 @@ export default async function({ e, form }: { e: RequestEvent, form: FormValidate
       fn: e.locals.db.update(entityFields).set(properties).where(eq(entityFields.id, properties.id)),
       errorMsg: "Something went wrong."
     })
-    await tryQuery({
-      fn: e.locals.db.update(entityFieldLayouts).set(layout).where(eq(entityFieldLayouts.id, layout.id)),
-      errorMsg: "Something went wrong."
-    })
+    const [maybeFieldLayout] = await e.locals.db.select().from(entityFieldLayouts).where(eq(entityFieldLayouts.id, layout.id)).limit(1)
+    if (maybeFieldLayout) {
+      const x = await tryQuery({
+        fn: e.locals.db.update(entityFieldLayouts).set(layout).where(eq(entityFieldLayouts.id, layout.id)),
+        errorMsg: "Something went wrong."
+      })
+      console.dir(x, { depth: null })
+    } else {
+      const x = await tryQuery({
+        fn: e.locals.db.insert(entityFieldLayouts).values(layout),
+        errorMsg: "Something went wrong."
+      })
+      console.dir(x, { depth: null })
+    }
   })
   return ar.success({ form })
 }

@@ -4,10 +4,9 @@ import { Type, TextSearch } from "@lucide/svelte"
 import { position2coordinate } from "$src/lib/components/user-grid/utils/item";
 import { getFirstAvailableCoords } from "../../user-grid/utils/grid";
 import type { GridSettings } from "$src/lib/components/user-grid";
-import type { FormValidated } from "$src/lib/interfaces";
 import type { Component } from "svelte";
 import type { Lookup } from "$src/lib/interfaces/Lookup";
-import type { LayoutItem } from "../../user-grid/types";
+import type { FormData } from "$src/lib/interfaces/forms";
 
 
 const fields = {
@@ -19,8 +18,6 @@ const fields = {
       title: 'Input'
     },
     properties: {
-      id: '',
-      entityId: '',
       name: 'input',
       label: 'Default Label',
       fieldType: "input" as const,
@@ -33,8 +30,6 @@ const fields = {
       inputOptions: [] as Lookup[]
     },
     layout: {
-      id: '',
-      fieldId: '',
       x: Infinity,
       y: Infinity,
       widthGridUnits: 10,
@@ -56,8 +51,6 @@ const fields = {
       title: 'Select'
     },
     properties: {
-      id: '',
-      entityId: '',
       name: 'lookup',
       label: 'Default Label',
       fieldType: "lookup" as const,
@@ -70,8 +63,6 @@ const fields = {
       inputOptions: [] as Lookup[]
     },
     layout: {
-      id: '',
-      fieldId: '',
       x: Infinity,
       y: Infinity,
       widthGridUnits: 10,
@@ -89,8 +80,20 @@ const fields = {
 export default fields
 
 export type BuildableField = {
-  properties: Omit<FormValidated<typeof entityFieldsSchema>['data'], 'id'> & { id: string; },
-  layout: Omit<FormValidated<typeof entityFieldLayoutSchema>['data'], 'id'> & { id: string },
+  properties: FormData<typeof entityFieldsSchema>,
+  layout: FormData<typeof entityFieldLayoutSchema> & BuildableFieldLayoutMetaData,
+}
+export type BuildableFieldLayoutMetaData = {
+  min: {
+    widthGridUnits: number,
+    heightGridUnits: number
+  },
+  max?: {
+    widthGridUnits: number,
+    heightGridUnits: number
+  }
+  moveable: boolean,
+  resizeable: boolean
 }
 export type BuildableFieldDefault = {
   category: typeof ELEMENT_TYPES.FORM_FIELDS,
@@ -99,34 +102,21 @@ export type BuildableFieldDefault = {
     icon: Component,
     title: string
   },
-  properties: BuildableField['properties'] & { id: string; },
-  layout: BuildableField['layout'] & {
-    id: string;
-    min: {
-      widthGridUnits: number,
-      heightGridUnits: number
-    },
-    max?: {
-      widthGridUnits: number,
-      heightGridUnits: number
-    }
-    moveable: boolean,
-    resizeable: boolean
-  },
+  properties: Omit<BuildableField['properties'], "id" | "entityId">,
+  layout: Omit<BuildableField['layout'], "id" | "fieldId"> & BuildableFieldLayoutMetaData,
 }
 
-export function buildableFieldDefault({ e, entityId, field, gridSettings }:
-  { e: DragEvent, entityId: string, field: BuildableFieldDefault, gridSettings: GridSettings }): BuildableFieldDefault {
+export function buildableFieldCreate({ e, entityId, field, gridSettings }:
+  { e: DragEvent, entityId: string, field: BuildableFieldDefault, gridSettings: GridSettings }): BuildableField {
 
   let { itemSize, gap, boundsTo } = gridSettings
   let gridRect = boundsTo?.getBoundingClientRect()
   if (!gridRect) throw Error("Grid not initialized.")
 
-  let fieldId = field.properties.id.length > 0 ? field.properties.id : crypto.randomUUID()
-  let layoutId = field.layout.id.length > 0 ? field.layout.id : crypto.randomUUID()
+  let fieldId = crypto.randomUUID()
   let fieldMetaData = fields[field.properties.fieldType]
 
-  let previewEntityField = {
+  return {
     ...fieldMetaData,
     properties: {
       ...field.properties,
@@ -135,17 +125,15 @@ export function buildableFieldDefault({ e, entityId, field, gridSettings }:
     },
     layout: {
       ...field.layout,
-      id: layoutId,
+      id: crypto.randomUUID(),
       fieldId,
       x: position2coordinate(e.pageX - (gridRect.left), itemSize.width, gap),
       y: position2coordinate(e.pageY - (gridRect.top), itemSize.height, gap)
     }
   }
-
-  return previewEntityField
 }
 
-export function buildableFieldPlacedInBounds({ item, gridSettings }: { item: BuildableFieldDefault, gridSettings: GridSettings }) {
+export function buildableFieldPlacedInBounds<T extends { layout: BuildableField['layout'] }>({ item, gridSettings }: { item: T, gridSettings: GridSettings }) {
   if (
     item.layout.x < 0 ||
     item.layout.x + item.layout.widthGridUnits >

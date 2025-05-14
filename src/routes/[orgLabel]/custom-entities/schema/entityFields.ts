@@ -4,7 +4,7 @@ import { createInsertSchema } from "drizzle-valibot"
 import { entities } from "./entities";
 import { relations, sql } from "drizzle-orm";
 import { entityFieldLayouts } from "./entityFieldLayouts";
-import { object, array, string } from "valibot";
+import * as v from "valibot";
 import type { Lookup } from "$src/lib/interfaces/Lookup";
 
 export const entityFieldType = pgEnum("entity_field_type", ['input', 'lookup'])
@@ -26,7 +26,8 @@ export const entityFields = pgTable("entity_fields", {
   inputOptions: jsonb("input_options").array().notNull().default(sql`'{}'::jsonb[]`).$type<Lookup[]>()
 })
 export const entityFieldsSchema = createInsertSchema(entityFields, {
-  inputOptions: array(object({ id: string(), label: string() }))
+  id: v.pipe(v.string(), v.uuid('UUID is badly formed.')),
+  inputOptions: v.array(v.object({ id: v.string(), label: v.string() }))
 })
 
 export const entityFieldRelations = relations(entityFields, ({ one, many }) => ({

@@ -2,9 +2,11 @@ import { calcPosition, coordinate2size, snapOnMove, snapOnResize } from "./utils
 import { on } from "svelte/events";
 import { getGridContext } from "./utils/GridContext.svelte";
 import { getValidCoordsIfCollisionOrOutsideBounds, hasCollisions } from "./utils/grid";
-import type { ItemSize, LayoutItem } from "./types";
+import type { ItemSize } from "./types";
 import type { TabEntity } from "./GridItemTabsState.svelte";
 import type { BuildableField, BuildableFieldDefault } from "../forms/buildable/fields";
+import type { FormData } from "$src/lib/interfaces/forms";
+import type { entityFieldLayoutSchema } from "$src/schemas";
 
 
 
@@ -48,7 +50,7 @@ export default class {
       )
     }
   })
-  item: BuildableFieldDefault['layout'] = $state({
+  item: BuildableField['layout'] = $state({
     id: "",
     x: 0,
     y: 0,
@@ -60,14 +62,13 @@ export default class {
     moveable: true,
     resizeable: true
   })
-  previewItem = $state({ ...this.item } as LayoutItem)
+  previewItem = $state({ ...this.item } as BuildableField['layout'])
   preview = $derived(calcPosition(this.previewItem, {
     itemSize: this.settings.itemSize,
     gap: this.settings.gap
   }))
-  constructor({ item, min, onChanged, moveable = true, resizeable = true }: { item: Omit<BuildableField['layout'], "id"> & { id?: string }, min: BuildableFieldDefault['layout']['min'], onChanged?: (item: BuildableField['layout']) => void, moveable: boolean, resizeable: boolean }) {
+  constructor({ item, min, onChanged, moveable = true, resizeable = true }: { item: FormData<typeof entityFieldLayoutSchema>, min: BuildableFieldDefault['layout']['min'], onChanged?: (item: BuildableField['layout']) => void, moveable: boolean, resizeable: boolean }) {
     this.item = {
-      id: crypto.randomUUID(),
       ...item,
       min,
       moveable,

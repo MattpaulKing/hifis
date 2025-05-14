@@ -8,15 +8,17 @@
 	import { route } from '$src/lib/ROUTES';
 	import { page } from '$app/state';
 	import { getToaster } from '../../toast';
-	import type { BuildableField, BuildableFieldDefault } from './fields';
+	import type { BuildableField } from './fields';
+	import type { entityFieldLayoutSchema } from '$src/schemas';
+	import type { FormData } from '$src/lib/interfaces/forms';
 
 	type Props = {
-		item: Omit<BuildableField['layout'], 'id'> & { id?: string };
+		item: FormData<typeof entityFieldLayoutSchema>;
 		taintedFieldInputs?: TaintedFieldInputs['fields'];
-		min: BuildableFieldDefault['layout']['min'];
+		min: BuildableField['layout']['min'];
 		onDelete: (_item: typeof item) => void;
-		moveable?: BuildableFieldDefault['layout']['moveable'];
-		resizeable?: BuildableFieldDefault['layout']['resizeable'];
+		moveable?: BuildableField['layout']['moveable'];
+		resizeable?: BuildableField['layout']['resizeable'];
 		dragEvent?: DragEvent;
 		children: Snippet;
 		onclick?: (e: MouseEvent) => void;

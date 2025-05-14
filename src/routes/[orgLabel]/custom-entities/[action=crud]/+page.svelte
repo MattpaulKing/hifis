@@ -31,8 +31,7 @@
 		Input,
 		FormContainer,
 		BuildableFormFieldMenuContainer,
-		type BuildableField,
-		type BuildableFieldDefault
+		type BuildableField
 	} from '$src/lib/components/forms';
 	import type { FormValidated } from '$src/lib/interfaces';
 
@@ -40,7 +39,7 @@
 	let modalStore = getModalStore();
 	let toaster = getToaster();
 	let gridSettings = setGridContext({ cellSize: 16, bounds: true });
-	let draggedField = $state<BuildableFieldDefault | null>(null);
+	let draggedField = $state<BuildableField | null>(null);
 	let isDragging = $derived(Boolean(draggedField));
 	let fieldMenuState = setBuildableFormFieldMenuState();
 	let dragEvent = $state<DragEvent | null>(null);
@@ -89,7 +88,7 @@
 		fieldMenuState.setInputField(field);
 	}
 
-	function submitField(field: BuildableFieldDefault) {
+	function submitField(field: BuildableField) {
 		setActiveField(field);
 		entityFieldsForm.submit();
 		entityFieldLayoutForm.submit();
@@ -102,7 +101,6 @@
 		let idx = $entityFormData.fields.findIndex(({ layout: { id } }) => id === layout.id);
 		if (idx < 0) return;
 		setActiveField({ ...$entityFormData.fields[idx], layout });
-		console.log('hit');
 		entityFieldLayoutForm.submit();
 	}
 	function deleteField() {
@@ -121,27 +119,17 @@
 				({ view }) => view === gridSettings.screenView
 			);
 			if (!newLayout) {
-				let item = fields[field.properties.fieldType];
-				item.layout = {
-					...item.layout,
-					...field.layout
-				};
-				item = buildableFieldPlacedInBounds({
-					item,
+				let itemDefault = fields[field.properties.fieldType];
+				let { layout } = buildableFieldPlacedInBounds({
+					item: { layout: { ...field.layout, ...itemDefault.layout } },
 					gridSettings
 				});
-				field.layout = item.layout;
+				field.layout = { ...layout, id: crypto.randomUUID() };
 			}
-			return {
-				properties: field.properties,
-				layout: {
-					...field.layout,
-					id: crypto.randomUUID(),
-					view: gridSettings.screenView
-				}
-			};
+			field.layout.view = gridSettings.screenView;
+			return field;
 		});
-    $entityFormData = $entityFormData
+		$entityFormData = $entityFormData;
 		rerender = !rerender;
 		saveGrid();
 	}
@@ -193,7 +181,6 @@
 			published={$entityFormData.published}
 			taintedInputFieldsExist={taintedFieldInputs.hasEntries}
 			bind:screenView={gridSettings.screenView}
-			onScreenSizeClick={setFieldLayouts}
 			onSave={saveGrid}
 			onPublishClick={() => {
 				$entityFormData.published = !$entityFormData.published;
@@ -241,7 +228,7 @@
 			{/each}
 			{#snippet fieldPreview()}
 				{#if draggedField && dragEvent}
-					{@const FieldInput = draggedField.component.render}
+					{@const FieldInput = fields[draggedField.properties.fieldType].component.render}
 					<BuildableFieldContainer
 						item={draggedField.layout}
 						min={draggedField.layout.min}

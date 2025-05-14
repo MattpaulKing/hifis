@@ -19,7 +19,7 @@
 		taintedInputFieldsExist: boolean;
 		class?: string;
 		children: Snippet;
-		onScreenSizeClick: (screenView: GridSettings['screenView']) => void;
+		onScreenSizeClick?: () => void;
 		onSave: () => void;
 		onPublishClick: () => void;
 	} = $props();
@@ -81,7 +81,7 @@
 		type="button"
 		onclick={() => {
 			screenView = view;
-			onScreenSizeClick();
+			onScreenSizeClick?.();
 		}}
 		class="w-min hover:brightness-150 {screenView === view
 			? 'transition-colors [&>*]:stroke-warning-500'
