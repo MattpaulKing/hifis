@@ -121,17 +121,29 @@
 			if (layoutExisting) {
 				field.layout = layoutExisting;
 			} else {
-				let itemDefault = fields[field.properties.fieldType];
+				let {
+					layout: { widthGridUnits, heightGridUnits, min, moveable, resizeable }
+				} = fields[field.properties.fieldType];
 				let { layout } = buildableFieldPlacedInBounds({
-					item: { layout: { ...field.layout, ...itemDefault.layout } },
+					item: {
+						layout: {
+							...field.layout,
+							id: crypto.randomUUID(),
+							view: gridSettings.screenView,
+							widthGridUnits,
+							heightGridUnits,
+							min,
+							moveable,
+							resizeable
+						}
+					},
 					gridSettings
 				});
 				field.layout = { ...layout, id: crypto.randomUUID() };
 			}
-			field.layout.view = gridSettings.screenView;
 			return field;
 		});
-		$entityFormData = $entityFormData;
+		// $entityFormData = $entityFormData;
 		rerender = !rerender;
 		saveGrid();
 	}

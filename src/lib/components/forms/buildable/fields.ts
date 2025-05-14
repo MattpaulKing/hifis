@@ -141,6 +141,9 @@ export function buildableFieldPlacedInBounds<T extends { layout: BuildableField[
     item.layout.y < 0 ||
     item.layout.y + item.layout.heightGridUnits > gridSettings.maxDimensions.rows
   ) {
+    console.log('hit')
+    console.log(gridSettings.maxDimensions)
+    console.log(item.layout.x, item.layout.y)
     let coords = getFirstAvailableCoords({ item: item.layout, gridSettings })
     if (!coords) throw Error("Something went wrong")
     item.layout.x = coords.x

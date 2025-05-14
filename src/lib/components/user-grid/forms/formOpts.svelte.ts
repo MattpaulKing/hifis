@@ -16,7 +16,7 @@ export function entityFormOpts({ taintedFieldInputs }: { taintedFieldInputs: Tai
 }
 export function entityFieldsFormOpts({ entityFormData, taintedFieldInputs, toaster }: { entityFormData: Writable<FormValidated<typeof entitySchema>['data']>, taintedFieldInputs: TaintedFieldInputs, toaster: Toaster }): FormOpts<typeof entityFieldsSchema> {
   return {
-    invalidateAll: false,
+    invalidateAll: true,
     applyAction: false,
     onUpdate({ form }) {
       entityFormData.update((data) => {
