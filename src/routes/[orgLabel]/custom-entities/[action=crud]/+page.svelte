@@ -55,7 +55,7 @@
 	let entityFieldsForm = initForm({
 		form: data.entityFieldsForm,
 		schema: entityFieldsSchema,
-		opts: entityFieldsFormOpts({ $entityFormData, taintedFieldInputs, toaster })
+		opts: entityFieldsFormOpts({ entityFormData, taintedFieldInputs, toaster })
 	});
 	let { form: entityFieldsFormData, isTainted: entityFieldsFormTainted } = entityFieldsForm;
 
@@ -103,7 +103,7 @@
 		setActiveField({ ...$entityFormData.fields[idx], layout });
 		entityFieldLayoutForm.submit();
 	}
-	function deleteField() {
+	function fieldMenuStateReset() {
 		fieldMenuState.default();
 	}
 	function saveGrid() {
@@ -218,7 +218,7 @@
 						item={field.layout}
 						min={fieldMetadata.layout.min}
 						taintedFieldInputs={taintedFieldInputs.fields}
-						onDelete={deleteField}
+						onDelete={fieldMenuStateReset}
 						onChanged={syncEntityFormsWithTainted}
 					>
 						<Field class="-mt-0" form={entityForm} path="fields[{i}].properties.placeholder">
