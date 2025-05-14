@@ -115,10 +115,12 @@
 	function setFieldLayouts() {
 		$entityFormData.fields = $entityFormData.fields.map((field) => {
 			if (!field.properties.id) throw Error('Unable to find field id');
-			let newLayout = data.layouts[field.properties.id]?.find(
+			let layoutExisting = data.layouts[field.properties.id]?.find(
 				({ view }) => view === gridSettings.screenView
 			);
-			if (!newLayout) {
+			if (layoutExisting) {
+				field.layout = layoutExisting;
+			} else {
 				let itemDefault = fields[field.properties.fieldType];
 				let { layout } = buildableFieldPlacedInBounds({
 					item: { layout: { ...field.layout, ...itemDefault.layout } },
