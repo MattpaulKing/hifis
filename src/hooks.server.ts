@@ -23,8 +23,10 @@ async function verifyAndSetTokens(event: RequestEvent) {
 
 export const handle: Handle = async ({ event, resolve }) => {
   const { error: err } = await verifyAndSetTokens(event)
-  const { url } = await client.authorize(new URL(event.request.url).origin + "/auth/callback", "code")
+  let redirectURI = `${event.url.origin}/auth/callback?next=${event.url.pathname + event.url.search}`
+  const { url } = await client.authorize(redirectURI, "code")
   if (err && !event.url.pathname.startsWith("/auth/callback")) {
+    event.locals.redirectURI = event.url.href
     redirect(302, url)
   }
   event.locals.db = db

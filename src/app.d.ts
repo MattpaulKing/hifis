@@ -15,7 +15,8 @@ declare global {
   namespace App {
     interface Locals {
       subject: Subject,
-      db: DB
+      db: DB,
+      redirectURI?: string
     }
     // interface Error {}
     // interface Locals {}

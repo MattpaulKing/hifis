@@ -103,7 +103,10 @@
 		setActiveField({ ...$entityFormData.fields[idx], layout });
 		entityFieldLayoutForm.submit();
 	}
-	function fieldMenuStateReset() {
+	function fieldMenuStateReset(layoutItem: BuildableField['layout']) {
+		$entityFormData.fields = $entityFormData.fields.filter(
+			({ layout: { id } }) => id !== layoutItem.id
+		);
 		fieldMenuState.default();
 	}
 	function saveGrid() {
@@ -121,20 +124,14 @@
 			if (layoutExisting) {
 				field.layout = layoutExisting;
 			} else {
-				let {
-					layout: { widthGridUnits, heightGridUnits, min, moveable, resizeable }
-				} = fields[field.properties.fieldType];
+				let layoutDefault = fields[field.properties.fieldType].layout;
 				let { layout } = buildableFieldPlacedInBounds({
 					item: {
 						layout: {
+							...layoutDefault,
 							...field.layout,
 							id: crypto.randomUUID(),
-							view: gridSettings.screenView,
-							widthGridUnits,
-							heightGridUnits,
-							min,
-							moveable,
-							resizeable
+							view: gridSettings.screenView
 						}
 					},
 					gridSettings
@@ -143,10 +140,13 @@
 			}
 			return field;
 		});
-		// $entityFormData = $entityFormData;
+		$entityFormData = $entityFormData;
 		rerender = !rerender;
 		saveGrid();
 	}
+	/* TODO: 
+    Screen view change from sm -> md places item in the wrong spot
+  */
 </script>
 
 <div class="flex h-full w-full">

@@ -14,7 +14,6 @@ import type { FormValidated } from "$src/lib/interfaces"
 type SearchParams = {
   entityId?: string,
 }
-export const ssr = false
 
 export const load: PageServerLoad = async ({ url, params: { orgLabel, action }, locals: { db, subject } }) => {
   let searchParams: SearchParams = Object.fromEntries(url.searchParams)

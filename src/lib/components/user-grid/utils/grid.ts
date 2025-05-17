@@ -37,8 +37,8 @@ export function getFirstAvailableCoords({ item, gridSettings }: { item: Buildabl
   y: number;
 } | null {
 
-  for (let y = 0; y <= gridSettings.maxDimensions.rows - item.heightGridUnits; y++) {
-    for (let x = 0; x <= gridSettings.maxDimensions.cols - item.widthGridUnits; x++) {
+  for (let x = 0; x <= gridSettings.maxDimensions.cols - item.widthGridUnits; x++) {
+    for (let y = 0; y <= gridSettings.maxDimensions.rows - item.heightGridUnits; y++) {
       const _item = { ...item, x, y };
       if (!hasCollisions(_item, Object.values(gridSettings.items))) {
         const newPosition = { x, y };

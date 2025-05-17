@@ -98,7 +98,14 @@
 				orgLabel: page.data.org.label
 			})}
 			method="POST"
-			use:enhance
+			use:enhance={() => {
+				return async ({ result }) => {
+					if (result.type === 'success') {
+						toast.add({ type: 'save', message: 'Deleted' });
+						onDelete(controller.item);
+					}
+				};
+			}}
 		>
 			<button
 				class="variant-ghost btn-icon btn-icon-sm rounded-token hover:variant-filled-error"
@@ -107,8 +114,6 @@
 				onpointerdown={(e) => e.stopPropagation()}
 				onclick={(e) => {
 					e.stopPropagation();
-					toast.add({ type: 'save', message: 'Deleted' });
-					onDelete(controller.item);
 				}}
 			>
 				<TrashIcon />

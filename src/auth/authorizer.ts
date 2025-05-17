@@ -50,7 +50,7 @@ export default authorizer({
   success: async (ctx, value, req) => {
     if (value.provider === "password") {
       const user = await getUser(value.email)
-      console.log(user)
+      console.log(req.url)
       return ctx.subject("user", {
         ...user
       })
