@@ -57,7 +57,7 @@
 			onpointerout={() => (hoveringSave = false)}
 			class="peer relative {taintedInputFieldsExist
 				? 'variant-filled-warning transition-colors hover:variant-filled-success'
-				: 'variant-filled-success'} btn-icon h-9 rounded-token"
+				: 'variant-filled-success'} btn-icon h-10 rounded-token"
 		>
 			{#if taintedInputFieldsExist && !hoveringSave}
 				<SaveOffIcon transitions={{ in: { duration: 500 } }} />

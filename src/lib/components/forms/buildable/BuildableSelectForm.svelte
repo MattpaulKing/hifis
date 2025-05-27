@@ -45,14 +45,20 @@
 		<Errors></Errors>
 	</Field>
 	<Field form={entityFieldsForm} path="multiple" class="">
-		<Label label="Allow Multiple Selections">
-			<InputCheckbox class="mr-auto h-8 w-8" />
+		<Label label="Multiple Selections">
+			<InputCheckbox class="mr-auto h-6 w-6" />
 		</Label>
 		<Errors></Errors>
 	</Field>
 	<Field form={entityFieldsForm} path="required" class="">
 		<Label label="Required Field">
-			<InputCheckbox class="mr-auto h-8 w-8" />
+			<InputCheckbox class="mr-auto h-6 w-6" />
+		</Label>
+		<Errors></Errors>
+	</Field>
+	<Field form={entityFieldsForm} path="placeholder" class="">
+		<Label label="Placeholder">
+			<Input />
 		</Label>
 		<Errors></Errors>
 	</Field>
@@ -61,6 +67,7 @@
 		<InputLookup
 			title={$entityFieldsFormData.inputOptions?.map(({ label }) => label).join(', ')}
 			apiRoute={null}
+			placeholder="Add options"
 			onkeydown={(e) => {
 				if (e.key !== 'Enter') return;
 				e.preventDefault();

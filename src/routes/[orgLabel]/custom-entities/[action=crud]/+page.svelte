@@ -34,6 +34,7 @@
 		type BuildableField
 	} from '$src/lib/components/forms';
 	import type { FormValidated } from '$src/lib/interfaces';
+	import type { FormData } from '$src/lib/interfaces/forms';
 
 	let { data } = $props();
 	let modalStore = getModalStore();
@@ -103,7 +104,7 @@
 		setActiveField({ ...$entityFormData.fields[idx], layout });
 		entityFieldLayoutForm.submit();
 	}
-	function fieldMenuStateReset(layoutItem: BuildableField['layout']) {
+	function fieldMenuStateReset(layoutItem: FormData<typeof entityFieldLayoutSchema>) {
 		$entityFormData.fields = $entityFormData.fields.filter(
 			({ layout: { id } }) => id !== layoutItem.id
 		);
@@ -112,7 +113,6 @@
 	function saveGrid() {
 		$entityFormData.fields = taintedFieldInputs.getTaintedFields({ $entityFormData });
 		entityForm.submit();
-		fieldMenuState.default();
 	}
 
 	function setFieldLayouts() {
@@ -125,23 +125,23 @@
 				field.layout = layoutExisting;
 			} else {
 				let layoutDefault = fields[field.properties.fieldType].layout;
+				let id = crypto.randomUUID();
 				let { layout } = buildableFieldPlacedInBounds({
 					item: {
 						layout: {
 							...layoutDefault,
 							...field.layout,
-							id: crypto.randomUUID(),
+							id,
 							view: gridSettings.screenView
 						}
 					},
 					gridSettings
 				});
-				field.layout = { ...layout, id: crypto.randomUUID() };
+				field.layout = { ...layout, id };
 			}
 			return field;
 		});
 		$entityFormData = $entityFormData;
-		rerender = !rerender;
 		saveGrid();
 	}
 	/* TODO: 
@@ -151,7 +151,7 @@
 
 <div class="flex h-full w-full">
 	<BuildableFormFieldMenuContainer rerenderKey={fieldMenuState.state.field?.properties.id}>
-		<BuildableFormFieldMenuHeader></BuildableFormFieldMenuHeader>
+		<BuildableFormFieldMenuHeader />
 		<FormContainer
 			form={entityFieldsForm}
 			action={route('createOrUpdate /[orgLabel]/custom-entities/properties', {
@@ -171,10 +171,10 @@
 					></BuildableFormFieldInputButtons>
 				{:else if fieldMenuState.state.tab === 'properties'}
 					{#key $entityFieldsFormData.id}
-						{#if fieldMenuState.state.field.properties.fieldType === 'input'}
-							<BuildableInputForm {entityFieldsForm}></BuildableInputForm>
-						{:else if fieldMenuState.state.field.properties.fieldType === 'lookup'}
+						{#if fieldMenuState.state.field.properties.fieldType === 'lookup'}
 							<BuildableSelectForm {entityFieldsForm}></BuildableSelectForm>
+						{:else if fieldMenuState.state.field.properties.fieldType === 'input'}
+							<BuildableInputForm {entityFieldsForm}></BuildableInputForm>
 						{/if}
 					{/key}
 				{/if}
