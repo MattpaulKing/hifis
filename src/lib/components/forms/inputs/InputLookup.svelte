@@ -7,11 +7,13 @@
 		apiRoute: string | null;
 		onkeydown?: (e: KeyboardEvent) => void;
 		onInputKeydown?: (e: KeyboardEvent) => void;
+		inputEl?: HTMLInputElement;
 	} & HTMLInputAttributes;
 	let {
 		apiRoute: _apiRoute,
 		onkeydown: _onkeydown,
 		onInputKeydown,
+		inputEl = $bindable(),
 		...restProps
 	}: Props = $props();
 	let { value, focused, disabled, errors, isArray, path } = getField<
@@ -84,6 +86,7 @@
 		</div>
 	{/if}
 	<input
+		bind:this={inputEl}
 		id={path}
 		type="text"
 		autocomplete="off"

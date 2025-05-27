@@ -5,6 +5,8 @@
 	import { fly, slide } from 'svelte/transition';
 	import type { Lookup } from '$lib/interfaces/Lookup';
 
+	let { onclick }: { onclick?: (lookup: Lookup) => void } = $props();
+
 	let { value, path, focused, disabled } = getField<Lookup[]>();
 	let store = getLookups();
 
@@ -17,6 +19,7 @@
 			$value = $value;
 			store.inputValue = '';
 		}
+		onclick?.(lookup);
 	}
 	let dropdownRect = $state<DOMRectReadOnly>();
 </script>

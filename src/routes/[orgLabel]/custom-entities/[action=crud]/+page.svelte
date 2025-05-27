@@ -171,10 +171,10 @@
 					></BuildableFormFieldInputButtons>
 				{:else if fieldMenuState.state.tab === 'properties'}
 					{#key $entityFieldsFormData.id}
-						{#if fieldMenuState.state.field.properties.fieldType === 'lookup'}
-							<BuildableSelectForm {entityFieldsForm}></BuildableSelectForm>
-						{:else if fieldMenuState.state.field.properties.fieldType === 'input'}
+						{#if fieldMenuState.state.field.properties.fieldType === 'input'}
 							<BuildableInputForm {entityFieldsForm}></BuildableInputForm>
+						{:else if fieldMenuState.state.field.properties.fieldType === 'lookup'}
+							<BuildableSelectForm {entityFieldsForm}></BuildableSelectForm>
 						{/if}
 					{/key}
 				{/if}

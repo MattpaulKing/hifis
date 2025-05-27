@@ -57,7 +57,7 @@
 		</Label>
 		<Errors></Errors>
 	</Field>
-	<Field form={entityFieldsForm} path="placeholder" class="">
+	<Field form={entityFieldsForm} path="entityLookupId" class="">
 		<Label label="Placeholder" />
 		<Input />
 		<Errors></Errors>

@@ -26,5 +26,6 @@ export const entitySchema = v.object({
 
 export const entityRelations = relations(entities, ({ one, many }) => ({
   parent: one(entities, { fields: [entities.parentId], references: [entities.id] }),
-  fields: many(entityFields)
+  fields: many(entityFields, { relationName: "entityFields" }),
+  lookups: many(entityFields, { relationName: "fieldLookups" })
 }))
