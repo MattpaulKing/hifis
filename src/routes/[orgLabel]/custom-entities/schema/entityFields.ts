@@ -26,19 +26,10 @@ export const entityFields = pgTable("entity_fields", {
   max: integer("max"),
   inputOptions: jsonb("input_options").array().notNull().default(sql`'{}'::jsonb[]`).$type<Lookup[]>()
 })
-export const entityFieldsSchema = v.pipe(createInsertSchema(entityFields, {
+export const entityFieldsSchema = createInsertSchema(entityFields, {
   id: v.pipe(v.string(), v.uuid('UUID is badly formed.')),
   inputOptions: v.array(v.object({ id: v.string(), label: v.string() }))
-}),
-  v.forward(
-    v.check(({ min, max }) => (min ?? 0) <= (max ?? 0), 'Must be less than Maximum'),
-    ['max']
-  ),
-  v.forward(
-    v.check(({ entityLookupId, fieldType }) => fieldType === 'lookup' && entityLookupId === null ? false : true, 'Please specify an entity'),
-    ['entityLookupId']
-  )
-)
+})
 
 export const entityFieldRelations = relations(entityFields, ({ one, many }) => ({
   entity: one(entities, { fields: [entityFields.entityId], references: [entities.id], relationName: "entityFields" }),

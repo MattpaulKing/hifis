@@ -21,7 +21,6 @@
 		BuildableFieldContainer,
 		BuildableFormFieldInputButtons,
 		BuildableInputForm,
-		BuildableSelectForm,
 		BuildableFormFieldMenuHeader,
 		Field,
 		initForm,
@@ -31,6 +30,7 @@
 		Input,
 		FormContainer,
 		BuildableFormFieldMenuContainer,
+		BuildableLookupForm,
 		type BuildableField
 	} from '$src/lib/components/forms';
 	import type { FormValidated } from '$src/lib/interfaces';
@@ -144,9 +144,6 @@
 		$entityFormData = $entityFormData;
 		saveGrid();
 	}
-	/* TODO: 
-    Screen view change from sm -> md places item in the wrong spot
-  */
 </script>
 
 <div class="flex h-full w-full">
@@ -172,9 +169,10 @@
 				{:else if fieldMenuState.state.tab === 'properties'}
 					{#key $entityFieldsFormData.id}
 						{#if fieldMenuState.state.field.properties.fieldType === 'input'}
-							<BuildableInputForm {entityFieldsForm}></BuildableInputForm>
+							<BuildableInputForm {entityFieldsForm} />
 						{:else if fieldMenuState.state.field.properties.fieldType === 'lookup'}
-							<BuildableSelectForm {entityFieldsForm}></BuildableSelectForm>
+							<BuildableLookupForm {entityFieldsForm} />
+							<!-- <BuildableSelectForm {entityFieldsForm} /> -->
 						{/if}
 					{/key}
 				{/if}

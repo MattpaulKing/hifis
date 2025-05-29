@@ -24,6 +24,7 @@ export { default as BuildableFieldContainer } from "./buildable/BuildableFieldCo
 export { default as InputCheckbox } from "./inputs/InputCheckbox.svelte"
 export { default as BuildableInputForm } from "./buildable/BuildableInputForm.svelte"
 export { default as BuildableSelectForm } from "./buildable/BuildableSelectForm.svelte"
+export { default as BuildableLookupForm } from "./buildable/BuildableLookupForm.svelte"
 export { default as BuildableInputOptionsDropdown } from "./buildable/BuildableInputOptionsDropdown.svelte"
 export { default as BuildableFormFieldInputButtons } from "./buildable/BuildableFormFieldInputButtons.svelte"
 export { BuildableFormFieldMenu, setBuildableFormFieldMenuState, getBuildableFormFieldMenuState } from "./buildable/buildableFormFieldMenuState.svelte"

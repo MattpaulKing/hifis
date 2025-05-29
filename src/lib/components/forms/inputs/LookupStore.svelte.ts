@@ -25,15 +25,13 @@ export class LookupStore {
   filterFetchedLookups({ fetchedLookups, $value }: { fetchedLookups: Lookup[], $value: string[] | string | undefined }) {
     if (Array.isArray($value)) {
       this.filterLookupsForArray({ fetchedLookups, $value })
-    } else if (typeof $value === "string") {
+    } else if (typeof $value === "string" || $value === null) {
       this.filterLookupsForStr({ fetchedLookups, $value })
     }
   }
   private filterLookupsForArray({ fetchedLookups, $value }: { fetchedLookups: Lookup[], $value: string[] }) {
     let selectedLookups = this.lookups.filter((lookup) => $value.includes(lookup.id));
-    console.log(selectedLookups)
     let filteredLookups = fetchedLookups.filter((lookup) => !$value.includes(lookup.id) && !this.excludedIds.includes(lookup.id))
-    console.log(filteredLookups)
     this.lookups = [...selectedLookups, ...filteredLookups]
   }
   private filterLookupsForStr({ fetchedLookups, $value }: { fetchedLookups: Lookup[], $value: string }) {

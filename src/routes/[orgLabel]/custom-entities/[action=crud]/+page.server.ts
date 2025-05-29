@@ -70,7 +70,7 @@ async function getEntityFormDataAndLayouts({ db, entityId }: { entityId: string,
             with: {
               layouts: {},
             },
-          }
+          },
         },
         where: eq(entities.id, entityId)
       }),

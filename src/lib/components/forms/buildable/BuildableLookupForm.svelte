@@ -3,7 +3,6 @@
 	import {
 		Errors,
 		Field,
-		FieldArray,
 		Input,
 		InputCheckbox,
 		InputLookup,
@@ -12,17 +11,15 @@
 		BuildableInputOptionsDropdown,
 		LookupStore
 	} from '..';
+	import { route } from '$src/lib/ROUTES';
 	import type { FormInitialized } from '$src/lib/interfaces/forms';
+	import type { Lookup } from '$src/lib/interfaces/Lookup';
 
 	type Props = {
 		entityFieldsForm: FormInitialized<typeof entityFieldsSchema>;
 	};
 	let { entityFieldsForm }: Props = $props();
 	let { form: entityFieldsFormData, errors } = entityFieldsForm;
-	let inputLookupStore = new LookupStore({
-		lookups: $entityFieldsFormData.inputOptions,
-		inputValue: ''
-	});
 
 	function handleDisabledClick() {
 		if (!$entityFieldsFormData.multiple) {
@@ -32,6 +29,18 @@
 		}
 	}
 	let optionsInputEl = $state<HTMLInputElement>();
+	let entityLookups = new LookupStore({ lookups: [], inputValue: '' });
+
+	async function getEntities() {
+		let entities = await fetch(route('GET /api/v1/entities/discover')).then(
+			async (r) => (await r.json()) as Lookup[]
+		);
+		if ($entityFieldsFormData.entityLookupId) {
+			let entitySelected = entities.find(({ id }) => id === $entityFieldsFormData.entityLookupId);
+			entityLookups.inputValue = entitySelected?.label ?? '';
+		}
+		entityLookups.lookups = entities;
+	}
 </script>
 
 <div class="h-fit w-full p-0">
@@ -57,30 +66,24 @@
 		</Label>
 		<Errors></Errors>
 	</Field>
-	<Field form={entityFieldsForm} path="entityLookupId" class="">
-		<Label label="Placeholder" />
-		<Input />
+	<Field form={entityFieldsForm} path="entityLookupId" class="" lookups={entityLookups}>
+		<Label label="Entity" />
+		{#await getEntities()}
+			<InputLookup
+				apiRoute={route('GET /api/v1/entities/discover')}
+				placeholder="Entity Referenced"
+				bind:inputEl={optionsInputEl}
+			/>
+		{:then}
+			<InputLookup
+				apiRoute={route('GET /api/v1/entities/discover')}
+				placeholder="Entity Referenced"
+				bind:inputEl={optionsInputEl}
+			/>
+			<BuildableInputOptionsDropdown />
+		{/await}
 		<Errors></Errors>
 	</Field>
-	<FieldArray form={entityFieldsForm} path="inputOptions" lookups={inputLookupStore} class="">
-		<Label label="Options" />
-		<InputLookup
-			title={$entityFieldsFormData.inputOptions?.map(({ label }) => label).join(', ')}
-			apiRoute={null}
-			placeholder="Add options"
-			bind:inputEl={optionsInputEl}
-			onkeydown={(e) => {
-				if (e.key !== 'Enter') return;
-				e.preventDefault();
-				let newLookup = { id: crypto.randomUUID(), label: inputLookupStore.inputValue };
-				$entityFieldsFormData.inputOptions = [...$entityFieldsFormData.inputOptions, newLookup];
-				inputLookupStore.lookups.push(newLookup);
-				inputLookupStore.inputValue = '';
-			}}
-		/>
-		<BuildableInputOptionsDropdown onclick={() => optionsInputEl?.focus()} />
-		<Errors></Errors>
-	</FieldArray>
 	<Field form={entityFieldsForm} path="min" class="" disabled={!$entityFieldsFormData.multiple}>
 		<Label label="Minimum selections"></Label>
 		<InputNumber onclick={handleDisabledClick}></InputNumber>

@@ -7,10 +7,11 @@
 
 	let { onclick }: { onclick?: (lookup: Lookup) => void } = $props();
 
-	let { value, path, focused, disabled } = getField<Lookup[]>();
+	let { value, path, focused, disabled } = getField<Lookup[] | string>();
 	let store = getLookups();
 
-	function handleClick({ lookup }: { lookup: Lookup }) {
+	function handleArrayClick({ lookup }: { lookup: Lookup }) {
+		if (!Array.isArray($value)) return;
 		if ($value.some(({ id }) => id === lookup.id)) {
 			$value = $value.filter(({ id }) => id !== lookup.id);
 			store.inputValue = '';
@@ -18,6 +19,24 @@
 			$value.push(lookup);
 			$value = $value;
 			store.inputValue = '';
+		}
+	}
+	function handleStrClick({ lookup }: { lookup: Lookup }) {
+		if (Array.isArray($value)) return;
+		if ($value === lookup.id) {
+			$value = '';
+			store.inputValue = '';
+		} else {
+			$value = lookup.id;
+			store.inputValue = lookup.label;
+		}
+	}
+
+	function handleClick({ lookup }: { lookup: Lookup }) {
+		if (Array.isArray($value)) {
+			handleArrayClick({ lookup });
+		} else {
+			handleStrClick({ lookup });
 		}
 		onclick?.(lookup);
 	}
@@ -42,7 +61,7 @@
 				{@render searchPlaceholder()}
 				{@render searchPlaceholder()}
 			{:else if store.lookups.length > 0}
-				{#each $value as lookup, i (i)}
+				{#each store.lookups as lookup, i (i)}
 					<button
 						animate:flip
 						transition:fly={{ x: dropdownRect.x, y: dropdownRect.y }}

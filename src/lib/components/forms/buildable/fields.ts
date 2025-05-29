@@ -48,7 +48,7 @@ const fields = {
     component: {
       render: Input,
       icon: TextSearch,
-      title: 'Select'
+      title: 'Lookup'
     },
     properties: {
       name: 'lookup',
