@@ -31,7 +31,9 @@
 		FormContainer,
 		BuildableFormFieldMenuContainer,
 		BuildableLookupForm,
-		type BuildableField
+		type BuildableField,
+		BuildableSelectForm,
+		BuildableDateForm
 	} from '$src/lib/components/forms';
 	import type { FormValidated } from '$src/lib/interfaces';
 	import type { FormData } from '$src/lib/interfaces/forms';
@@ -44,7 +46,7 @@
 	let isDragging = $derived(Boolean(draggedField));
 	let fieldMenuState = setBuildableFormFieldMenuState();
 	let dragEvent = $state<DragEvent | null>(null);
-	let taintedFieldInputs = new TaintedFieldInputs({});
+	let taintedFieldInputs = new TaintedFieldInputs();
 	let rerender = $state(false);
 
 	let entityForm = initForm({
@@ -82,7 +84,11 @@
 		handleUserPromptAction({ userAction, nav, $entityFieldsFormData, taintedFieldInputs });
 	});
 
-	function setActiveField(field: FormValidated<typeof entitySchema>['data']['fields'][0]) {
+	function setActiveField(
+		field:
+			| FormValidated<typeof entitySchema>['data']['fieldInputs'][0]
+			| FormValidated<typeof entitySchema>['data']['fieldBlocks'][0]
+	) {
 		$entityFormData = entityPushOrUpdateField({ $entityFormData, fieldKey: 'properties', field });
 		entityFieldsFormData.update(() => field.properties, { taint: false });
 		$entityFieldLayoutFormData = field.layout;
@@ -97,34 +103,36 @@
 
 	function syncEntityFormsWithTainted(layout: BuildableField['layout']) {
 		if (entityFieldsFormTainted() && $entityFieldsFormData.id) {
-			taintedFieldInputs.fields[$entityFieldsFormData.id] = $entityFieldsFormData;
+			taintedFieldInputs.fields.fieldInputs[$entityFieldsFormData.id] = $entityFieldsFormData;
 		}
-		let idx = $entityFormData.fields.findIndex(({ layout: { id } }) => id === layout.id);
+		let idx = $entityFormData.fieldInputs.findIndex(({ layout: { id } }) => id === layout.id);
 		if (idx < 0) return;
-		setActiveField({ ...$entityFormData.fields[idx], layout });
+		setActiveField({ ...$entityFormData.fieldInputs[idx], layout });
 		entityFieldLayoutForm.submit();
 	}
 	function fieldMenuStateReset(layoutItem: FormData<typeof entityFieldLayoutSchema>) {
-		$entityFormData.fields = $entityFormData.fields.filter(
+		$entityFormData.fieldInputs = $entityFormData.fieldInputs.filter(
 			({ layout: { id } }) => id !== layoutItem.id
 		);
 		fieldMenuState.default();
 	}
 	function saveGrid() {
-		$entityFormData.fields = taintedFieldInputs.getTaintedFields({ $entityFormData });
+		$entityFormData.fieldInputs = taintedFieldInputs.getTaintedInputFields({ $entityFormData });
+		$entityFormData.fieldBlocks = taintedFieldInputs.getTaintedBlockFields({ $entityFormData });
 		entityForm.submit();
 	}
 
 	function setFieldLayouts() {
-		$entityFormData.fields = $entityFormData.fields.map((field) => {
+		console.log('hit');
+		$entityFormData.fieldInputs = $entityFormData.fieldInputs.map((field) => {
 			if (!field.properties.id) throw Error('Unable to find field id');
-			let layoutExisting = data.layouts[field.properties.id]?.find(
+			let layoutExisting = data.layouts.fieldInputs[field.properties.id]?.find(
 				({ view }) => view === gridSettings.screenView
 			);
 			if (layoutExisting) {
 				field.layout = layoutExisting;
 			} else {
-				let layoutDefault = fields[field.properties.fieldType].layout;
+				let layoutDefault = fields[field.properties.elementType][field.properties.fieldType].layout;
 				let id = crypto.randomUUID();
 				let { layout } = buildableFieldPlacedInBounds({
 					item: {
@@ -157,7 +165,7 @@
 			class="p-0"
 			showMsg={false}
 		>
-			<div class="col-span-2 flex h-full flex-col">
+			<div class="col-span-2 flex h-full max-w-80 flex-col">
 				{#if fieldMenuState.state.tab === 'field-list'}
 					<BuildableFormFieldInputButtons
 						bind:draggedField
@@ -172,7 +180,12 @@
 							<BuildableInputForm {entityFieldsForm} />
 						{:else if fieldMenuState.state.field.properties.fieldType === 'lookup'}
 							<BuildableLookupForm {entityFieldsForm} />
-							<!-- <BuildableSelectForm {entityFieldsForm} /> -->
+						{:else if fieldMenuState.state.field.properties.fieldType === 'select'}
+							<BuildableSelectForm {entityFieldsForm} />
+						{:else if fieldMenuState.state.field.properties.fieldType === 'date'}
+							<BuildableDateForm {entityFieldsForm} />
+						{:else if fieldMenuState.state.field.properties.fieldType === 'label'}
+							<!-- TODO: Form for UI-Text -->
 						{/if}
 					{/key}
 				{/if}
@@ -221,8 +234,8 @@
 				: ''}"
 		>
 			{#each $entityFormData.fields as field, i}
-				{@const fieldMetadata = fields[field.properties.fieldType]}
-				{@const FieldInput = fieldMetadata.component.render}
+				{@const fieldMetadata = fields[field.properties.elementType][field.properties.fieldType]}
+				{@const Element = fieldMetadata.component.render}
 				{#key rerender}
 					<BuildableFieldContainer
 						item={field.layout}
@@ -231,10 +244,14 @@
 						onDelete={fieldMenuStateReset}
 						onChanged={syncEntityFormsWithTainted}
 					>
-						<Field class="-mt-0" form={entityForm} path="fields[{i}].properties.placeholder">
-							<Label label={field.properties.label}></Label>
-							<FieldInput />
-						</Field>
+						{#if field.properties.elementType === 'FIELDS'}
+							<Field class="-mt-0" form={entityForm} path="fields[{i}].properties.placeholder">
+								<Label label={field.properties.label}></Label>
+								<Element />
+							</Field>
+						{:else if field.properties.elementType === 'UI'}
+							<Element {...field.properties} />
+						{/if}
 					</BuildableFieldContainer>
 				{/key}
 			{/each}

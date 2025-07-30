@@ -10,7 +10,8 @@ export function entityFormOpts({ taintedFieldInputs }: { taintedFieldInputs: Tai
     applyAction: false,
     onUpdate({ form }) {
       if (!form.valid) return;
-      taintedFieldInputs.reset();
+      taintedFieldInputs.reset({ key: "fieldInputs" });
+      taintedFieldInputs.reset({ key: "fieldBlocks" });
     }
   }
 }
@@ -20,13 +21,13 @@ export function entityFieldsFormOpts({ entityFormData, taintedFieldInputs, toast
     applyAction: false,
     onUpdate({ form }) {
       entityFormData.update((data) => {
-        const idx = data.fields.findIndex(
+        const idx = data.fieldInputs.findIndex(
           ({ properties: { id } }) => id === form.data.id
         );
         if (idx < 0) return data;
-        data.fields[idx].properties = form.data
+        data.fieldInputs[idx].properties = form.data
         if (form.data.id && form.data.id in taintedFieldInputs.fields) {
-          delete taintedFieldInputs.fields[form.data.id];
+          delete taintedFieldInputs.fields.fieldInputs[form.data.id];
         }
         toaster.add({ type: 'save', message: 'Saved' });
         return data

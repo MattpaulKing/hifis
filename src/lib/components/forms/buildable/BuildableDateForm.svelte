@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { entityFieldsSchema } from '$src/schemas';
-	import { Errors, Field, Input, InputCheckbox, InputNumber, Label } from '..';
+	import { Errors, Field, Input, InputCheckbox, InputDate, Label } from '..';
 	import type { FormInitialized } from '$src/lib/interfaces/forms';
 
 	type Props = {
@@ -28,18 +28,18 @@
 		<Errors></Errors>
 	</Field>
 	<Field form={entityFieldsForm} path="placeholder" class="">
-		<Label label="Placeholder"></Label>
-		<Input></Input>
+		<Label label="Default"></Label>
+		<InputDate />
 		<Errors></Errors>
 	</Field>
-	<Field form={entityFieldsForm} path="min" class="">
+	<Field form={entityFieldsForm} path="minDate" class="">
 		<Label label="Minimum {minMaxAttr}"></Label>
-		<InputNumber></InputNumber>
+		<InputDate />
 		<Errors></Errors>
 	</Field>
-	<Field form={entityFieldsForm} path="max" class="">
+	<Field form={entityFieldsForm} path="maxDate" class="">
 		<Label label="Maximum {minMaxAttr}"></Label>
-		<InputNumber></InputNumber>
+		<InputDate />
 		<Errors></Errors>
 	</Field>
 	<Field form={entityFieldsForm} path="required" class="">

@@ -29,7 +29,7 @@
 		hasFormEl?: boolean;
 	} = $props();
 
-	setFormCtx({ disabled });
+	setFormCtx({ form, disabled });
 	let { delayed, enhance, formId } = form;
 	let msgStore = getFormMsgStore();
 	onDestroy(() => {

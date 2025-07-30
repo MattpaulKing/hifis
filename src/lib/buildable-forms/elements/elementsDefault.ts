@@ -1,42 +1,31 @@
 import { Input, InputNumber, InputDate } from "$lib/components/forms";
-import { entityFieldLayoutSchema, entityFieldsSchema, entityBlocksSchema, entityBlockLayoutSchema } from "$src/schemas";
+import { entityFieldsSchema, entityBlocksSchema, entityBlockLayoutSchema, entityFieldLayoutSchema } from "$src/schemas";
 import { GitCompareIcon, TextSearchIcon, HashIcon, CalendarDaysIcon, TextIcon, PencilIcon, Tally1Icon, MinusIcon } from "@lucide/svelte"
-import { position2coordinate } from "$src/lib/components/user-grid/utils/item";
-import { getFirstAvailableCoords } from "../../user-grid/utils/grid";
 import { ELEMENT_TYPES } from "$routes/[orgLabel]/custom-entities/schema/entityFields";
-import type { GridSettings } from "$src/lib/components/user-grid";
-import type { Component } from "svelte";
 import type { Lookup } from "$src/lib/interfaces/Lookup";
 import type { FormData } from "$src/lib/interfaces/forms";
+import type { Component } from "svelte";
+import type { BuildableField, BuildableLayoutMetaData } from "../types";
 
-export type BuildableField = {
-  properties: FormData<typeof entityFieldsSchema>,
-  layout: FormData<typeof entityFieldLayoutSchema> & BuildableFieldLayoutMetaData,
-}
-export type BuildableFieldLayoutMetaData = {
-  min: {
-    widthGridUnits: number,
-    heightGridUnits: number
-  },
-  max?: {
-    widthGridUnits: number,
-    heightGridUnits: number
-  }
-  moveable: boolean,
-  resizeable: boolean
-}
 export type FieldBtnProps = {
   render: Component,
   icon: Component,
   title: string
 }
+
 export type BuildableFieldDefault = {
   component: FieldBtnProps,
   properties: Omit<BuildableField['properties'], "id" | "entityId">,
-  layout: Omit<BuildableField['layout'], "id" | "fieldId"> & BuildableFieldLayoutMetaData,
+  layout: Omit<BuildableField['layout'], "id" | "fieldId"> & BuildableLayoutMetaData,
 }
 
-const inputs = {
+export type BuildableBlockDefault = {
+  component: FieldBtnProps,
+  properties: Omit<FormData<typeof entityBlocksSchema>, "id" | "entityId">,
+  layout: Omit<FormData<typeof entityBlockLayoutSchema>, "id" | "blockId"> & BuildableLayoutMetaData
+}
+
+const fields = {
   input: {
     component: {
       render: Input,
@@ -46,7 +35,7 @@ const inputs = {
     properties: {
       name: 'input',
       label: 'Default Label',
-      elementType: ELEMENT_TYPES.FIELDS,
+      elementType: ELEMENT_TYPES.fields,
       fieldType: "input" as const,
       inputType: "text",
       multiple: false,
@@ -79,7 +68,7 @@ const inputs = {
     properties: {
       name: 'number',
       label: 'Default Label',
-      elementType: ELEMENT_TYPES.FIELDS,
+      elementType: ELEMENT_TYPES.fields,
       fieldType: "input" as const,
       inputType: "number",
       multiple: false,
@@ -112,7 +101,7 @@ const inputs = {
     properties: {
       name: 'date',
       label: 'Default Label',
-      elementType: ELEMENT_TYPES.FIELDS,
+      elementType: ELEMENT_TYPES.fields,
       fieldType: "date" as const,
       inputType: "date",
       multiple: false,
@@ -145,7 +134,7 @@ const inputs = {
     properties: {
       name: 'lookup',
       label: 'Default Label',
-      elementType: ELEMENT_TYPES.FIELDS,
+      elementType: ELEMENT_TYPES.fields,
       fieldType: "lookup" as const,
       inputType: null,
       multiple: false,
@@ -178,7 +167,7 @@ const inputs = {
     properties: {
       name: 'lookup',
       label: 'Default Label',
-      elementType: ELEMENT_TYPES.FIELDS,
+      elementType: ELEMENT_TYPES.fields,
       fieldType: "lookup" as const,
       inputType: null,
       multiple: false,
@@ -204,11 +193,6 @@ const inputs = {
   }
 } satisfies Record<string, BuildableFieldDefault>
 
-export type BuildableUIDefault = {
-  component: FieldBtnProps,
-  properties: Omit<FormData<typeof entityBlocksSchema>, "id" | "entityId">,
-  layout: Omit<FormData<typeof entityBlockLayoutSchema>, "id" | "blockId"> & BuildableFieldLayoutMetaData
-}
 const blocks = {
   textBlock: {
     component: {
@@ -217,7 +201,7 @@ const blocks = {
       title: 'Text'
     },
     properties: {
-      elementType: "BLOCKS",
+      elementType: "blocks",
       fieldType: "textBlock" as const,
       size: "lg",
       color: "white",
@@ -244,7 +228,7 @@ const blocks = {
       title: 'Divider'
     },
     properties: {
-      elementType: "BLOCKS",
+      elementType: "blocks",
       fieldType: "dividerHorizontal" as const,
       size: "",
       color: "",
@@ -271,7 +255,7 @@ const blocks = {
       title: 'Divider'
     },
     properties: {
-      elementType: "BLOCKS",
+      elementType: "blocks",
       fieldType: "dividerVertical" as const,
       size: "",
       color: "",
@@ -291,54 +275,15 @@ const blocks = {
       resizeable: true,
     },
   }
-} satisfies Record<string, BuildableUIDefault>
+} satisfies Record<string, BuildableBlockDefault>
 
-const fields: { [ELEMENT_TYPES.FIELDS]: Record<FormData<typeof entityFieldsSchema>['fieldType'], BuildableFieldDefault> } & { [ELEMENT_TYPES.BLOCKS]: Record<FormData<typeof entityBlocksSchema>['fieldType'], BuildableUIDefault> } = {
-  [ELEMENT_TYPES.FIELDS]: inputs,
-  [ELEMENT_TYPES.BLOCKS]: blocks,
+const formElements: {
+  [ELEMENT_TYPES.fields]: Record<FormData<typeof entityFieldsSchema>['fieldType'], BuildableFieldDefault>
 }
-export default fields
-
-export function buildableFieldCreate({ e, entityId, field, gridSettings }:
-  { e: DragEvent, entityId: string, field: BuildableFieldDefault | BuildableUIDefault, gridSettings: GridSettings }): BuildableField {
-
-  let { itemSize, gap, boundsTo } = gridSettings
-  let gridRect = boundsTo?.getBoundingClientRect()
-  if (!gridRect) throw Error("Grid not initialized.")
-
-  let fieldId = crypto.randomUUID()
-  if (!field.properties.elementType) throw Error("Missing Element Type!")
-  let fieldMetaData = fields[field.properties.elementType][field.properties.fieldType]
-
-  return {
-    ...fieldMetaData,
-    properties: {
-      ...field.properties,
-      id: fieldId,
-      entityId,
-    },
-    layout: {
-      ...field.layout,
-      id: crypto.randomUUID(),
-      fieldId,
-      x: position2coordinate(e.pageX - (gridRect.left), itemSize.width, gap),
-      y: position2coordinate(e.pageY - (gridRect.top), itemSize.height, gap)
-    }
-  }
+  & { [ELEMENT_TYPES.blocks]: Record<FormData<typeof entityBlocksSchema>['fieldType'], BuildableBlockDefault> } = {
+  [ELEMENT_TYPES.fields]: fields,
+  [ELEMENT_TYPES.blocks]: blocks,
 }
+export default formElements
 
-export function buildableFieldPlacedInBounds<T extends { layout: BuildableField['layout'] }>({ item, gridSettings }: { item: T, gridSettings: GridSettings }) {
-  if (
-    item.layout.x < 0 ||
-    item.layout.x + item.layout.widthGridUnits >
-    gridSettings.maxDimensions.cols ||
-    item.layout.y < 0 ||
-    item.layout.y + item.layout.heightGridUnits > gridSettings.maxDimensions.rows
-  ) {
-    let coords = getFirstAvailableCoords({ item: item.layout, gridSettings })
-    if (!coords) throw Error("Something went wrong")
-    item.layout.x = coords.x
-    item.layout.y = coords.y
-  }
-  return item
-}
+

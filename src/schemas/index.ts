@@ -9,5 +9,7 @@ export { clientServiceEvents, clientServiceEventsRelations, clientServiceEventsS
 export { logCategories, logs, logsRelations, logsClients, logsServices, logsClientsRelations, logsServicesRelations } from "../routes/[orgLabel]/logs/schema"
 export { usersClients } from "../routes/[orgLabel]/users/clients/schema"
 export { entities, entitySchema, entityRelations } from "../routes/[orgLabel]/custom-entities/schema/entities"
-export { entityFields, entityFieldsSchema, entityFieldRelations, entityFieldType, entityInputType } from "../routes/[orgLabel]/custom-entities/schema/entityFields"
+export { entityFields, entityFieldsSchema, entityFieldRelations, entityElementFieldType, entityFieldType, entityInputType } from "../routes/[orgLabel]/custom-entities/schema/entityFields"
 export { entityFieldLayouts, entityFieldLayoutSchema, entityFieldLayoutRelations, inputLayoutViewType } from "../routes/[orgLabel]/custom-entities/schema/entityFieldLayouts"
+export { entityBlocks, entityBlocksSchema, entityBlockType, entityBlocksRelations } from "../routes/[orgLabel]/custom-entities/schema/entityBlocks"
+export { entityBlockLayouts, entityBlockLayoutSchema, entityBlockLayoutRelations } from "../routes/[orgLabel]/custom-entities/schema/entityBlockLayouts"

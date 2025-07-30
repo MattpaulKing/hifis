@@ -1,8 +1,7 @@
 <script lang="ts">
 	/* 
  TODO:
- -2. Add Await block for getting label on entityLookupId on BuildableLookupForm
- -1. add isTainted for field proxies
+  -1. Need a min/max for date inputs
   0. Implement path finding algo for finding firstAvailableCoords
   1. Create a way to make valibot schemas from fields
   2. Figure out if modals & drawers being open at the same time messes with each other closing

@@ -7,12 +7,12 @@ import type { RequestEvent } from "../../[action=crud]/$types"
 
 export default async function({ e, form }: { e: RequestEvent, form: FormValidated<typeof entitySchema> }) {
   if (!form.data.id) return ar.invalid({ form, msg: "No ID found." })
-  let { fields, ...entityData } = form.data
+  let { fieldInputs, fieldBlocks, ...entityData } = form.data
   await tryQuery({
     fn: e.locals.db.update(entities).set(entityData).where(eq(entities.id, form.data.id)),
     errorMsg: "Something went wrong."
   })
-  fields.forEach(async ({ properties, layout }) => {
+  fieldInputs.forEach(async ({ properties, layout }) => {
     if (!properties.id || !layout.id) return ar.dbError({ form, msg: "No ID found." })
     await tryQuery({
       fn: e.locals.db.update(entityFields).set(properties).where(eq(entityFields.id, properties.id)),

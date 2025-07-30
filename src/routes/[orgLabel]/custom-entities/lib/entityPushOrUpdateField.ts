@@ -3,25 +3,25 @@ import type { entitySchema } from "$src/schemas";
 
 type EntityFormData = FormValidated<typeof entitySchema>['data']
 
-function entityFindFieldIdx({ $entityFormData, entityKey, id }: { $entityFormData: EntityFormData, entityKey: keyof EntityFormData['fields'][0], id: string }) {
-  return $entityFormData.fields.findIndex((field) => field[entityKey]['id'] === id);
+function entityFindFieldIdx<T extends keyof Pick<EntityFormData, "fieldInputs" | "fieldBlocks">>({ $entityFormData, entityKey, id }: { $entityFormData: EntityFormData, entityKey: T, id: string }) {
+  return $entityFormData[entityKey].findIndex((field) => field['properties']['id'] === id);
 }
 
-export default function({ $entityFormData, fieldKey, field }:
-  { $entityFormData: EntityFormData, fieldKey: keyof EntityFormData['fields'][0], field: EntityFormData['fields'][0] }) {
-  let id = field[fieldKey]['id']
+export default function <T extends keyof EntityFormData & "fieldBlocks" | "fieldInputs">({ $entityFormData, fieldKey, field }:
+  { $entityFormData: EntityFormData, fieldKey: T, field: EntityFormData[T][0] }) {
+  let id = field['properties']['id']
   if (!id) {
     throw Error("Id not found")
   }
   let idx = entityFindFieldIdx({
     $entityFormData,
-    entityKey: 'properties',
+    entityKey: fieldKey,
     id
   });
   if (idx >= 0) {
-    $entityFormData.fields[idx] = field;
+    $entityFormData[fieldKey][idx] = field;
   } else {
-    $entityFormData.fields = [...$entityFormData.fields, field];
+    $entityFormData[fieldKey] = [...$entityFormData[fieldKey], field];
   }
   return $entityFormData
 }

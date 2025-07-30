@@ -37,7 +37,7 @@
     "prettier": "^3.4.2",
     "prettier-plugin-svelte": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
-    "svelte": "^5.16.0",
+    "svelte": "^5.36.13",
     "svelte-check": "^4.1.1",
     "sveltekit-search-params": "^3.0.0",
     "sveltekit-superforms": "^2.22.1",
@@ -52,9 +52,8 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
-    "@floating-ui/dom": "^1.6.12",
-    "@hono/node-server": "^1.13.7",
     "@lucide/svelte": "^0.482.0",
+    "@neodrag/svelte": "3.0.0-next.7",
     "@openauthjs/openauth": "^0.2.6",
     "@skeletonlabs/tw-plugin": "^0.4.0",
     "@tailwindcss/container-queries": "^0.1.1",

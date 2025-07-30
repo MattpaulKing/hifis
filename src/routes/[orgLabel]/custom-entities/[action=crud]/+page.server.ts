@@ -66,25 +66,40 @@ async function getEntityFormDataAndLayouts({ db, entityId }: { entityId: string,
     fn: db
       .query.entities.findMany({
         with: {
-          fields: {
+          fieldInputs: {
             with: {
               layouts: {},
             },
           },
+          fieldBlocks: {
+            with: {
+              layouts: {},
+            }
+          }
         },
         where: eq(entities.id, entityId)
       }),
     errorMsg: "Entity not found"
   })
-  let fields: typeof entityFormData['fields'] = []
-  let layoutsMap: Record<string, typeof entityFormData['fields'][0]['layout'][]> = {}
-  entity?.fields.forEach(({ layouts, ...properties }) => {
-    fields.push({ properties, layout: layouts[0] })
-    layoutsMap[properties.id] = layouts
+  let fields: {
+    fieldInputs: typeof entityFormData['fieldInputs'],
+    fieldBlocks: typeof entityFormData['fieldBlocks']
+  } = { fieldInputs: [], fieldBlocks: [] }
+  let layoutsMap: {
+    fieldInputs: Record<string, typeof entityFormData['fieldInputs'][0]['layout'][]>,
+    fieldBlocks: Record<string, typeof entityFormData['fieldBlocks'][0]['layout'][]>,
+  } = { fieldInputs: {}, fieldBlocks: {} }
+  entity?.fieldInputs.forEach(({ layouts, ...properties }) => {
+    fields.fieldInputs.push({ properties, layout: layouts[0] })
+    layoutsMap.fieldInputs[properties.id] = layouts
+  })
+  entity?.fieldBlocks.forEach(({ layouts, ...properties }) => {
+    fields.fieldBlocks.push({ properties, layout: layouts[0] })
+    layoutsMap.fieldBlocks[properties.id] = layouts
   })
   entityFormData = {
     ...entity,
-    fields
+    ...fields
   }
   return { entityFormData, layouts: layoutsMap }
 }

@@ -3,8 +3,9 @@ import { writable, type Writable } from "svelte/store";
 import { arrayProxy, formFieldProxy, type ArrayProxy, type FormFieldProxy, type FormPathArrays, type FormPathLeaves, type SuperForm } from "sveltekit-superforms";
 
 const FORM_CTX = Symbol("DISABLED")
-export function setFormCtx(props: { disabled: boolean }) {
+export function setFormCtx<T extends Record<string, unknown>>(props: { form: SuperForm<T>, disabled: boolean }) {
   return setContext(FORM_CTX, {
+    form: props.form,
     disabled: writable(props.disabled)
   })
 }
@@ -42,7 +43,6 @@ export function setField<T extends Record<string, unknown>>({ form, path }: { fo
   })
 }
 type FormFieldMetadata = {
-  // selected: Writable<LookupOption[]>,
   focused: Writable<boolean>,
   searching: Writable<boolean>,
   disabled: Writable<boolean>,
