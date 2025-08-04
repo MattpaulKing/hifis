@@ -8,6 +8,9 @@ const config = {
   preprocess: vitePreprocess(),
 
   kit: {
+    experimental: {
+      remoteFunctions: true
+    },
     alias: {
       '$routes': './src/routes',
       '$api': './src/routes/api/v1',

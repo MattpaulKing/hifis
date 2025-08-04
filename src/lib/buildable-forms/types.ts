@@ -21,7 +21,9 @@ export type BuildableLayoutMetaData = {
     heightGridUnits: number
   }
   moveable: boolean,
-  resizeable: boolean
+  resizeable: boolean,
+  active: boolean,
+  element: HTMLElement | null,
 }
 export type CoordsAndSize = {
   id: string,

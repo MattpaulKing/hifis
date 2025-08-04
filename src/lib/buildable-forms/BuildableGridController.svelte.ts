@@ -1,8 +1,8 @@
 import { getContext, setContext } from "svelte"
+import { on } from "svelte/events";
 import type { BuildableBlockDefault, BuildableFieldDefault } from "./elements/elementsDefault";
 import type { BuildableBlock, BuildableField, CoordsAndSize } from "./types";
 import type { ELEMENT_TYPES } from "$routes/[orgLabel]/custom-entities/schema/entityFields";
-import { BuildableBlockBtns } from ".";
 
 type BuildableGridControllerArgs = {
   buildableFields: BuildableField[],
@@ -11,6 +11,11 @@ type BuildableGridControllerArgs = {
   entityId: string,
 }
 type BuildableGridMenuState = {
+  label: string;
+  showing: 'form-entity-properties';
+  blockId: null;
+  fieldId: null;
+} | {
   label: string;
   showing: 'form-elements-list';
   fieldId: null;
@@ -23,11 +28,15 @@ type BuildableGridMenuState = {
 } | {
   label: string;
   showing: 'form-block-properties';
+  fieldId: null;
   blockId: string;
-  fieldId: string;
 }
 
 class BuildableGridController {
+
+  entityId: string
+  menu = $state<BuildableGridMenuState>(DEFAULT_MENU)
+
   items = $state<{
     fields: BuildableField[],
     blocks: BuildableBlock[],
@@ -36,14 +45,18 @@ class BuildableGridController {
     fields: Record<string, BuildableField>,
     blocks: Record<string, BuildableBlock>
   }>({ fields: {}, blocks: {} })
-  gridSize = $state<BuildableGridControllerArgs['gridSize']>(50)
-  gridElement = $state<NonNullable<HTMLElement>>()
-  menu = $state<BuildableGridMenuState>(DEFAULT_MENU)
-  entityId: string
   dragIdx = $state<null | number>(null)
   dragItemKey = $state<(keyof typeof this.items) | null>(null)
   tempField = $state<BuildableField | null>(null)
   tempBlock = $state<BuildableBlock | null>(null)
+
+  gridSize = $state<BuildableGridControllerArgs['gridSize']>(50)
+  gridElement = $state<NonNullable<HTMLElement>>()
+
+  initialSize = $state({ width: 0, height: 0 })
+  initialPointerPosition = $state({ left: 0, top: 0 })
+  cleanupResizeMouse = $state<void | (() => void)>()
+  cleanupResizeMouseEnd = $state<void | (() => void)>()
 
   constructor({ buildableFields, buildableBlocks, gridSize, entityId }: BuildableGridControllerArgs) {
     this.menuDefault()
@@ -62,14 +75,14 @@ class BuildableGridController {
   setMenu({ elementType, idx }: { elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
     if (elementType === "fields") {
       this.menu = {
-        label: this.items.fields[idx].properties.fieldType,
+        label: `${this.items.fields[idx].properties.fieldType} Properties`,
         showing: "form-field-properties",
         fieldId: this.items.fields[idx].properties.id,
         blockId: null
       }
     } else if (elementType === "blocks") {
       this.menu = {
-        label: this.items.blocks[idx].properties.fieldType,
+        label: `${this.items.blocks[idx].properties.fieldType} Properties`,
         showing: "form-block-properties",
         fieldId: null,
         blockId: this.items.blocks[idx].properties.id
@@ -152,6 +165,7 @@ class BuildableGridController {
       currItem.y + ((currItem.heightGridUnits - 1) * this.gridSize) >= item.y);
 
   }
+
   handleDelete({
     elementType,
     i
@@ -161,6 +175,7 @@ class BuildableGridController {
   }) {
     if (!elementType) throw Error('No element type found.');
     this.items[elementType].splice(i);
+    this.menuDefault()
   }
   hasCollisions(currItem: CoordsAndSize) {
     if (!this.dragItemKey) throw Error("Not dragging")
@@ -179,6 +194,76 @@ class BuildableGridController {
       y: this.gridElement.offsetHeight - this.gridElement.offsetTop - (this.gridSize * 2)
     }
   }
+  private initInteraction({ e, elementType, idx }: { e: PointerEvent | MouseEvent | DragEvent | TouchEvent["touches"][0], elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
+    this.items[elementType][idx].layout.active = true;
+    this.initialPointerPosition = { left: e.pageX, top: e.pageY }
+    this.initialSize = {
+      width: this.items[elementType][idx].layout.widthGridUnits * this.gridSize,
+      height: this.items[elementType][idx].layout.heightGridUnits * this.gridSize
+    }
+    // this.initialPosition = { left: this.left, top: this.top }
+    if ("pointerId" in e && this.items[elementType][idx].layout.element) {
+      this.items[elementType][idx].layout.element?.setPointerCapture(e.pointerId)
+    }
+  }
+  resizeMouseStart({ e, elementType, idx }: { e: MouseEvent, elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
+    if (e.button !== 0 || this.items[elementType][idx].layout.active) return
+    this.initInteraction({ e, elementType, idx });
+    this.cleanupResizeMouse = on(window, 'pointermove', (e) => this.resizeMouse({ e, elementType, idx }))
+    this.cleanupResizeMouseEnd = on(window, 'pointerup', (e) => this.resizeMouseEnd({ e, elementType, idx }))
+  }
+  private resizeMouse({ e, elementType, idx }: { e: MouseEvent, elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
+    let _width = e.pageX + this.initialSize.width - this.initialPointerPosition.left;
+    let _height = e.pageY + this.initialSize.height - this.initialPointerPosition.top;
+    let minSize = {
+      width: this.items[elementType][idx].layout.min.widthGridUnits * this.gridSize,
+      height: this.items[elementType][idx].layout.min.heightGridUnits * this.gridSize
+    }
+    if (this.gridElement) {
+      const parentRect = this.gridElement.getBoundingClientRect();
+      // if (_width + this.left > parentRect.width + parentRect.left) {
+      if (_width > parentRect.width) {
+        _width = parentRect.width;
+      }
+      if (_height > parentRect.height) {
+        _height = parentRect.height;
+      }
+    }
+    _width = Math.max(_width, minSize.width)
+    _height = Math.max(_height, minSize.height)
+    this.items[elementType][idx].layout = {
+      ...this.items[elementType][idx].layout,
+      widthGridUnits: Math.round(_width / this.gridSize),
+      heightGridUnits: Math.round(_height / this.gridSize)
+    }
+
+    // if (_width > this.maxSize.width) {
+    //   _width = this.maxSize.width
+    // }
+    // if (_height > this.maxSize.height) {
+    //   _height = this.maxSize.height
+    // }
+    // const { widthGridUnits, heightGridUnits } = snapOnResize(_width, _height, this.previewItem, this.settings);
+
+    // if (!hasCollisions({ ...this.previewItem, widthGridUnits, heightGridUnits }, Object.values(this.settings.items))) {
+    //   this.height = _height
+    //   this.width = _width
+    //   this.previewItem = {
+    //     ...this.previewItem,
+    //     widthGridUnits,
+    //     heightGridUnits
+    //   }
+    // }
+  }
+  private resizeMouseEnd({ e, elementType, idx }: { e: PointerEvent, elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
+    if (e.button !== 0 || !this.items[elementType][idx].layout.active) return;
+    this.items[elementType][idx].layout.active = false;
+    if ("pointerId" in e) {
+      this.items[elementType][idx].layout.element?.releasePointerCapture(e.pointerId)
+    }
+    if (this.cleanupResizeMouse) this.cleanupResizeMouse()
+    if (this.cleanupResizeMouseEnd) this.cleanupResizeMouseEnd()
+  }
 }
 
 export function setBuildableGridController(args: BuildableGridControllerArgs) {
@@ -196,4 +281,4 @@ const DEFAULT_MENU = {
   showing: "form-elements-list",
   fieldId: null,
   blockId: null
-} as const
+} satisfies BuildableGridMenuState

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import { ArrowLeftIcon } from '@lucide/svelte';
+	import { ArrowLeftIcon, NotebookPenIcon } from '@lucide/svelte';
 	import { getBuildableGridController } from '../BuildableGridController.svelte';
 	import type { Snippet } from 'svelte';
 

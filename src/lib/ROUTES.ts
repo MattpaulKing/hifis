@@ -11,61 +11,64 @@
 const PAGES = {
   "/": `/`,
   "/[orgLabel]": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}`
+    return `/${params['orgLabel']}`
   },
   "/[orgLabel]/clients": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/clients`
+    return `/${params['orgLabel']}/clients`
   },
   "/[orgLabel]/clients/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/clients/${params.action}`
+    return `/${params['orgLabel']}/clients/${params['action']}`
   },
   "/[orgLabel]/clients/[clientId=uuid]": (params: { orgLabel: (string | number), clientId: (Parameters<typeof import('../params/uuid.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/clients/${params.clientId}`
+    return `/${params['orgLabel']}/clients/${params['clientId']}`
   },
   "/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]": (params: { orgLabel: (string | number), clientId: (Parameters<typeof import('../params/uuid.ts').match>[0]), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/clients/${params.clientId}/services/${params.action}`
+    return `/${params['orgLabel']}/clients/${params['clientId']}/services/${params['action']}`
   },
   "/[orgLabel]/clients/[clientId=uuid]/services/events": (params: { orgLabel: (string | number), clientId: (Parameters<typeof import('../params/uuid.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/clients/${params.clientId}/services/events`
+    return `/${params['orgLabel']}/clients/${params['clientId']}/services/events`
   },
   "/[orgLabel]/custom-entities/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/custom-entities/${params.action}`
+    return `/${params['orgLabel']}/custom-entities/${params['action']}`
+  },
+  "/[orgLabel]/custom-entities/v1/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
+    return `/${params['orgLabel']}/custom-entities/v1/${params['action']}`
   },
   "/[orgLabel]/logs": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/logs`
+    return `/${params['orgLabel']}/logs`
   },
   "/[orgLabel]/logs/categories/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/logs/categories/${params.action}`
+    return `/${params['orgLabel']}/logs/categories/${params['action']}`
   },
   "/[orgLabel]/services": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/services`
+    return `/${params['orgLabel']}/services`
   },
   "/[orgLabel]/services/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/services/${params.action}`
+    return `/${params['orgLabel']}/services/${params['action']}`
   },
   "/[orgLabel]/services/[serviceId=uuid]": (params: { orgLabel: (string | number), serviceId: (Parameters<typeof import('../params/uuid.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/services/${params.serviceId}`
+    return `/${params['orgLabel']}/services/${params['serviceId']}`
   },
   "/[orgLabel]/services/[serviceId=uuid]/referrals": (params: { orgLabel: (string | number), serviceId: (Parameters<typeof import('../params/uuid.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/services/${params.serviceId}/referrals`
+    return `/${params['orgLabel']}/services/${params['serviceId']}/referrals`
   },
   "/[orgLabel]/services/[serviceId=uuid]/referrals/[action=crud]": (params: { orgLabel: (string | number), serviceId: (Parameters<typeof import('../params/uuid.ts').match>[0]), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/services/${params.serviceId}/referrals/${params.action}`
+    return `/${params['orgLabel']}/services/${params['serviceId']}/referrals/${params['action']}`
   },
   "/[orgLabel]/services/categories/create": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/services/categories/create`
+    return `/${params['orgLabel']}/services/categories/create`
   },
   "/[orgLabel]/services/events": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/services/events`
+    return `/${params['orgLabel']}/services/events`
   },
   "/[orgLabel]/services/events/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/services/events/${params.action}`
+    return `/${params['orgLabel']}/services/events/${params['action']}`
   },
   "/[orgLabel]/services/events/clients/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/services/events/clients/${params.action}`
+    return `/${params['orgLabel']}/services/events/clients/${params['action']}`
   },
   "/[orgLabel]/users/create": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/users/create`
+    return `/${params['orgLabel']}/users/create`
   }
 }
 
@@ -79,7 +82,7 @@ const SERVERS = {
   "GET /api/v1/logs/categories": `/api/v1/logs/categories`,
   "GET /api/v1/organizations": `/api/v1/organizations`,
   "GET /api/v1/search": (params?: { value?: (string) }) => {
-    return `/api/v1/search${appendSp({ value: params?.value })}`
+    return `/api/v1/search${appendSp({ 'value': params?.['value'] })}`
   },
   "GET /api/v1/services": `/api/v1/services`,
   "GET /api/v1/services/categories": `/api/v1/services/categories`,
@@ -94,49 +97,52 @@ const SERVERS = {
  */
 const ACTIONS = {
   "default /[orgLabel]/clients/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/clients/${params.action}`
+    return `/${params['orgLabel']}/clients/${params['action']}`
   },
   "default /[orgLabel]/clients/[clientId=uuid]/services/[action=crud]": (params: { orgLabel: (string | number), clientId: (Parameters<typeof import('../params/uuid.ts').match>[0]), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/clients/${params.clientId}/services/${params.action}`
+    return `/${params['orgLabel']}/clients/${params['clientId']}/services/${params['action']}`
   },
   "default /[orgLabel]/custom-entities/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/custom-entities/${params.action}`
+    return `/${params['orgLabel']}/custom-entities/${params['action']}`
   },
   "default /[orgLabel]/custom-entities/layouts": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/custom-entities/layouts`
+    return `/${params['orgLabel']}/custom-entities/layouts`
   },
   "createOrUpdate /[orgLabel]/custom-entities/properties": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/custom-entities/properties?/createOrUpdate`
+    return `/${params['orgLabel']}/custom-entities/properties?/createOrUpdate`
   },
   "delete /[orgLabel]/custom-entities/properties": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/custom-entities/properties?/delete`
+    return `/${params['orgLabel']}/custom-entities/properties?/delete`
+  },
+  "updateEntity /[orgLabel]/custom-entities/v1/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
+    return `/${params['orgLabel']}/custom-entities/v1/${params['action']}?/updateEntity`
   },
   "create /[orgLabel]/logs": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/logs?/create`
+    return `/${params['orgLabel']}/logs?/create`
   },
   "update /[orgLabel]/logs": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/logs?/update`
+    return `/${params['orgLabel']}/logs?/update`
   },
   "default /[orgLabel]/logs/categories/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/logs/categories/${params.action}`
+    return `/${params['orgLabel']}/logs/categories/${params['action']}`
   },
   "default /[orgLabel]/services/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/services/${params.action}`
+    return `/${params['orgLabel']}/services/${params['action']}`
   },
   "default /[orgLabel]/services/[serviceId=uuid]/referrals/[action=crud]": (params: { orgLabel: (string | number), serviceId: (Parameters<typeof import('../params/uuid.ts').match>[0]), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/services/${params.serviceId}/referrals/${params.action}`
+    return `/${params['orgLabel']}/services/${params['serviceId']}/referrals/${params['action']}`
   },
   "create /[orgLabel]/services/categories/create": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/services/categories/create?/create`
+    return `/${params['orgLabel']}/services/categories/create?/create`
   },
   "default /[orgLabel]/services/events/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/services/events/${params.action}`
+    return `/${params['orgLabel']}/services/events/${params['action']}`
   },
   "default /[orgLabel]/services/events/clients/[action=crud]": (params: { orgLabel: (string | number), action: (Parameters<typeof import('../params/crud.ts').match>[0]) }) => {
-    return `/${params.orgLabel}/services/events/clients/${params.action}`
+    return `/${params['orgLabel']}/services/events/clients/${params['action']}`
   },
   "create /[orgLabel]/users/create": (params: { orgLabel: (string | number) }) => {
-    return `/${params.orgLabel}/users/create?/create`
+    return `/${params['orgLabel']}/users/create?/create`
   }
 }
 
@@ -152,7 +158,10 @@ type ParamValue = string | number | undefined
 /**
  * Append search params to a string
  */
-export const appendSp = (sp?: Record<string, ParamValue | ParamValue[]>, prefix: '?' | '&' = '?') => {
+export const appendSp = (
+  sp?: Record<string, ParamValue | ParamValue[]>,
+  prefix: '?' | '&' = '?',
+) => {
   if (sp === undefined) return ''
 
   const params = new URLSearchParams()
@@ -162,7 +171,12 @@ export const appendSp = (sp?: Record<string, ParamValue | ParamValue[]>, prefix:
     }
   }
 
+  let anchor = ''
   for (const [name, val] of Object.entries(sp)) {
+    if (name === '__KIT_ROUTES_ANCHOR__' && val !== undefined) {
+      anchor = `#${val}`
+      continue
+    }
     if (Array.isArray(val)) {
       for (const v of val) {
         append(name, v)
@@ -173,8 +187,8 @@ export const appendSp = (sp?: Record<string, ParamValue | ParamValue[]>, prefix:
   }
 
   const formatted = params.toString()
-  if (formatted) {
-    return `${prefix}${formatted}`
+  if (formatted || anchor) {
+    return `${prefix}${formatted}${anchor}`.replace('?#', '#')
   }
   return ''
 }
@@ -233,7 +247,7 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 *
 * Full example:
 * ```ts
-* import type { KIT_ROUTES } from '$_lib/ROUTES'
+* import type { KIT_ROUTES } from '$lib/ROUTES'
 * import { kitRoutes } from 'vite-plugin-kit-routes'
 *
 * kitRoutes<KIT_ROUTES>({
@@ -244,9 +258,9 @@ export function route<T extends keyof AllTypes>(key: T, ...params: any[]): strin
 * ```
 */
 export type KIT_ROUTES = {
-  PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients': 'orgLabel', '/[orgLabel]/clients/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/clients/[clientId=uuid]': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]': 'orgLabel' | 'clientId' | 'action', '/[orgLabel]/clients/[clientId=uuid]/services/events': 'orgLabel' | 'clientId', '/[orgLabel]/custom-entities/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/logs': 'orgLabel', '/[orgLabel]/logs/categories/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services': 'orgLabel', '/[orgLabel]/services/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services/[serviceId=uuid]': 'orgLabel' | 'serviceId', '/[orgLabel]/services/[serviceId=uuid]/referrals': 'orgLabel' | 'serviceId', '/[orgLabel]/services/[serviceId=uuid]/referrals/[action=crud]': 'orgLabel' | 'serviceId' | 'action', '/[orgLabel]/services/categories/create': 'orgLabel', '/[orgLabel]/services/events': 'orgLabel', '/[orgLabel]/services/events/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services/events/clients/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/users/create': 'orgLabel' }
+  PAGES: { '/': never, '/[orgLabel]': 'orgLabel', '/[orgLabel]/clients': 'orgLabel', '/[orgLabel]/clients/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/clients/[clientId=uuid]': 'orgLabel' | 'clientId', '/[orgLabel]/clients/[clientId=uuid]/services/[action=crud]': 'orgLabel' | 'clientId' | 'action', '/[orgLabel]/clients/[clientId=uuid]/services/events': 'orgLabel' | 'clientId', '/[orgLabel]/custom-entities/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/custom-entities/v1/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/logs': 'orgLabel', '/[orgLabel]/logs/categories/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services': 'orgLabel', '/[orgLabel]/services/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services/[serviceId=uuid]': 'orgLabel' | 'serviceId', '/[orgLabel]/services/[serviceId=uuid]/referrals': 'orgLabel' | 'serviceId', '/[orgLabel]/services/[serviceId=uuid]/referrals/[action=crud]': 'orgLabel' | 'serviceId' | 'action', '/[orgLabel]/services/categories/create': 'orgLabel', '/[orgLabel]/services/events': 'orgLabel', '/[orgLabel]/services/events/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/services/events/clients/[action=crud]': 'orgLabel' | 'action', '/[orgLabel]/users/create': 'orgLabel' }
   SERVERS: { 'GET /api/v1/clients': never, 'GET /api/v1/clients/services': never, 'GET /api/v1/entities/discover': never, 'GET /api/v1/logs/categories': never, 'GET /api/v1/organizations': never, 'GET /api/v1/search': never, 'GET /api/v1/services': never, 'GET /api/v1/services/categories': never, 'GET /api/v1/services/events': never, 'GET /api/v1/services/events/clients': never, 'GET /api/v1/user/grid': never, 'GET /auth/callback': never }
-  ACTIONS: { 'default /[orgLabel]/clients/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/clients/[clientId=uuid]/services/[action=crud]': 'orgLabel' | 'clientId' | 'action', 'default /[orgLabel]/custom-entities/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/custom-entities/layouts': 'orgLabel', 'createOrUpdate /[orgLabel]/custom-entities/properties': 'orgLabel', 'delete /[orgLabel]/custom-entities/properties': 'orgLabel', 'create /[orgLabel]/logs': 'orgLabel', 'update /[orgLabel]/logs': 'orgLabel', 'default /[orgLabel]/logs/categories/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/[serviceId=uuid]/referrals/[action=crud]': 'orgLabel' | 'serviceId' | 'action', 'create /[orgLabel]/services/categories/create': 'orgLabel', 'default /[orgLabel]/services/events/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/events/clients/[action=crud]': 'orgLabel' | 'action', 'create /[orgLabel]/users/create': 'orgLabel' }
+  ACTIONS: { 'default /[orgLabel]/clients/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/clients/[clientId=uuid]/services/[action=crud]': 'orgLabel' | 'clientId' | 'action', 'default /[orgLabel]/custom-entities/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/custom-entities/layouts': 'orgLabel', 'createOrUpdate /[orgLabel]/custom-entities/properties': 'orgLabel', 'delete /[orgLabel]/custom-entities/properties': 'orgLabel', 'updateEntity /[orgLabel]/custom-entities/v1/[action=crud]': 'orgLabel' | 'action', 'create /[orgLabel]/logs': 'orgLabel', 'update /[orgLabel]/logs': 'orgLabel', 'default /[orgLabel]/logs/categories/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/[serviceId=uuid]/referrals/[action=crud]': 'orgLabel' | 'serviceId' | 'action', 'create /[orgLabel]/services/categories/create': 'orgLabel', 'default /[orgLabel]/services/events/[action=crud]': 'orgLabel' | 'action', 'default /[orgLabel]/services/events/clients/[action=crud]': 'orgLabel' | 'action', 'create /[orgLabel]/users/create': 'orgLabel' }
   LINKS: Record<string, never>
-  Params: { orgLabel: never, action: never, clientId: never, serviceId: never, value: never }
+  Params: { 'orgLabel': never, 'action': never, 'clientId': never, 'serviceId': never, 'value': never }
 }

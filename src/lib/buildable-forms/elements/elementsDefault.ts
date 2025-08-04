@@ -16,13 +16,29 @@ export type FieldBtnProps = {
 export type BuildableFieldDefault = {
   component: FieldBtnProps,
   properties: Omit<BuildableField['properties'], "id" | "entityId">,
-  layout: Omit<BuildableField['layout'], "id" | "fieldId"> & BuildableLayoutMetaData,
+  layout: Omit<FormData<typeof entityFieldLayoutSchema>, "id" | "fieldId"> & BuildableLayoutMetaData
 }
 
 export type BuildableBlockDefault = {
   component: FieldBtnProps,
   properties: Omit<FormData<typeof entityBlocksSchema>, "id" | "entityId">,
   layout: Omit<FormData<typeof entityBlockLayoutSchema>, "id" | "blockId"> & BuildableLayoutMetaData
+}
+
+const DEFAULT_SIZE = {
+  widthGridUnits: 5,
+  heightGridUnits: 3
+}
+const DEFAULT_LAYOUT = {
+  x: Infinity,
+  y: Infinity,
+  ...DEFAULT_SIZE,
+  view: 'xl' as const,
+  min: DEFAULT_SIZE,
+  moveable: true,
+  resizeable: true,
+  element: null,
+  active: false,
 }
 
 const fields = {
@@ -46,17 +62,7 @@ const fields = {
       inputOptions: [] as Lookup[]
     },
     layout: {
-      x: Infinity,
-      y: Infinity,
-      widthGridUnits: 10,
-      heightGridUnits: 4,
-      view: 'xl',
-      min: {
-        widthGridUnits: 10,
-        heightGridUnits: 4,
-      },
-      moveable: true,
-      resizeable: true,
+      ...DEFAULT_LAYOUT
     },
   },
   number: {
@@ -79,17 +85,7 @@ const fields = {
       inputOptions: [] as Lookup[]
     },
     layout: {
-      x: Infinity,
-      y: Infinity,
-      widthGridUnits: 10,
-      heightGridUnits: 4,
-      view: 'xl',
-      min: {
-        widthGridUnits: 10,
-        heightGridUnits: 4,
-      },
-      moveable: true,
-      resizeable: true,
+      ...DEFAULT_LAYOUT
     },
   },
   date: {
@@ -112,18 +108,9 @@ const fields = {
       inputOptions: [] as Lookup[]
     },
     layout: {
-      x: Infinity,
-      y: Infinity,
-      widthGridUnits: 10,
-      heightGridUnits: 4,
-      view: 'xl',
-      min: {
-        widthGridUnits: 10,
-        heightGridUnits: 4,
-      },
-      moveable: true,
-      resizeable: true,
+      ...DEFAULT_LAYOUT
     },
+
   },
   lookup: {
     component: {
@@ -145,17 +132,7 @@ const fields = {
       inputOptions: [] as Lookup[]
     },
     layout: {
-      x: Infinity,
-      y: Infinity,
-      widthGridUnits: 10,
-      heightGridUnits: 4,
-      view: 'xl',
-      min: {
-        widthGridUnits: 10,
-        heightGridUnits: 4,
-      },
-      moveable: true,
-      resizeable: true,
+      ...DEFAULT_LAYOUT
     },
   },
   select: {
@@ -177,18 +154,9 @@ const fields = {
       max: null,
       inputOptions: [] as Lookup[]
     },
+
     layout: {
-      x: Infinity,
-      y: Infinity,
-      widthGridUnits: 10,
-      heightGridUnits: 4,
-      view: 'xl',
-      min: {
-        widthGridUnits: 10,
-        heightGridUnits: 4,
-      },
-      moveable: true,
-      resizeable: true,
+      ...DEFAULT_LAYOUT
     },
   }
 } satisfies Record<string, BuildableFieldDefault>
@@ -208,17 +176,7 @@ const blocks = {
       textValue: "Default Text",
     },
     layout: {
-      x: Infinity,
-      y: Infinity,
-      widthGridUnits: 10,
-      heightGridUnits: 4,
-      view: 'xl',
-      min: {
-        widthGridUnits: 10,
-        heightGridUnits: 4,
-      },
-      moveable: true,
-      resizeable: true,
+      ...DEFAULT_LAYOUT
     },
   },
   dividerHorizontal: {
@@ -235,17 +193,7 @@ const blocks = {
       textValue: "",
     },
     layout: {
-      x: Infinity,
-      y: Infinity,
-      widthGridUnits: 10,
-      heightGridUnits: 4,
-      view: 'xl',
-      min: {
-        widthGridUnits: 10,
-        heightGridUnits: 4,
-      },
-      moveable: true,
-      resizeable: true,
+      ...DEFAULT_LAYOUT
     },
   },
   dividerVertical: {
@@ -262,17 +210,7 @@ const blocks = {
       textValue: "",
     },
     layout: {
-      x: Infinity,
-      y: Infinity,
-      widthGridUnits: 10,
-      heightGridUnits: 4,
-      view: 'xl',
-      min: {
-        widthGridUnits: 10,
-        heightGridUnits: 4,
-      },
-      moveable: true,
-      resizeable: true,
+      ...DEFAULT_LAYOUT
     },
   }
 } satisfies Record<string, BuildableBlockDefault>
