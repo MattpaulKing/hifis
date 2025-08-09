@@ -1,8 +1,7 @@
 import { getContext, setContext } from "svelte"
-import { users } from "../../../schemas"
 import type { Lookup } from "$src/lib/interfaces/Lookup"
+import type { User as UserData } from "$src/lib/auth/subjects"
 
-export type UserData = typeof users.$inferSelect & { orgLabel: string }
 type UserProps = { user: UserData, clients: Lookup[], services: Lookup[] }
 
 class User {

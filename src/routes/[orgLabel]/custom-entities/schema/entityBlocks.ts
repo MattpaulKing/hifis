@@ -14,7 +14,7 @@ export const entityBlocks = pgTable("entity_blocks", {
   ...uuidPK,
   ...timestamps,
   entityId: uuid("entity_id").notNull().references(() => entities.id, { onUpdate: "cascade", onDelete: "restrict" }),
-  elementType: entityElementFieldType().notNull().default("BLOCKS"),
+  elementType: entityElementFieldType().notNull().default("blocks"),
   fieldType: entityBlockType().notNull(),
   size: text("size").notNull().default("base"),
   color: text("color"),

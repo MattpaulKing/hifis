@@ -13,6 +13,12 @@
 	import { entitySchema } from '$src/schemas/index.js';
 	import { route } from '$src/lib/ROUTES';
 	import { EntityForm } from '../../lib/index.js';
+	import {
+		entityBlockUpsert,
+		entityFieldDelete,
+		entityFieldLayoutUpsert,
+		entityFieldUpsert
+	} from '../../schema/data.remote.js';
 
 	let { data } = $props();
 
@@ -29,9 +35,8 @@
 	});
 	/*
     TODO:
-    1. Have to do resize logic
-    2. Do the Blocks Elements
-    3. Do the entity form
+    1. Do the entity form
+    2. Do the fields / blocks forms
   */
 </script>
 
@@ -63,13 +68,25 @@
 			orgLabel: data.org.label,
 			action: 'update'
 		})}
+		ondragenter={async (e) => {
+			let { field, block } = controller.onDragOver({ e });
+			if (field) {
+				await entityFieldUpsert(field);
+			} else if (block) {
+				await entityBlockUpsert(block);
+			}
+		}}
 	>
 		{#if controller.gridElement}
-			{#each controller.items.fields as _, i}
+			{#each controller.items.fields as _, i (i)}
 				{@const Input =
 					buildableElements.fields[controller.items.fields[i].properties.fieldType].component
 						.render}
 				<BuildableElementContainer
+					onPositionChange={async () =>
+						await entityFieldLayoutUpsert(controller.items.fields[i].layout)}
+					onResize={async () => await entityFieldLayoutUpsert(controller.items.fields[i].layout)}
+					onDelete={async () => await entityFieldDelete(controller.items.fields[i].properties.id)}
 					boundingElement={controller.gridElement}
 					elementType="fields"
 					idx={i}
@@ -80,7 +97,7 @@
 					</Field>
 				</BuildableElementContainer>
 			{/each}
-			{#each controller.items.blocks as _, i}
+			{#each controller.items.blocks as _, i (i)}
 				{@const Block =
 					buildableElements.blocks[controller.items.blocks[i].properties.fieldType].component
 						.render}

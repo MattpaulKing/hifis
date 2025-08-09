@@ -3,6 +3,7 @@ import { on } from "svelte/events";
 import type { BuildableBlockDefault, BuildableFieldDefault } from "./elements/elementsDefault";
 import type { BuildableBlock, BuildableField, CoordsAndSize } from "./types";
 import type { ELEMENT_TYPES } from "$routes/[orgLabel]/custom-entities/schema/entityFields";
+import { isItemColliding } from "../components/user-grid/utils/grid";
 
 type BuildableGridControllerArgs = {
   buildableFields: BuildableField[],
@@ -114,19 +115,34 @@ class BuildableGridController {
   }
   onNewBlockDragOver({ e }: { e: DragEvent }) {
     if (this.tempBlock) {
-      this.items.blocks.push(this.tempBlock)
+      let block = this.tempBlock
+      this.items.blocks.push(block)
       this.dragIdx = this.items.blocks.length - 1
       this.dragItemKey = "blocks"
       this.tempBlock = null
+      return block
     }
   }
   onNewFieldDragOver({ e }: { e: DragEvent }) {
     if (this.tempField) {
-      this.items.fields.push(this.tempField)
+      let field = this.tempField
+      this.items.fields.push(field)
       this.dragIdx = this.items.fields.length - 1
       this.dragItemKey = "fields"
       this.tempField = null
+      return field
     }
+  }
+  onDragOver({ e }: { e: DragEvent }) {
+    let res: { field: BuildableField | undefined, block: BuildableBlock | undefined } = { field: undefined, block: undefined }
+    if (this.tempField) {
+      res.field = this.onNewFieldDragOver({ e })
+    } else if (this.tempBlock) {
+      res.block = this.onNewBlockDragOver({ e })
+    } else {
+      throw Error("No element dragged")
+    }
+    return res
   }
   onNewBlockDrag({ e }: { e: DragEvent & { currentTarget: HTMLButtonElement } }) {
     if (!this.gridElement || e.offsetX < 0 || e.pageY < 0) return //NOTE: offset sometimes < 0 ????
@@ -159,11 +175,10 @@ class BuildableGridController {
   }
   private isItemColliding<T extends CoordsAndSize>(currItem: T, item: T) {
     return (currItem.id !== item.id &&
-      currItem.x <= item.x + ((item.widthGridUnits - 1) * this.gridSize) &&
-      currItem.y <= item.y + ((item.heightGridUnits - 1) * this.gridSize) &&
-      currItem.x + ((currItem.widthGridUnits - 1) * this.gridSize) >= item.x &&
-      currItem.y + ((currItem.heightGridUnits - 1) * this.gridSize) >= item.y);
-
+      currItem.x <= (item.x + (item.widthGridUnits * this.gridSize)) &&
+      currItem.y <= (item.y + (item.heightGridUnits * this.gridSize)) &&
+      (currItem.x + (currItem.widthGridUnits * this.gridSize)) >= item.x &&
+      (currItem.y + (currItem.heightGridUnits * this.gridSize)) >= item.y)
   }
 
   handleDelete({
@@ -177,9 +192,10 @@ class BuildableGridController {
     this.items[elementType].splice(i);
     this.menuDefault()
   }
-  hasCollisions(currItem: CoordsAndSize) {
-    if (!this.dragItemKey) throw Error("Not dragging")
-    return this.items[this.dragItemKey].some((item) => this.isItemColliding(currItem, item.layout));
+  hasCollisions(item: CoordsAndSize) {
+    let isColliding = this.items.fields.some((field) => this.isItemColliding(item, field.layout)) || this.items.blocks.some((block) => this.isItemColliding(item, block.layout))
+    console.log(isColliding)
+    return isColliding
   }
   private clamp(value: number, min: number, max: number) {
     return Math.max(min, Math.min(value, max))
@@ -201,7 +217,6 @@ class BuildableGridController {
       width: this.items[elementType][idx].layout.widthGridUnits * this.gridSize,
       height: this.items[elementType][idx].layout.heightGridUnits * this.gridSize
     }
-    // this.initialPosition = { left: this.left, top: this.top }
     if ("pointerId" in e && this.items[elementType][idx].layout.element) {
       this.items[elementType][idx].layout.element?.setPointerCapture(e.pointerId)
     }
@@ -221,7 +236,6 @@ class BuildableGridController {
     }
     if (this.gridElement) {
       const parentRect = this.gridElement.getBoundingClientRect();
-      // if (_width + this.left > parentRect.width + parentRect.left) {
       if (_width > parentRect.width) {
         _width = parentRect.width;
       }
@@ -236,24 +250,6 @@ class BuildableGridController {
       widthGridUnits: Math.round(_width / this.gridSize),
       heightGridUnits: Math.round(_height / this.gridSize)
     }
-
-    // if (_width > this.maxSize.width) {
-    //   _width = this.maxSize.width
-    // }
-    // if (_height > this.maxSize.height) {
-    //   _height = this.maxSize.height
-    // }
-    // const { widthGridUnits, heightGridUnits } = snapOnResize(_width, _height, this.previewItem, this.settings);
-
-    // if (!hasCollisions({ ...this.previewItem, widthGridUnits, heightGridUnits }, Object.values(this.settings.items))) {
-    //   this.height = _height
-    //   this.width = _width
-    //   this.previewItem = {
-    //     ...this.previewItem,
-    //     widthGridUnits,
-    //     heightGridUnits
-    //   }
-    // }
   }
   private resizeMouseEnd({ e, elementType, idx }: { e: PointerEvent, elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
     if (e.button !== 0 || !this.items[elementType][idx].layout.active) return;
