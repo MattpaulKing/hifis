@@ -14,6 +14,10 @@
 	import { getToaster } from '$src/lib/components/toast';
 	import type { Snippet } from 'svelte';
 	import type { ELEMENT_TYPES } from '$routes/[orgLabel]/custom-entities/schema/entityFields';
+	import {
+		entityBlockLayoutUpsert,
+		entityFieldLayoutUpsert
+	} from '$routes/[orgLabel]/custom-entities/lib';
 
 	type Props = {
 		idx: number;
@@ -41,13 +45,13 @@
 	let toaster = getToaster();
 	let controller = getBuildableGridController();
 	let validPos = $state({
-		x: controller.items[elementType][idx].layout.x,
-		y: controller.items[elementType][idx].layout.y
+		x: controller.items[elementType][idx].layouts[controller.view].x,
+		y: controller.items[elementType][idx].layouts[controller.view].y
 	});
 	$effect(() => {
 		validPos = {
-			x: controller.items[elementType][idx].layout.x,
-			y: controller.items[elementType][idx].layout.y
+			x: controller.items[elementType][idx].layouts[controller.view].x,
+			y: controller.items[elementType][idx].layouts[controller.view].y
 		};
 	});
 
@@ -65,19 +69,31 @@
 			},
 			async onDragEnd(data) {
 				if (
-					controller.hasCollisions({ ...controller.items[elementType][idx].layout, ...validPos })
+					controller.hasCollisions({
+						...controller.items[elementType][idx].layouts[controller.view],
+						...validPos
+					})
 				) {
 					validPos = {
-						x: controller.items[elementType][idx].layout.x,
-						y: controller.items[elementType][idx].layout.y
+						x: controller.items[elementType][idx].layouts[controller.view].x,
+						y: controller.items[elementType][idx].layouts[controller.view].y
 					};
 					toaster.add({
 						type: 'error',
 						message: `${elementType} cannot overlap.`
 					});
 				} else {
-					controller.items[elementType][idx].layout.x = validPos.x;
-					controller.items[elementType][idx].layout.y = validPos.y;
+					controller.items[elementType][idx].layouts[controller.view].x = validPos.x;
+					controller.items[elementType][idx].layouts[controller.view].y = validPos.y;
+					if (elementType === 'fields') {
+						await entityFieldLayoutUpsert(
+							controller.items[elementType][idx].layouts[controller.view]
+						);
+					} else if (elementType === 'blocks') {
+						await entityBlockLayoutUpsert(
+							controller.items[elementType][idx].layouts[controller.view]
+						);
+					}
 					onPositionChange?.();
 				}
 				eventHandlers?.onDragEnd?.(data);
@@ -86,7 +102,7 @@
 	);
 	const gridComp = Compartment.of(() => grid([controller.gridSize, controller.gridSize]));
 	const boundsComp = Compartment.of(() => bounds(BoundsFrom.element(boundingElement)));
-	let itemId = $derived(controller.items[elementType][idx].properties.id);
+	let itemId = $derived(controller.items[elementType][idx].id);
 </script>
 
 <div
@@ -106,8 +122,10 @@
 	transition:fade
 	role="gridcell"
 	tabindex="0"
-	style="width: {controller.items[elementType][idx].layout.widthGridUnits * controller.gridSize}px;
-    height: {controller.items[elementType][idx].layout.heightGridUnits * controller.gridSize}px;"
+	style="width: {controller.items[elementType][idx].layouts[controller.view].widthGridUnits *
+		controller.gridSize}px;
+    height: {controller.items[elementType][idx].layouts[controller.view].heightGridUnits *
+		controller.gridSize}px;"
 	class="{classes} border border-dashed {itemId in controller.items[elementType]
 		? 'border-warning-300-600-token'
 		: itemId === controller.menu.fieldId || itemId === controller.menu.blockId

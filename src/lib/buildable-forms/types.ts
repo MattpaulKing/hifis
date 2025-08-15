@@ -1,16 +1,3 @@
-import type { entityBlockLayoutSchema, entityBlocksSchema, entityFieldLayoutSchema, entityFieldsSchema } from "$src/schemas"
-import type { FormData } from "../interfaces/forms"
-
-export type BuildableField = {
-  properties: FormData<typeof entityFieldsSchema>,
-  layout: FormData<typeof entityFieldLayoutSchema> & BuildableLayoutMetaData,
-}
-
-export type BuildableBlock = {
-  properties: FormData<typeof entityBlocksSchema>,
-  layout: FormData<typeof entityBlockLayoutSchema> & BuildableLayoutMetaData,
-}
-
 export type BuildableLayoutMetaData = {
   min: {
     widthGridUnits: number,

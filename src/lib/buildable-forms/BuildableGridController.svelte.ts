@@ -1,14 +1,33 @@
 import { getContext, setContext } from "svelte"
 import { on } from "svelte/events";
+import { entityBlockType, layoutViewsEnum, type entitySchema } from "$src/schemas";
+import { entityBlockLayoutUpsert, entityBlockUpsert, entityFieldDelete, entityFieldLayoutUpsert, entityFieldUpsert } from "$routes/[orgLabel]/custom-entities/lib";
 import type { BuildableBlockDefault, BuildableFieldDefault } from "./elements/elementsDefault";
-import type { BuildableBlock, BuildableField, CoordsAndSize } from "./types";
-import type { ELEMENT_TYPES } from "$routes/[orgLabel]/custom-entities/schema/entityFields";
-import { isItemColliding } from "../components/user-grid/utils/grid";
+import type { BuildableLayoutMetaData, CoordsAndSize } from "./types";
+import type { ELEMENT_TYPES, entityFieldType } from "$routes/[orgLabel]/custom-entities/schema/entityFields";
+import type { FormData } from "../interfaces/forms";
+
+type FieldItem = FormData<typeof entitySchema>['fields'][0]
+type BlockItem = FormData<typeof entitySchema>['blocks'][0]
+
+type BuildableField = Omit<FieldItem, "layouts"> & {
+  layouts: {
+    [P in keyof FieldItem['layouts']]: FieldItem['layouts'][keyof FieldItem['layouts']] & BuildableLayoutMetaData
+  }
+}
+type BuildableBlock = FormData<typeof entitySchema>['blocks'][0] & {
+  layouts: {
+    [P in keyof BlockItem['layouts']]: BlockItem['layouts'][keyof BlockItem['layouts']] & BuildableLayoutMetaData
+  }
+}
 
 type BuildableGridControllerArgs = {
-  buildableFields: BuildableField[],
-  buildableBlocks: BuildableBlock[],
+  fields: FieldItem[];
+  blocks: BlockItem[];
+  fieldMetaData: Record<typeof entityFieldType.enumValues[number], BuildableLayoutMetaData>
+  blockMetaData: Record<typeof entityBlockType.enumValues[number], BuildableLayoutMetaData>
   gridSize: number,
+  view: typeof layoutViewsEnum.enumValues[number],
   entityId: string,
 }
 type BuildableGridMenuState = {
@@ -37,15 +56,17 @@ class BuildableGridController {
 
   entityId: string
   menu = $state<BuildableGridMenuState>(DEFAULT_MENU)
+  view = $state<typeof layoutViewsEnum.enumValues[0]>(layoutViewsEnum.enumValues[layoutViewsEnum.length - 1])
 
   items = $state<{
     fields: BuildableField[],
     blocks: BuildableBlock[],
   }>({ fields: [], blocks: [] })
   taintedItems = $state<{
-    fields: Record<string, BuildableField>,
+    fields: Record<string, BuildableField>
     blocks: Record<string, BuildableBlock>
   }>({ fields: {}, blocks: {} })
+
   dragIdx = $state<null | number>(null)
   dragItemKey = $state<(keyof typeof this.items) | null>(null)
   tempField = $state<BuildableField | null>(null)
@@ -59,9 +80,12 @@ class BuildableGridController {
   cleanupResizeMouse = $state<void | (() => void)>()
   cleanupResizeMouseEnd = $state<void | (() => void)>()
 
-  constructor({ buildableFields, buildableBlocks, gridSize, entityId }: BuildableGridControllerArgs) {
+  constructor({ fields, blocks, fieldMetaData, blockMetaData, gridSize, view, entityId }: BuildableGridControllerArgs) {
     this.menuDefault()
-    this.items = { fields: buildableFields, blocks: buildableBlocks }
+    this.items = {
+      fields: this.fieldsWithMetaData({ fields, fieldMetaData }),
+      blocks: this.blocksWithMetaData({ blocks, blockMetaData })
+    }
     this.gridSize = gridSize
     this.entityId = entityId
   }
@@ -76,17 +100,17 @@ class BuildableGridController {
   setMenu({ elementType, idx }: { elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
     if (elementType === "fields") {
       this.menu = {
-        label: `${this.items.fields[idx].properties.fieldType} Properties`,
+        label: `${this.items.fields[idx].fieldType} Properties`,
         showing: "form-field-properties",
-        fieldId: this.items.fields[idx].properties.id,
+        fieldId: this.items.fields[idx].id,
         blockId: null
       }
     } else if (elementType === "blocks") {
       this.menu = {
-        label: `${this.items.blocks[idx].properties.fieldType} Properties`,
+        label: `${this.items.blocks[idx].fieldType} Properties`,
         showing: "form-block-properties",
         fieldId: null,
-        blockId: this.items.blocks[idx].properties.id
+        blockId: this.items.blocks[idx].id
       }
     }
   }
@@ -99,50 +123,104 @@ class BuildableGridController {
     this.tempField = null
     this.tempBlock = null
   }
+  private fieldsWithMetaData({ fieldMetaData, fields }: { fields: BuildableGridControllerArgs['fields'], fieldMetaData: BuildableGridControllerArgs['fieldMetaData'] }) {
+    return fields.map((field) => {
+      let layouts = {} as BuildableField['layouts']
+      for (const keyUntyped in field.layouts) {
+        let key = keyUntyped as keyof BuildableField['layouts']
+        if (!field.elementType) throw Error("No Element Type")
+        layouts[key] = {
+          ...field.layouts[key],
+          ...fieldMetaData[field.fieldType]
+        }
+      }
+      return { ...field, layouts }
+    })
+  }
+  private blocksWithMetaData({ blockMetaData, blocks }: { blocks: BuildableGridControllerArgs['blocks'], blockMetaData: BuildableGridControllerArgs['blockMetaData'] }) {
+    return blocks.map((block) => {
+      let layouts = {} as BuildableBlock['layouts']
+      for (const keyUntyped in block.layouts) {
+        let key = keyUntyped as keyof BuildableField['layouts']
+        if (!block.elementType) throw Error("No Element Type")
+        layouts[key] = {
+          ...block.layouts[key],
+          ...blockMetaData[block.fieldType]
+        }
+      }
+      return { ...block, layouts }
+    })
+  }
+  private blockDefaultToLayoutsWithIds({ id, block }: { id: string, block: BuildableBlockDefault }) {
+    let layouts = {} as BuildableBlock['layouts']
+    for (let key in block.properties.layouts) {
+      let keyTyped = key as typeof layoutViewsEnum.enumValues[0]
+      layouts[keyTyped] = {
+        ...block.properties.layouts[keyTyped],
+        blockId: id,
+        id: crypto.randomUUID()
+      }
+    }
+    return layouts
+  }
+  private fieldDefaultToLayoutsWithIds({ id, field }: { id: string, field: BuildableFieldDefault }) {
+    let layouts = {} as BuildableField['layouts']
+    for (let key in field.properties.layouts) {
+      let keyTyped = key as typeof layoutViewsEnum.enumValues[0]
+      layouts[keyTyped] = {
+        ...field.properties.layouts[keyTyped],
+        fieldId: id,
+        id: crypto.randomUUID()
+      }
+    }
+    return layouts
+  }
   onNewBlockDragStart({ e, block }: { e: DragEvent, block: BuildableBlockDefault }) {
     let id = crypto.randomUUID()
     this.tempBlock = {
-      properties: { ...block.properties, id, entityId: this.entityId },
-      layout: { ...block.layout, id: crypto.randomUUID(), blockId: id, x: e.offsetX, y: e.pageY }
+      ...block.properties,
+      layouts: this.blockDefaultToLayoutsWithIds({ id, block }),
+      id,
+      entityId: this.entityId,
     }
   }
   onNewFieldDragStart({ e, field }: { e: DragEvent, field: BuildableFieldDefault }) {
     let id = crypto.randomUUID()
     this.tempField = {
-      properties: { ...field.properties, id, entityId: this.entityId },
-      layout: { ...field.layout, id: crypto.randomUUID(), fieldId: id, x: e.offsetX, y: e.pageY }
+      ...field.properties,
+      layouts: this.fieldDefaultToLayoutsWithIds({ id, field }),
+      id,
+      entityId: this.entityId
     }
   }
-  onNewBlockDragOver({ e }: { e: DragEvent }) {
+  async onNewBlockDragOver({ e }: { e: DragEvent }) {
     if (this.tempBlock) {
       let block = this.tempBlock
       this.items.blocks.push(block)
       this.dragIdx = this.items.blocks.length - 1
       this.dragItemKey = "blocks"
       this.tempBlock = null
-      return block
+      await entityBlockUpsert(block)
     }
   }
-  onNewFieldDragOver({ e }: { e: DragEvent }) {
+  async onNewFieldDragOver({ e }: { e: DragEvent }) {
     if (this.tempField) {
       let field = this.tempField
       this.items.fields.push(field)
       this.dragIdx = this.items.fields.length - 1
       this.dragItemKey = "fields"
       this.tempField = null
-      return field
+      await entityFieldUpsert(field)
     }
   }
-  onDragOver({ e }: { e: DragEvent }) {
-    let res: { field: BuildableField | undefined, block: BuildableBlock | undefined } = { field: undefined, block: undefined }
+  async onDragEnter({ e }: { e: DragEvent }) {
     if (this.tempField) {
-      res.field = this.onNewFieldDragOver({ e })
+      await this.onNewFieldDragOver({ e })
     } else if (this.tempBlock) {
-      res.block = this.onNewBlockDragOver({ e })
+      await this.onNewBlockDragOver({ e })
     } else {
       throw Error("No element dragged")
     }
-    return res
   }
   onNewBlockDrag({ e }: { e: DragEvent & { currentTarget: HTMLButtonElement } }) {
     if (!this.gridElement || e.offsetX < 0 || e.pageY < 0) return //NOTE: offset sometimes < 0 ????
@@ -150,11 +228,11 @@ class BuildableGridController {
     let xNew = this.clamp(this.snapMovement(e.offsetX - this.gridElement.offsetLeft), 0, max.x)
     let yNew = this.clamp(this.snapMovement(e.pageY - this.gridElement.offsetTop), 0, max.y)
     if (this.tempBlock !== null) {
-      this.tempBlock.layout.x = xNew
-      this.tempBlock.layout.y = yNew
+      this.tempBlock.layouts[this.view].x = xNew
+      this.tempBlock.layouts[this.view].y = yNew
     } else if (this.dragIdx !== null) {
-      this.items.blocks[this.dragIdx].layout.x = xNew
-      this.items.blocks[this.dragIdx].layout.y = yNew
+      this.items.blocks[this.dragIdx].layouts[this.view].x = xNew
+      this.items.blocks[this.dragIdx].layouts[this.view].y = yNew
     }
   }
   onNewFieldDrag({ e }: { e: DragEvent }) {
@@ -163,11 +241,11 @@ class BuildableGridController {
     let xNew = this.clamp(this.snapMovement(e.offsetX - this.gridElement.offsetLeft), 0, max.x)
     let yNew = this.clamp(this.snapMovement(e.pageY - this.gridElement.offsetTop), 0, max.y)
     if (this.tempField !== null) {
-      this.tempField.layout.x = xNew
-      this.tempField.layout.y = yNew
+      this.tempField.layouts[this.view].x = xNew
+      this.tempField.layouts[this.view].y = yNew
     } else if (this.dragIdx !== null) {
-      this.items.fields[this.dragIdx].layout.x = xNew
-      this.items.fields[this.dragIdx].layout.y = yNew
+      this.items.fields[this.dragIdx].layouts[this.view].x = xNew
+      this.items.fields[this.dragIdx].layouts[this.view].y = yNew
     }
   }
   onNewDragEnd({ e }: { e: DragEvent }) {
@@ -181,7 +259,7 @@ class BuildableGridController {
       (currItem.y + (currItem.heightGridUnits * this.gridSize)) >= item.y)
   }
 
-  handleDelete({
+  async handleDelete({
     elementType,
     i
   }: {
@@ -189,12 +267,16 @@ class BuildableGridController {
     i: number;
   }) {
     if (!elementType) throw Error('No element type found.');
+    if (elementType === "fields") {
+      await entityFieldDelete(this.items[elementType][i].id)
+    } else if (elementType === "blocks") {
+
+    }
     this.items[elementType].splice(i);
     this.menuDefault()
   }
   hasCollisions(item: CoordsAndSize) {
-    let isColliding = this.items.fields.some((field) => this.isItemColliding(item, field.layout)) || this.items.blocks.some((block) => this.isItemColliding(item, block.layout))
-    console.log(isColliding)
+    let isColliding = this.items.fields.some((field) => this.isItemColliding(item, field.layouts[this.view])) || this.items.blocks.some((block) => this.isItemColliding(item, block.layouts[this.view]))
     return isColliding
   }
   private clamp(value: number, min: number, max: number) {
@@ -211,18 +293,18 @@ class BuildableGridController {
     }
   }
   private initInteraction({ e, elementType, idx }: { e: PointerEvent | MouseEvent | DragEvent | TouchEvent["touches"][0], elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
-    this.items[elementType][idx].layout.active = true;
+    this.items[elementType][idx].layouts[this.view].active = true;
     this.initialPointerPosition = { left: e.pageX, top: e.pageY }
     this.initialSize = {
-      width: this.items[elementType][idx].layout.widthGridUnits * this.gridSize,
-      height: this.items[elementType][idx].layout.heightGridUnits * this.gridSize
+      width: this.items[elementType][idx].layouts[this.view].widthGridUnits * this.gridSize,
+      height: this.items[elementType][idx].layouts[this.view].heightGridUnits * this.gridSize
     }
-    if ("pointerId" in e && this.items[elementType][idx].layout.element) {
-      this.items[elementType][idx].layout.element?.setPointerCapture(e.pointerId)
+    if ("pointerId" in e && this.items[elementType][idx].layouts[this.view].element) {
+      this.items[elementType][idx].layouts[this.view].element?.setPointerCapture(e.pointerId)
     }
   }
   resizeMouseStart({ e, elementType, idx }: { e: MouseEvent, elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
-    if (e.button !== 0 || this.items[elementType][idx].layout.active) return
+    if (e.button !== 0 || this.items[elementType][idx].layouts[this.view].active) return
     this.initInteraction({ e, elementType, idx });
     this.cleanupResizeMouse = on(window, 'pointermove', (e) => this.resizeMouse({ e, elementType, idx }))
     this.cleanupResizeMouseEnd = on(window, 'pointerup', (e) => this.resizeMouseEnd({ e, elementType, idx }))
@@ -231,8 +313,8 @@ class BuildableGridController {
     let _width = e.pageX + this.initialSize.width - this.initialPointerPosition.left;
     let _height = e.pageY + this.initialSize.height - this.initialPointerPosition.top;
     let minSize = {
-      width: this.items[elementType][idx].layout.min.widthGridUnits * this.gridSize,
-      height: this.items[elementType][idx].layout.min.heightGridUnits * this.gridSize
+      width: this.items[elementType][idx].layouts[this.view].min.widthGridUnits * this.gridSize,
+      height: this.items[elementType][idx].layouts[this.view].min.heightGridUnits * this.gridSize
     }
     if (this.gridElement) {
       const parentRect = this.gridElement.getBoundingClientRect();
@@ -245,17 +327,22 @@ class BuildableGridController {
     }
     _width = Math.max(_width, minSize.width)
     _height = Math.max(_height, minSize.height)
-    this.items[elementType][idx].layout = {
-      ...this.items[elementType][idx].layout,
+    this.items[elementType][idx].layouts[this.view] = {
+      ...this.items[elementType][idx].layouts[this.view],
       widthGridUnits: Math.round(_width / this.gridSize),
       heightGridUnits: Math.round(_height / this.gridSize)
     }
   }
-  private resizeMouseEnd({ e, elementType, idx }: { e: PointerEvent, elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
-    if (e.button !== 0 || !this.items[elementType][idx].layout.active) return;
-    this.items[elementType][idx].layout.active = false;
+  private async resizeMouseEnd({ e, elementType, idx }: { e: PointerEvent, elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
+    if (e.button !== 0 || !this.items[elementType][idx].layouts[this.view].active) return;
+    this.items[elementType][idx].layouts[this.view].active = false;
+    if (elementType === "fields") {
+      await entityFieldLayoutUpsert(this.items[elementType][idx].layouts[this.view])
+    } else if (elementType === "blocks") {
+      await entityBlockLayoutUpsert(this.items[elementType][idx].layouts[this.view])
+    }
     if ("pointerId" in e) {
-      this.items[elementType][idx].layout.element?.releasePointerCapture(e.pointerId)
+      this.items[elementType][idx].layouts[this.view].element?.releasePointerCapture(e.pointerId)
     }
     if (this.cleanupResizeMouse) this.cleanupResizeMouse()
     if (this.cleanupResizeMouseEnd) this.cleanupResizeMouseEnd()

@@ -1,11 +1,11 @@
 import { Input, InputNumber, InputDate } from "$lib/components/forms";
-import { entityFieldsSchema, entityBlocksSchema, entityBlockLayoutSchema, entityFieldLayoutSchema } from "$src/schemas";
+import { entityFieldsSchema, entityBlocksSchema, entitySchema } from "$src/schemas";
 import { GitCompareIcon, TextSearchIcon, HashIcon, CalendarDaysIcon, TextIcon, PencilIcon, Tally1Icon, MinusIcon } from "@lucide/svelte"
 import { ELEMENT_TYPES } from "$routes/[orgLabel]/custom-entities/schema/entityFields";
 import type { Lookup } from "$src/lib/interfaces/Lookup";
 import type { FormData } from "$src/lib/interfaces/forms";
 import type { Component } from "svelte";
-import type { BuildableField, BuildableLayoutMetaData } from "../types";
+import type { BuildableLayoutMetaData } from "../types";
 
 export type FieldBtnProps = {
   render: Component,
@@ -15,30 +15,41 @@ export type FieldBtnProps = {
 
 export type BuildableFieldDefault = {
   component: FieldBtnProps,
-  properties: Omit<BuildableField['properties'], "id" | "entityId">,
-  layout: Omit<FormData<typeof entityFieldLayoutSchema>, "id" | "fieldId"> & BuildableLayoutMetaData
+  properties: Omit<FormData<typeof entitySchema>['fields'][0], "id" | "entityId" | "layouts"> & {
+    layouts: {
+      [P in keyof FormData<typeof entitySchema>['fields'][0]['layouts']]: Omit<FormData<typeof entitySchema>['fields'][0]['layouts']['xl'], "id" | "fieldId"> & BuildableLayoutMetaData
+    }
+  },
 }
 
 export type BuildableBlockDefault = {
   component: FieldBtnProps,
-  properties: Omit<FormData<typeof entityBlocksSchema>, "id" | "entityId">,
-  layout: Omit<FormData<typeof entityBlockLayoutSchema>, "id" | "blockId"> & BuildableLayoutMetaData
+  properties: Omit<FormData<typeof entitySchema>['blocks'][0], "id" | "entityId" | "layouts"> & {
+    layouts: {
+      [P in keyof FormData<typeof entitySchema>['blocks'][0]['layouts']]: Omit<FormData<typeof entitySchema>['blocks'][0]['layouts']['xl'], "id" | "blockId"> & BuildableLayoutMetaData
+    }
+  }
 }
 
-const DEFAULT_SIZE = {
+const SIZE_MIN = {
   widthGridUnits: 5,
   heightGridUnits: 3
 }
 const DEFAULT_LAYOUT = {
   x: Infinity,
   y: Infinity,
-  ...DEFAULT_SIZE,
+  ...SIZE_MIN,
   view: 'xl' as const,
-  min: DEFAULT_SIZE,
+  min: SIZE_MIN,
   moveable: true,
   resizeable: true,
   element: null,
   active: false,
+}
+const DEFAULT_LAYOUTS = {
+  sm: DEFAULT_LAYOUT,
+  lg: DEFAULT_LAYOUT,
+  xl: DEFAULT_LAYOUT,
 }
 
 const fields = {
@@ -59,10 +70,8 @@ const fields = {
       required: true,
       min: null,
       max: null,
-      inputOptions: [] as Lookup[]
-    },
-    layout: {
-      ...DEFAULT_LAYOUT
+      inputOptions: [] as Lookup[],
+      layouts: DEFAULT_LAYOUTS
     },
   },
   number: {
@@ -82,10 +91,8 @@ const fields = {
       required: true,
       min: null,
       max: null,
-      inputOptions: [] as Lookup[]
-    },
-    layout: {
-      ...DEFAULT_LAYOUT
+      inputOptions: [] as Lookup[],
+      layouts: DEFAULT_LAYOUTS
     },
   },
   date: {
@@ -105,10 +112,8 @@ const fields = {
       required: true,
       min: null,
       max: null,
-      inputOptions: [] as Lookup[]
-    },
-    layout: {
-      ...DEFAULT_LAYOUT
+      inputOptions: [] as Lookup[],
+      layouts: DEFAULT_LAYOUTS
     },
 
   },
@@ -129,10 +134,8 @@ const fields = {
       required: true,
       min: null,
       max: null,
-      inputOptions: [] as Lookup[]
-    },
-    layout: {
-      ...DEFAULT_LAYOUT
+      inputOptions: [] as Lookup[],
+      layouts: DEFAULT_LAYOUTS
     },
   },
   select: {
@@ -152,11 +155,8 @@ const fields = {
       required: true,
       min: null,
       max: null,
-      inputOptions: [] as Lookup[]
-    },
-
-    layout: {
-      ...DEFAULT_LAYOUT
+      inputOptions: [] as Lookup[],
+      layouts: DEFAULT_LAYOUTS
     },
   }
 } satisfies Record<string, BuildableFieldDefault>
@@ -174,9 +174,7 @@ const blocks = {
       size: "lg",
       color: "white",
       textValue: "Default Text",
-    },
-    layout: {
-      ...DEFAULT_LAYOUT
+      layouts: DEFAULT_LAYOUTS
     },
   },
   dividerHorizontal: {
@@ -191,9 +189,7 @@ const blocks = {
       size: "",
       color: "",
       textValue: "",
-    },
-    layout: {
-      ...DEFAULT_LAYOUT
+      layouts: DEFAULT_LAYOUTS
     },
   },
   dividerVertical: {
@@ -208,9 +204,7 @@ const blocks = {
       size: "",
       color: "",
       textValue: "",
-    },
-    layout: {
-      ...DEFAULT_LAYOUT
+      layouts: DEFAULT_LAYOUTS
     },
   }
 } satisfies Record<string, BuildableBlockDefault>
@@ -223,5 +217,3 @@ const formElements: {
   [ELEMENT_TYPES.blocks]: blocks,
 }
 export default formElements
-
-

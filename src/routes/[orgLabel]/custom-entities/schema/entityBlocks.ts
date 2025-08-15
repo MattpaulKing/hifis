@@ -4,7 +4,7 @@ import { entities } from "./entities";
 import { entityElementFieldType } from "./entityFields";
 import { createInsertSchema } from "drizzle-valibot";
 import { relations } from "drizzle-orm";
-import { entityBlockLayouts } from "./entityBlockLayouts";
+import { entityBlockLayouts, entityBlockLayoutSchema } from "./entityBlockLayouts";
 import * as v from 'valibot'
 
 
@@ -21,11 +21,18 @@ export const entityBlocks = pgTable("entity_blocks", {
   textValue: text("text_value").notNull().default(''),
 })
 
-export const entityBlocksSchema = createInsertSchema(entityBlocks, {
-  id: v.pipe(v.string(), v.uuid('UUID is badly formed.')),
+export const entityBlocksSchema = v.object({
+  ...createInsertSchema(entityBlocks, {
+    id: v.pipe(v.string(), v.uuid('UUID is badly formed.')),
+  }).entries,
+  layouts: v.object({
+    xl: entityBlockLayoutSchema,
+    lg: entityBlockLayoutSchema,
+    sm: entityBlockLayoutSchema,
+  })
 })
 
 export const entityBlocksRelations = relations(entityBlocks, ({ one, many }) => ({
-  entity: one(entities, { fields: [entityBlocks.entityId], references: [entities.id], relationName: "fieldBlocks" }),
+  entity: one(entities, { fields: [entityBlocks.entityId], references: [entities.id], relationName: "blocks" }),
   layouts: many(entityBlockLayouts)
 }))

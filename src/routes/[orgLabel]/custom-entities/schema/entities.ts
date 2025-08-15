@@ -3,9 +3,7 @@ import { timestamps, uuidPK } from "$src/schemas/helpers";
 import { createInsertSchema } from "drizzle-valibot"
 import { entityFields, entityFieldsSchema } from "./entityFields";
 import { relations } from "drizzle-orm";
-import { entityFieldLayoutSchema } from "./entityFieldLayouts";
 import { entityBlocks, entityBlocksSchema } from "./entityBlocks";
-import { entityBlockLayoutSchema } from "./entityBlockLayouts";
 import * as v from "valibot"
 
 export const entities = pgTable("entities", {
@@ -20,20 +18,14 @@ export const entities = pgTable("entities", {
 
 export const entitySchema = v.object({
   ...createInsertSchema(entities).entries,
-  fieldInputs: v.fallback(v.array(v.object({
-    properties: entityFieldsSchema,
-    layout: entityFieldLayoutSchema,
-  })), []),
-  fieldBlocks: v.fallback(v.array(v.object({
-    properties: entityBlocksSchema,
-    layout: entityBlockLayoutSchema,
-  })), []),
+  fields: v.fallback(v.array(entityFieldsSchema), []),
+  blocks: v.fallback(v.array(entityBlocksSchema), []),
 
 })
 
 export const entityRelations = relations(entities, ({ one, many }) => ({
   parent: one(entities, { fields: [entities.parentId], references: [entities.id] }),
-  fieldInputs: many(entityFields, { relationName: "fieldInputs" }),
-  fieldBlocks: many(entityBlocks, { relationName: "fieldBlocks" }),
-  lookups: many(entityFields, { relationName: "fieldLookups" })
+  fields: many(entityFields, { relationName: "fields" }),
+  blocks: many(entityBlocks, { relationName: "blocks" }),
+  lookups: many(entityFields, { relationName: "entityLookups" })
 }))

@@ -18,9 +18,9 @@
 
 <div class="flex h-fit w-full justify-end">
 	<button
-		onclick={(e) => {
+		onclick={async (e) => {
 			e.stopImmediatePropagation();
-			controller.handleDelete({ elementType, i: idx });
+			await controller.handleDelete({ elementType, i: idx });
 			onDelete?.();
 		}}
 		class="variant-ghost btn-icon btn-icon-sm transition-colors rounded-token hover:variant-filled-error"

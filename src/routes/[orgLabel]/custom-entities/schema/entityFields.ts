@@ -3,7 +3,7 @@ import { timestamps, uuidPK } from "$src/schemas/helpers";
 import { createInsertSchema } from "drizzle-valibot"
 import { entities } from "./entities";
 import { relations, sql } from "drizzle-orm";
-import { entityFieldLayouts } from "./entityFieldLayouts";
+import { entityFieldLayouts, entityFieldLayoutSchema } from "./entityFieldLayouts";
 import * as v from "valibot";
 import type { Lookup } from "$src/lib/interfaces/Lookup";
 
@@ -36,13 +36,20 @@ export const entityFields = pgTable("entity_fields", {
   maxDate: timestamp("max_date"),
   inputOptions: jsonb("input_options").array().notNull().default(sql`'{}'::jsonb[]`).$type<Lookup[]>()
 })
-export const entityFieldsSchema = createInsertSchema(entityFields, {
-  id: v.pipe(v.string(), v.uuid('UUID is badly formed.')),
-  inputOptions: v.array(v.object({ id: v.string(), label: v.string() }))
+export const entityFieldsSchema = v.object({
+  ...createInsertSchema(entityFields, {
+    id: v.pipe(v.string(), v.uuid('UUID is badly formed.')),
+    inputOptions: v.array(v.object({ id: v.string(), label: v.string() })),
+  }).entries,
+  layouts: v.object({
+    xl: entityFieldLayoutSchema,
+    lg: entityFieldLayoutSchema,
+    sm: entityFieldLayoutSchema,
+  })
 })
 
 export const entityFieldRelations = relations(entityFields, ({ one, many }) => ({
-  entity: one(entities, { fields: [entityFields.entityId], references: [entities.id], relationName: "fieldInputs" }),
-  lookup: one(entities, { fields: [entityFields.entityLookupId], references: [entities.id], relationName: "fieldLookups" }),
+  entity: one(entities, { fields: [entityFields.entityId], references: [entities.id], relationName: "fields" }),
+  lookup: one(entities, { fields: [entityFields.entityLookupId], references: [entities.id], relationName: "entityLookups" }),
   layouts: many(entityFieldLayouts),
 }))
