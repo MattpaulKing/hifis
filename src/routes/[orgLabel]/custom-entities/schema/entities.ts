@@ -18,9 +18,8 @@ export const entities = pgTable("entities", {
 
 export const entitySchema = v.object({
   ...createInsertSchema(entities).entries,
-  fields: v.fallback(v.array(entityFieldsSchema), []),
-  blocks: v.fallback(v.array(entityBlocksSchema), []),
-
+  fields: v.array(entityFieldsSchema),
+  blocks: v.array(entityBlocksSchema)
 })
 
 export const entityRelations = relations(entities, ({ one, many }) => ({

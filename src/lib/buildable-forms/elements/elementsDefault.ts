@@ -36,8 +36,8 @@ const SIZE_MIN = {
   heightGridUnits: 3
 }
 const DEFAULT_LAYOUT = {
-  x: Infinity,
-  y: Infinity,
+  x: 0,
+  y: 0,
   ...SIZE_MIN,
   view: 'xl' as const,
   min: SIZE_MIN,
@@ -47,9 +47,9 @@ const DEFAULT_LAYOUT = {
   active: false,
 }
 const DEFAULT_LAYOUTS = {
-  sm: DEFAULT_LAYOUT,
-  lg: DEFAULT_LAYOUT,
-  xl: DEFAULT_LAYOUT,
+  sm: { ...DEFAULT_LAYOUT, view: "sm" as const },
+  lg: { ...DEFAULT_LAYOUT, view: "lg" as const },
+  xl: { ...DEFAULT_LAYOUT, view: "xl" as const },
 }
 
 const fields = {

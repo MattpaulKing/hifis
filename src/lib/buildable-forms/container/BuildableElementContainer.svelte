@@ -12,12 +12,12 @@
 	import { BuildableElementMenu, getBuildableGridController } from '$lib/buildable-forms';
 	import { fade } from 'svelte/transition';
 	import { getToaster } from '$src/lib/components/toast';
-	import type { Snippet } from 'svelte';
-	import type { ELEMENT_TYPES } from '$routes/[orgLabel]/custom-entities/schema/entityFields';
 	import {
 		entityBlockLayoutUpsert,
 		entityFieldLayoutUpsert
 	} from '$routes/[orgLabel]/custom-entities/lib';
+	import type { Snippet } from 'svelte';
+	import type { ELEMENT_TYPES } from '$routes/[orgLabel]/custom-entities/schema/entityFields';
 
 	type Props = {
 		idx: number;

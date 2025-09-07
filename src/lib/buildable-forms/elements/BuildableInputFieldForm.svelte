@@ -19,10 +19,8 @@
 	let { form: entityFieldsFormData } = entityFieldForm;
 	let controller = getBuildableGridController();
 	onMount(() => {
-		let idx = controller.items.fields.findIndex(
-			({ properties: { id } }) => id === controller.menu.fieldId
-		);
-		$entityFieldsFormData = controller.items.fields[idx].properties;
+		let idx = controller.items.fields.findIndex(({ id }) => id === controller.menu.fieldId);
+		$entityFieldsFormData = controller.items.fields[idx];
 	});
 	let minMaxAttr =
 		$entityFieldsFormData.inputType === 'text'

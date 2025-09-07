@@ -1,10 +1,10 @@
 import type { FormData } from "$src/lib/interfaces/forms"
 import type { entitySchema, layoutViewsEnum } from "$src/schemas"
-import type { getEntityAndElements } from "../queries/queries.remote"
+import type { entityAndElementsQueryById } from "../queries/entityAndElementsQueryById.remote"
 
-type GetEntityWithElementsRes = Awaited<ReturnType<typeof getEntityAndElements>>
+type EntityAndElements = Awaited<ReturnType<typeof entityAndElementsQueryById>>
 
-function entityElementsArrToLayoutMap<T extends GetEntityWithElementsRes['fields'] | GetEntityWithElementsRes['blocks']>(elements: T) {
+function entityElementsArrToLayoutMap<T extends EntityAndElements['fields'] | EntityAndElements['blocks']>(elements: T) {
   return elements.map((element) => ({
     ...element,
     layouts: element.layouts.reduce((agg, curr) => {
@@ -15,10 +15,10 @@ function entityElementsArrToLayoutMap<T extends GetEntityWithElementsRes['fields
 }
 
 
-export default function(entity: GetEntityWithElementsRes) {
+export default function(entity: EntityAndElements) {
   return {
     ...entity,
-    fields: entityElementsArrToLayoutMap(entity.fields) as unknown as FormData<typeof entitySchema>['fields'],
-    blocks: entityElementsArrToLayoutMap(entity.blocks) as unknown as FormData<typeof entitySchema>['blocks'],
+    fields: entityElementsArrToLayoutMap(entity.fields) as FormData<typeof entitySchema>['fields'],
+    blocks: entityElementsArrToLayoutMap(entity.blocks) as FormData<typeof entitySchema>['blocks'],
   }
 }

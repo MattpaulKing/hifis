@@ -9,7 +9,7 @@
 		btnData={fieldInputDefault.component}
 		ondragstart={(e) => controller.onNewFieldDragStart({ e, field: fieldInputDefault })}
 		ondrag={(e) => controller.onNewFieldDrag({ e })}
-		ondragend={(e) => controller.onNewDragEnd({ e })}
+		ondragend={async (e) => await controller.onNewDragEnd({ e })}
 	>
 		<Icon size={20} />
 	</BuildableElementButton>

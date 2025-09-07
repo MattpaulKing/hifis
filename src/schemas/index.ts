@@ -13,3 +13,5 @@ export { entityFields, entityFieldsSchema, entityFieldRelations, entityElementFi
 export { entityFieldLayouts, entityFieldLayoutSchema, entityFieldLayoutRelations, layoutViewsEnum } from "../routes/[orgLabel]/custom-entities/schema/entityFieldLayouts"
 export { entityBlocks, entityBlocksSchema, entityBlockType, entityBlocksRelations } from "../routes/[orgLabel]/custom-entities/schema/entityBlocks"
 export { entityBlockLayouts, entityBlockLayoutSchema, entityBlockLayoutRelations } from "../routes/[orgLabel]/custom-entities/schema/entityBlockLayouts"
+export { entityFieldLayoutMetaData, entityFieldLayoutMetaDataSchema } from "../routes/[orgLabel]/custom-entities/schema/entityFieldLayoutMetaData"
+export { entityBlockLayoutMetaData, entityBlockLayoutMetaDataSchema } from "../routes/[orgLabel]/custom-entities/schema/entityBlockLayoutMetaData"

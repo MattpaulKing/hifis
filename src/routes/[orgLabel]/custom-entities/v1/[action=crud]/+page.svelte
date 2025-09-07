@@ -7,18 +7,11 @@
 		BuildableFormButtonsMenu,
 		BuildableFormButtonsMenuSection,
 		BuildableGrid,
-		BuildableFieldForm,
-		type BuildableLayoutMetaData
+		BuildableFieldForm
 	} from '$src/lib/buildable-forms';
 	import { setBuildableGridController } from '$src/lib/buildable-forms/BuildableGridController.svelte.js';
 	import { Field, initForm, Label } from '$src/lib/components/forms/index.js';
-	import {
-		entityBlocksSchema,
-		entityBlockType,
-		entityFieldsSchema,
-		entityFieldType,
-		entitySchema
-	} from '$src/schemas/index.js';
+	import { entityBlocksSchema, entityFieldsSchema, entitySchema } from '$src/schemas/index.js';
 	import { route } from '$src/lib/ROUTES';
 	import { EntityForm } from '../../lib/index.js';
 
@@ -28,32 +21,8 @@
 		entityId: data.entityId,
 		fields: data.entityForm.data.fields,
 		blocks: data.entityForm.data.blocks,
-		fieldMetaData: entityFieldType.enumValues.reduce(
-			(agg, curr) => {
-				agg[curr] = {
-					min: { widthGridUnits: 5, heightGridUnits: 3 },
-					moveable: true,
-					resizeable: true,
-					element: null,
-					active: false
-				};
-				return agg;
-			},
-			{} as Record<(typeof entityFieldType.enumValues)[number], BuildableLayoutMetaData>
-		),
-		blockMetaData: entityBlockType.enumValues.reduce(
-			(agg, curr) => {
-				agg[curr] = {
-					min: { widthGridUnits: 5, heightGridUnits: 3 },
-					moveable: true,
-					resizeable: true,
-					element: null,
-					active: false
-				};
-				return agg;
-			},
-			{} as Record<(typeof entityBlockType.enumValues)[number], BuildableLayoutMetaData>
-		),
+		fieldLayoutMetaData: data.entityFieldLayoutMetaData,
+		blockLayoutMetaData: data.entityBlockLayoutMetaData,
 		gridSize: 50,
 		view: 'xl'
 	});
@@ -64,7 +33,19 @@
 	});
 	let entityFieldForm = initForm({
 		form: data.entityFieldForm,
-		schema: entityFieldsSchema
+		schema: entityFieldsSchema,
+		opts: {
+			onUpdate({ form: { data: formData }, result: { type: resType } }) {
+				if (resType === 'success') {
+					let idx = controller.items.fields.findIndex(({ id }) => id === formData.id);
+					let { layouts } = controller.items.fields[idx];
+					controller.items.fields[idx] = {
+						...formData,
+						layouts
+					};
+				}
+			}
+		}
 	});
 	let entityBlockSchema = initForm({
 		form: data.entityBlockForm,
@@ -72,16 +53,15 @@
 	});
 	/*
     TODO:
-    -1. Remove infinity values from defaults filter
-    0. Add defaults for field types to DB and query them to add to the controller
-    1. Add error handling for form finding idx
-    2. Do the entity form
-    3. Do the fields / blocks forms
+    1. Prompt with modal for deleting a field
   */
+	$inspect(controller.items);
 </script>
 
 <div class="relative flex h-full w-full overflow-y-auto">
-	<BuildableFormButtonsMenu>
+	<BuildableFormButtonsMenu
+		rerenderKey={`${controller.menu.label} ${controller.menu.fieldId} ${controller.menu.blockId}`}
+	>
 		{#if controller.menu.showing === 'form-entity-properties'}
 			<EntityForm
 				form={entityForm}
@@ -97,7 +77,9 @@
 			<BuildableFormButtonsMenuSection label="Blocks"></BuildableFormButtonsMenuSection>
 			<BuildableBlockBtns></BuildableBlockBtns>
 		{:else if controller.menu.showing === 'form-field-properties'}
-			<BuildableFieldForm {entityFieldForm} />
+			{#key controller.menu.fieldId}
+				<BuildableFieldForm {entityFieldForm} />
+			{/key}
 		{:else if controller.menu.showing === 'form-block-properties'}
 			<div class="col-span-2 h-48 w-48 bg-blue-500"></div>
 		{/if}
@@ -120,7 +102,7 @@
 					idx={i}
 				>
 					<Field class="-mt-0" form={entityForm} path="description">
-						<Label label={controller.items.fields[i].label} />
+						<Label class="" label={controller.items.fields[i].label} />
 						<Input />
 					</Field>
 				</BuildableElementContainer>

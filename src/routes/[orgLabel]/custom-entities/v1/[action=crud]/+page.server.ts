@@ -6,7 +6,7 @@ import { route } from "$src/lib/ROUTES"
 import { error, redirect } from "@sveltejs/kit"
 import { ar } from "$src/lib/server/forms"
 import { eq } from "drizzle-orm"
-import { entityDbToClient, getEntityAndElements } from "../../lib"
+import { entityAndElementsQueryById, entityBlockLayoutMetaDataQuery, entityDbToClient, entityFieldLayoutMetaDataQuery } from "../../lib"
 import type { Actions, PageServerLoad } from "./$types"
 
 export const load: PageServerLoad = async ({ url, params: { action }, locals: { db, subject } }) => {
@@ -23,13 +23,16 @@ export const load: PageServerLoad = async ({ url, params: { action }, locals: { 
     redirect(302, `${route("/[orgLabel]/custom-entities/v1/[action=crud]", { orgLabel: subject.properties.orgLabel, action: "update" })}?id=${id}`)
   }
   let id = url.searchParams.get("id") ?? error(404, "No id found")
-  let entity = await getEntityAndElements(id).then(entityDbToClient)
-  let entityForm = await superValidate(entity, valibot(entitySchema), { id: 'entity-form', errors: false })
   return {
     entityId: id,
-    entityForm,
+    entityForm: await entityAndElementsQueryById(id)
+      .then(entityDbToClient)
+      .then(async entity => await superValidate(entity, valibot(entitySchema), { id: 'entity-form', errors: true })),
     entityFieldForm: await superValidate(valibot(entityFieldsSchema)),
     entityBlockForm: await superValidate(valibot(entityBlocksSchema)),
+    entityFieldLayoutMetaData: await entityFieldLayoutMetaDataQuery(),
+    entityBlockLayoutMetaData: await entityBlockLayoutMetaDataQuery(),
+
   }
 }
 

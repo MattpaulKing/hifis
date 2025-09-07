@@ -39,7 +39,6 @@
 			apiRoute = _apiRoute.concat(`?search=${store.inputValue}&looukps=true`);
 		}
 		let fetchedLookups = await fetch(apiRoute).then(async (r) => (await r.json()) as Lookup[]);
-		console.log(fetchedLookups);
 		store.filterFetchedLookups({ fetchedLookups, $value });
 		store.searching = false;
 	}

@@ -1,10 +1,10 @@
 import { getContext, setContext } from "svelte"
 import { on } from "svelte/events";
-import { entityBlockType, layoutViewsEnum, type entitySchema } from "$src/schemas";
-import { entityBlockLayoutUpsert, entityBlockUpsert, entityFieldDelete, entityFieldLayoutUpsert, entityFieldUpsert } from "$routes/[orgLabel]/custom-entities/lib";
+import { entityBlocks, layoutViewsEnum, type entitySchema } from "$src/schemas";
+import { entityBlockDelete, entityBlockLayoutMetaDataQuery, entityBlockLayoutMetaDataRowsToMap, entityBlockLayoutUpsert, entityBlockUpsert, entityFieldDelete, entityFieldLayoutMetaDataQuery, entityFieldLayoutMetaDataRowsToMap, entityFieldLayoutUpsert, entityFieldUpsert } from "$routes/[orgLabel]/custom-entities/lib";
 import type { BuildableBlockDefault, BuildableFieldDefault } from "./elements/elementsDefault";
 import type { BuildableLayoutMetaData, CoordsAndSize } from "./types";
-import type { ELEMENT_TYPES, entityFieldType } from "$routes/[orgLabel]/custom-entities/schema/entityFields";
+import type { ELEMENT_TYPES } from "$routes/[orgLabel]/custom-entities/schema/entityFields";
 import type { FormData } from "../interfaces/forms";
 
 type FieldItem = FormData<typeof entitySchema>['fields'][0]
@@ -24,10 +24,12 @@ type BuildableBlock = FormData<typeof entitySchema>['blocks'][0] & {
 type BuildableGridControllerArgs = {
   fields: FieldItem[];
   blocks: BlockItem[];
-  fieldMetaData: Record<typeof entityFieldType.enumValues[number], BuildableLayoutMetaData>
-  blockMetaData: Record<typeof entityBlockType.enumValues[number], BuildableLayoutMetaData>
+  fieldLayoutMetaData: Awaited<ReturnType<typeof entityFieldLayoutMetaDataQuery>>
+  blockLayoutMetaData: Awaited<ReturnType<typeof entityBlockLayoutMetaDataQuery>>
   gridSize: number,
   view: typeof layoutViewsEnum.enumValues[number],
+  moveable?: boolean,
+  resizeable?: boolean,
   entityId: string,
 }
 type BuildableGridMenuState = {
@@ -80,14 +82,15 @@ class BuildableGridController {
   cleanupResizeMouse = $state<void | (() => void)>()
   cleanupResizeMouseEnd = $state<void | (() => void)>()
 
-  constructor({ fields, blocks, fieldMetaData, blockMetaData, gridSize, view, entityId }: BuildableGridControllerArgs) {
+  constructor({ fields, blocks, fieldLayoutMetaData, blockLayoutMetaData, gridSize, moveable = true, resizeable = true, view, entityId }: BuildableGridControllerArgs) {
     this.menuDefault()
     this.items = {
-      fields: this.fieldsWithMetaData({ fields, fieldMetaData }),
-      blocks: this.blocksWithMetaData({ blocks, blockMetaData })
+      fields: this.fieldsWithMetaData({ fields, fieldLayoutMetaData, moveable, resizeable }),
+      blocks: this.blocksWithMetaData({ blocks, blockLayoutMetaData, moveable, resizeable })
     }
     this.gridSize = gridSize
     this.entityId = entityId
+    this.view = view
   }
   menuDefault() {
     this.menu = DEFAULT_MENU
@@ -99,6 +102,7 @@ class BuildableGridController {
   }
   setMenu({ elementType, idx }: { elementType: keyof typeof ELEMENT_TYPES, idx: number }) {
     if (elementType === "fields") {
+      console.log(this.items.fields[idx])
       this.menu = {
         label: `${this.items.fields[idx].fieldType} Properties`,
         showing: "form-field-properties",
@@ -114,7 +118,7 @@ class BuildableGridController {
       }
     }
   }
-  clearDrag() {
+  async clearDrag() {
     if (this.dragItemKey !== null && this.dragIdx !== null) {
       this.setMenu({ elementType: this.dragItemKey, idx: this.dragIdx })
     }
@@ -123,7 +127,8 @@ class BuildableGridController {
     this.tempField = null
     this.tempBlock = null
   }
-  private fieldsWithMetaData({ fieldMetaData, fields }: { fields: BuildableGridControllerArgs['fields'], fieldMetaData: BuildableGridControllerArgs['fieldMetaData'] }) {
+  private fieldsWithMetaData({ fieldLayoutMetaData, fields, moveable, resizeable }: { fields: BuildableGridControllerArgs['fields'], fieldLayoutMetaData: BuildableGridControllerArgs['fieldLayoutMetaData'], moveable: boolean, resizeable: boolean }) {
+    let fieldLayoutMap = entityFieldLayoutMetaDataRowsToMap({ rows: fieldLayoutMetaData, resizeable, moveable })
     return fields.map((field) => {
       let layouts = {} as BuildableField['layouts']
       for (const keyUntyped in field.layouts) {
@@ -131,13 +136,14 @@ class BuildableGridController {
         if (!field.elementType) throw Error("No Element Type")
         layouts[key] = {
           ...field.layouts[key],
-          ...fieldMetaData[field.fieldType]
+          ...fieldLayoutMap[field.fieldType],
         }
       }
       return { ...field, layouts }
     })
   }
-  private blocksWithMetaData({ blockMetaData, blocks }: { blocks: BuildableGridControllerArgs['blocks'], blockMetaData: BuildableGridControllerArgs['blockMetaData'] }) {
+  private blocksWithMetaData({ blockLayoutMetaData, blocks, moveable, resizeable }: { blocks: BuildableGridControllerArgs['blocks'], blockLayoutMetaData: BuildableGridControllerArgs['blockLayoutMetaData'], moveable: boolean, resizeable: boolean }) {
+    let blockLayoutMap = entityBlockLayoutMetaDataRowsToMap({ rows: blockLayoutMetaData, resizeable, moveable })
     return blocks.map((block) => {
       let layouts = {} as BuildableBlock['layouts']
       for (const keyUntyped in block.layouts) {
@@ -145,7 +151,7 @@ class BuildableGridController {
         if (!block.elementType) throw Error("No Element Type")
         layouts[key] = {
           ...block.layouts[key],
-          ...blockMetaData[block.fieldType]
+          ...blockLayoutMap[block.fieldType],
         }
       }
       return { ...block, layouts }
@@ -200,7 +206,7 @@ class BuildableGridController {
       this.dragIdx = this.items.blocks.length - 1
       this.dragItemKey = "blocks"
       this.tempBlock = null
-      await entityBlockUpsert(block)
+      // await entityBlockUpsert(block)
     }
   }
   async onNewFieldDragOver({ e }: { e: DragEvent }) {
@@ -210,7 +216,7 @@ class BuildableGridController {
       this.dragIdx = this.items.fields.length - 1
       this.dragItemKey = "fields"
       this.tempField = null
-      await entityFieldUpsert(field)
+      // await entityFieldUpsert(field)
     }
   }
   async onDragEnter({ e }: { e: DragEvent }) {
@@ -248,7 +254,13 @@ class BuildableGridController {
       this.items.fields[this.dragIdx].layouts[this.view].y = yNew
     }
   }
-  onNewDragEnd({ e }: { e: DragEvent }) {
+  async onNewDragEnd({ e }: { e: DragEvent }) {
+    if (this.dragItemKey === "fields" && this.dragIdx !== null) {
+      console.log(this.items[this.dragItemKey][this.dragIdx])
+      await entityFieldUpsert(this.items[this.dragItemKey][this.dragIdx])
+    } else if (this.dragItemKey === "blocks" && this.dragIdx !== null) {
+      await entityBlockUpsert(this.items[this.dragItemKey][this.dragIdx])
+    }
     this.clearDrag()
   }
   private isItemColliding<T extends CoordsAndSize>(currItem: T, item: T) {
@@ -267,13 +279,15 @@ class BuildableGridController {
     i: number;
   }) {
     if (!elementType) throw Error('No element type found.');
+    let id = this.items[elementType][i].id
     if (elementType === "fields") {
       await entityFieldDelete(this.items[elementType][i].id)
+      this.items.fields = this.items.fields.filter((field) => field.id !== id)
     } else if (elementType === "blocks") {
-
+      await entityBlockDelete(this.items[elementType][i].id)
+      this.items.blocks = this.items.blocks.filter((block) => block.id !== id)
     }
-    this.items[elementType].splice(i);
-    this.menuDefault()
+    if (this.menu.fieldId === id || this.menu.blockId === id) this.menuDefault()
   }
   hasCollisions(item: CoordsAndSize) {
     let isColliding = this.items.fields.some((field) => this.isItemColliding(item, field.layouts[this.view])) || this.items.blocks.some((block) => this.isItemColliding(item, block.layouts[this.view]))
